@@ -1,0 +1,33 @@
+if (showCarImage != "")
+                          carImage == null
+                              ? showCarImage != "NA"
+                                  ? Image.network(
+                                      "${AppConfigProvider.imageURL}$showCarImage",
+                                      fit: BoxFit.cover,
+                                      loadingBuilder: (BuildContext context,
+                                          Widget child,
+                                          ImageChunkEvent? loadingProgress) {
+                                        if (loadingProgress == null) {
+                                          // Image has loaded
+                                          return child;
+                                        } else {
+                                          // Image is still loading, show shimmer
+                                          return Shimmer.fromColors(
+                                            baseColor: Colors.grey.shade300,
+                                            highlightColor:
+                                                Colors.grey.shade100,
+                                            child: Container(
+                                              color: Colors.grey.shade300,
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    )
+                                  : Image.asset(
+                                      AppImage.profilePlaceholderImage,
+                                      fit: BoxFit.cover,
+                                    )
+                              : Image.file(
+                                  File(carImage!.path),
+                                  fit: BoxFit.cover,
+                                ),

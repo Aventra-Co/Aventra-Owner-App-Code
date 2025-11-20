@@ -1,0 +1,119 @@
+import 'dart:async';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:provider/provider.dart';
+import 'utilities/app_color.dart';
+import 'utilities/app_connectivity.dart';
+import 'utilities/app_constant.dart';
+import 'utilities/app_font.dart';
+import 'utilities/one_signal_service.dart';
+import 'utilities/routes.dart';
+import 'view/authentication/splash_screen.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize OneSignal
+  await initOneSignal(AppConstant.oneSignalAppId);
+  await OneSignalService.initOneSignal();
+
+  runApp(const MyApp());
+
+  // Initialize Firebase first
+  await Firebase.initializeApp(
+      options: FirebaseOptions(
+          apiKey: AppConstant.apiKey,
+          appId: AppConstant.appId,
+          messagingSenderId: AppConstant.messagingSenderId,
+          projectId: AppConstant.projectId));
+}
+
+Future<void> initOneSignal(oneSignalAppId) async {
+  print("initOneSignal ------ ");
+  if (AppConstant.deviceType == "android") {
+  } else {}
+  await OneSignal.shared.setAppId(AppConstant.oneSignalAppId);
+
+  print("Prompting for Permission");
+  OneSignal.shared.promptUserForPushNotificationPermission().then((accepted) {
+    print("Accepted permission: $accepted");
+  });
+
+  final status = await OneSignal.shared.getDeviceState();
+  if (status != null) {
+    print("main dart line 41");
+    var tokenId = status.userId;
+    if (tokenId != null) {
+      print("player Id $tokenId");
+      print(tokenId);
+      AppConstant.playerID = tokenId;
+      print("playerID : ${AppConstant.playerID}");
+    }
+  }
+
+  Timer.periodic(const Duration(seconds: 1), (timer) async {
+    final status = await OneSignal.shared.getDeviceState();
+    if (status != null) {
+      print("status $status");
+      final tokenId = status.userId;
+
+      if (tokenId != null) {
+        timer.cancel();
+        AppConstant.playerID = tokenId;
+        print('Interval stopped');
+      }
+    }
+  });
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+            create: (_) => ConnectionProvider()..initialize()),
+      ],
+      child: MaterialApp(
+        title: 'Aventra Owner',
+        debugShowCheckedModeBanner: false,
+        navigatorKey: navigatorKey, // Make sure this is set
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: AppColor.themeColor),
+          fontFamily: AppFont.fontFamily,
+        ),
+        routes: routes,
+        home: const AppInitializer(), // Use wrapper to handle initialization
+      ),
+    );
+  }
+}
+
+// Wrapper widget to handle app initialization
+class AppInitializer extends StatefulWidget {
+  const AppInitializer({super.key});
+
+  @override
+  _AppInitializerState createState() => _AppInitializerState();
+}
+
+class _AppInitializerState extends State<AppInitializer> {
+  @override
+  void initState() {
+    super.initState();
+    // Mark app as initialized after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      OneSignalService.setAppInitialized(true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Splash(); // Your splash screen will handle the rest
+  }
+}

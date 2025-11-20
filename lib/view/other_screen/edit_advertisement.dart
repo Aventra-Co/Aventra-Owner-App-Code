@@ -1,0 +1,5870 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:the_boat_ownerside/utilities/app_snack_bar_toast_message.dart';
+import '../../utilities/app_config_provider.dart';
+import '../../utilities/app_loader.dart';
+import '../authentication/login_screen.dart';
+import '/utilities/app_button.dart';
+import '/utilities/textinput.dart';
+import '../../utilities/app_color.dart';
+import '../../utilities/app_constant.dart';
+import '../../utilities/app_font.dart';
+import '../../utilities/app_header.dart';
+import '../../utilities/app_image.dart';
+import '../../utilities/app_language.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:ui' as ui;
+import 'edit_advertise_second.dart';
+
+class EditAdvertisementScreen extends StatefulWidget {
+  static String routeName = './EditAdvertisementScreen';
+  final String tripId;
+  const EditAdvertisementScreen({super.key, required this.tripId});
+
+  @override
+  State<EditAdvertisementScreen> createState() =>
+      _EditProfileScreenScreenState();
+}
+
+class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
+  TextEditingController emailTextEditingController = TextEditingController();
+  TextEditingController genderTextEditingController = TextEditingController();
+  TextEditingController languageTextEditingController = TextEditingController();
+  TextEditingController captainEnglishNameTextController =
+      TextEditingController();
+  TextEditingController captainArabicNameTextController =
+      TextEditingController();
+  TextEditingController captainNumberTextController = TextEditingController();
+  TextEditingController activityTextEditingController = TextEditingController();
+  TextEditingController boatTextEditingController = TextEditingController();
+  TextEditingController pickUpTextEditingController = TextEditingController();
+  TextEditingController cityTextEditingController = TextEditingController();
+  TextEditingController maxNumberTextController = TextEditingController();
+  TextEditingController messageTextEditingController = TextEditingController();
+  TextEditingController messageArabicTextEditingController =
+      TextEditingController();
+  TextEditingController coupanDiscountTextEditingController =
+      TextEditingController();
+  TextEditingController discountTextEditingController = TextEditingController();
+  TextEditingController searchCountryTextEditingController =
+      TextEditingController();
+  TextEditingController nationalityTextEditingController =
+      TextEditingController();
+  TextEditingController destinationTextEditingController =
+      TextEditingController();
+  TextEditingController couponCodeTextEditingController =
+      TextEditingController();
+  DateTime? selectedDate;
+  var sendDate = "";
+  List genderList = [
+    AppLanguage.maleText[language],
+    AppLanguage.femaleText[language],
+    AppLanguage.otherText[language]
+  ];
+
+  String isSelectedGender = AppLanguage.maleText[language];
+  int selectedLanguage = 0;
+  int selectedActivity = 0;
+  int selectedGender = 0;
+  int isSelectedNationality = 0;
+  int isSelectedBoat = 0;
+  int isSelectedCity = 0;
+  int isSelectedDestination = 0;
+  List<XFile> serverImageList = [];
+  var fileName = 'NA';
+  // late File _image;
+  bool isApiCalling = false;
+  XFile? coverImage;
+  String showCoverImage = "";
+  List languageList = [
+    {
+      "id": 1,
+      "title": AppLanguage.englishText[language],
+    },
+    {
+      "id": 2,
+      "title": AppLanguage.arabicText[language],
+    },
+    {
+      "id": 3,
+      "title": AppLanguage.frenchText[language],
+    },
+    {
+      "id": 4,
+      "title": AppLanguage.italianText[language],
+    },
+    {
+      "id": 5,
+      "title": AppLanguage.koreanText[language],
+    },
+  ];
+  List activityList = <dynamic>[];
+  List nationsList = <dynamic>[];
+  List nationsSearchList = <dynamic>[];
+  List cityList = <dynamic>[];
+  List destinationList = <dynamic>[];
+  List<dynamic> boatList = <dynamic>[];
+  int userId = 0;
+  dynamic userDetails;
+//==map====
+  GoogleMapController? mapController;
+  LatLng initialPosition = const LatLng(32.44745630896057, 14.723027497529984);
+  bool mapshow = false;
+  double lat = 32.44745630896057;
+  double long = 14.723027497529984;
+  double latitudex = 32.44745630896057;
+  double longtitudex = 14.723027497529984;
+  // String? _currentAddress;
+  // Position? _currentPosition;
+  TextEditingController controller = TextEditingController();
+  var address;
+  TextEditingController searchController = TextEditingController();
+  List<dynamic> predictions = [];
+  List<dynamic> selectedActivityList = [];
+  List<dynamic> selectedActivityNameList = [];
+  Timer? _debounce;
+  dynamic tripDetails;
+  List<dynamic> boatImageList = <dynamic>[];
+  List deleteId = [];
+  String boatCapacity = '0';
+  DateTime? startDate;
+  DateTime? endDate;
+  String sendStartDate = "";
+  String sendEndDate = "";
+  TextEditingController startDateController = TextEditingController();
+  TextEditingController endDateController = TextEditingController();
+  bool isCouponExist = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentPosition();
+    getUserDetails();
+    getTripDetailsApi();
+  }
+
+  //=============================GET Trip DETAILS===================================//
+  Future<void> getTripDetailsApi() async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}view_trip_details?trip_id=${widget.tripId}");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isApiCalling = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['trip_arr'];
+          tripDetails = (item != "NA") ? item[0] : {};
+
+          print("adfasdfafd$tripDetails");
+
+          fillData();
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  fillData() {
+    showCoverImage = tripDetails["trip_image"];
+    boatImageList =
+        tripDetails["tripImages"] != "NA" ? tripDetails["tripImages"] : [];
+    isToggle = tripDetails["advertisement_type"];
+    captainEnglishNameTextController.text = tripDetails["captain_name_english"];
+    captainArabicNameTextController.text = tripDetails["captain_name_arabic"];
+    captainNumberTextController.text = tripDetails["contact_number"];
+    selectedGender = tripDetails["gender"];
+    isSelectedGender = genderList[selectedGender];
+    nationalityTextEditingController.text = tripDetails["country_name"];
+    isSelectedNationality = tripDetails["country_id"];
+    isSelectedDestination = tripDetails["destination_id"];
+    destinationTextEditingController.text = tripDetails["destinaton"][language];
+    isSelectedCity = tripDetails["city_id"];
+    cityTextEditingController.text = tripDetails["city_name"];
+    isSelectedBoat = tripDetails["boat_id"];
+    boatTextEditingController.text = tripDetails["boat_name_english"];
+    selectedActivityList = tripDetails["activity_ids"] != null
+        ? tripDetails["activity_ids"].split(',')
+        : [];
+    print("selectedActivityList$selectedActivityList");
+    pickUpTextEditingController.text = tripDetails["pickup_point"];
+    maxNumberTextController.text = tripDetails["max_people"].toString();
+    messageTextEditingController.text = tripDetails["description_english"];
+    messageArabicTextEditingController.text = tripDetails["description_arabic"];
+    discountTextEditingController.text =
+        tripDetails["discount"] == 0 ? "" : tripDetails["discount"].toString();
+    coupanDiscountTextEditingController.text =
+        tripDetails["coupon_discount"] == 0
+            ? ""
+            : tripDetails["coupon_discount"].toString();
+    lat = double.parse(tripDetails["latitude"].toString());
+    long = double.parse(tripDetails["longitude"].toString());
+    couponCodeTextEditingController.text = tripDetails["coupon_code"] ?? "";
+    if (couponCodeTextEditingController.text.isNotEmpty &&
+        couponCodeTextEditingController.text != "NA") {
+      isCouponExist = true;
+      startDate = DateTime.parse(tripDetails["coupon_start_date"]);
+      endDate = DateTime.parse(tripDetails["coupon_end_date"]);
+      startDateController.text = DateFormat('MMM dd, yyyy')
+          .format(DateTime.parse(tripDetails["coupon_start_date"] ?? ""));
+      endDateController.text = DateFormat('MMM dd, yyyy')
+          .format(DateTime.parse(tripDetails["coupon_end_date"] ?? ""));
+      sendStartDate = tripDetails["coupon_start_date"];
+      sendEndDate = tripDetails["coupon_end_date"];
+    } else {
+      couponCodeTextEditingController.text = "";
+    }
+    getActivityApi(
+      userId,
+    );
+    boatCapacity = tripDetails['boat_capacity'].toString().trim();
+    print("boatCapacity$boatCapacity");
+    activityTextEditingController.text = language == 0
+        ? tripDetails["activity"][0]['english'][0]
+        : tripDetails["activity"][0]['arabic'][0];
+    getCitiesApi(userId);
+    print("selectedActivityList$selectedActivityList");
+    print("selectedActivityList${selectedActivityList[0].runtimeType}");
+    setState(() {});
+  }
+
+  //---------------------SEARCH FUNCTION COUNTRY--------------------///
+  searchResultCountry(String query) {
+    print(query);
+
+    var results1 = nationsSearchList
+        .where((value) => value['country_name']
+            .toString()
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+        .toList();
+
+    print("results1 $results1");
+
+    nationsList = [];
+
+    nationsList = results1;
+
+    setState(() {});
+  }
+
+  int isToggle = 0;
+
+  Future<void> _imgFromGallery() async {
+    Navigator.pop(context);
+    List<XFile>? images = await ImagePicker().pickMultiImage();
+
+    List<File> data = [];
+
+    // ignore: unnecessary_null_comparison
+    if (images != null && images.length <= 7) {
+      if (images.length == 1 || images.length <= 7) {
+        images = images.sublist(0, min(7, images.length));
+
+        for (var xFile in images) {
+          File file = File(xFile.path);
+          data.add(file);
+        }
+
+        List imageListdata = boatImageList;
+
+        if (imageListdata.length <= 7) {
+          for (var i = 0; i < data.length; i++) {
+            imageListdata
+                .add({"image": data[i], "status": true, "trip_image_id": 0});
+
+            setState(() {
+              boatImageList = imageListdata;
+            });
+          }
+        }
+        if (imageListdata.length > 7) {
+          print("Line 760");
+          boatImageList = imageListdata.sublist(0, 7);
+
+          setState(() {});
+        }
+      }
+    } else {
+      // ignore: use_build_context_synchronously
+      // SnackBarToastMessage.showSnackBar(
+      //     context, AppLanguage.selectonlyimageText[language]);
+    }
+  }
+
+  Future<void> _imgFromCamera() async {
+    final XFile? image = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      maxHeight: 1440,
+      maxWidth: 1080,
+    );
+
+    if (image != null) {
+      setState(() {
+        boatImageList.add({"image": File(image.path), "trip_image_id": 0});
+      });
+    }
+  }
+
+  //-------------------------------IMAGE PICKER BOTTOM SHEET--------------------------//
+  void imagePickerBottomSheet() {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: Wrap(
+                children: <Widget>[
+                  ListTile(
+                      leading: const Icon(Icons.photo_library),
+                      title: Text(AppLanguage.photoGalleryText[language]),
+                      onTap: () {
+                        _imgFromGallery();
+                        setState(() {});
+                        // Navigator.of(context).pop();
+                      }),
+                  ListTile(
+                    leading: const Icon(Icons.photo_camera),
+                    title: Text(AppLanguage.cameraText[language]),
+                    onTap: () {
+                      _imgFromCamera();
+                      setState(() {});
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+//=============cover image picker===========
+  //--------------------------------FROM CAMERA-----------------------//
+  Future<void> _coverImgFromCamera() async {
+    dynamic image = await ImagePicker().pickImage(
+        source: ImageSource.camera,
+        // maxHeight: 450.0,
+        // maxWidth: 450.0,
+        imageQuality: 50);
+
+    if (image != null) {
+      Future.delayed(const Duration(seconds: 2), () {
+        setState(() {
+          coverImage = image;
+          //  var _btnActive = true;
+        });
+      });
+    } else {
+      setState(() {
+        //  var _btnActive = false;
+      });
+    }
+
+    Navigator.of(context).pop();
+  }
+
+// ------------------------------FROM GALLERY------------------------//
+  Future<void> _coverImgFromGallery() async {
+    print("run");
+    dynamic image = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        // maxHeight: 450.0,
+        // maxWidth: 450.0,
+        imageQuality: 50);
+
+    if (image != null) {
+      print("image 243 $image");
+      Future.delayed(const Duration(seconds: 0), () {
+        setState(() {
+          coverImage = image;
+          //  var _btnActive = true;
+        });
+      });
+    } else {
+      setState(() {
+        //    var _btnActive = false;
+      });
+    }
+
+    Navigator.of(context).pop();
+  }
+
+  //-------------------------------IMAGE PICKER BOTTOM SHEET--------------------------//
+  void coverImagePickerBottomSheet() {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: Wrap(
+                children: <Widget>[
+                  ListTile(
+                      leading: const Icon(Icons.photo_library),
+                      title: Text(AppLanguage.photoGalleryText[language]),
+                      onTap: () {
+                        _coverImgFromGallery();
+                        setState(() {});
+                        // Navigator.of(context).pop();
+                      }),
+                  ListTile(
+                    leading: const Icon(Icons.photo_camera),
+                    title: Text(AppLanguage.cameraText[language]),
+                    onTap: () {
+                      _coverImgFromCamera();
+                      setState(() {});
+                      // Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  //--------------------GET USER DETAILS-----------------------//
+  Future<dynamic> getUserDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    userDetails = prefs.getString("userDetails");
+    setState(() {
+      isApiCalling = true;
+    });
+
+    // print("userDetails $userDetails");
+    if (userDetails != null) {
+      dynamic data = json.decode(userDetails);
+      // print("up $data");
+      userId = data['user_id'];
+    }
+    setState(() {
+      isApiCalling = false;
+    });
+
+    getCountriesApi(userId);
+    getDestinationApi(userId);
+    getBoatApi(userId);
+    getActivityApi(userId);
+    setState(() {});
+  }
+
+  //=============================GET Countries DETAILS===================================//
+  Future<void> getCountriesApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}fetch_country_list?user_id=$userId");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isApiCalling = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['country_arr'];
+          nationsList = (item != "NA") ? item : [];
+          nationsSearchList = (item != "NA") ? item : [];
+
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  //=============================GET activity DETAILS===================================//
+  Future<void> getActivityApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}get_all_trip_types?user_id=$userId");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isApiCalling = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['tripTypes'];
+          activityList = (item != "NA") ? item : [];
+          // activitySearchList = (item != "NA") ? item : [];
+
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  //=============================GET boats DETAILS===================================//
+  Future<void> getBoatApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}fetch_all_boats?owner_id=$userId");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isApiCalling = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['boat_arr'];
+          boatList = (item != "NA") ? item : [];
+          print("boatList $boatList");
+          // activitySearchList = (item != "NA") ? item : [];
+          // if (boatList.isNotEmpty) {
+          //   for (var boat in boatList) {
+          //     if (boat['boat_id'].toString() ==
+          //         tripDetails["boat_id"].toString()) {
+
+          //     }
+          //   }
+          // }
+          print("boatCapacity$boatCapacity");
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  //=============================GET cities DETAILS===================================//
+  Future<void> getCitiesApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}fetch_city_by_country?$userId=5&country_id=$isSelectedNationality");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isApiCalling = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['city_arr'];
+          cityList = (item != "NA") ? item : [];
+          // activitySearchList = (item != "NA") ? item : [];
+
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  //=============================GET destination DETAILS===================================//
+  Future<void> getDestinationApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}get_desctination?user_id=$userId");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isApiCalling = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['destination_arr'];
+          destinationList = (item != "NA") ? item : [];
+          // activitySearchList = (item != "NA") ? item : [];
+
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  //!=============add ad validation===========
+  // editAdvertisementValidation(
+  //     XFile? coverImage,
+  //     List<XFile> serverImageList,
+  //     String capNameEnglish,
+  //     String capNameArabic,
+  //     String number,
+  //     String gender,
+  //     String nationality,
+  //     String destination,
+  //     String activity,
+  //     String boat,
+  //     String pickUpPoint,
+  //     String city,
+  //     String numOfPeople,
+  //     String descEnglish,
+  //     String descArabic,
+  //     String couponCode,
+  //     String startDate,
+  //     String endDate,
+  //     String couponDiscount,
+  //     String discount) {
+  //   if (coverImage == null && showCoverImage.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.coverImageMsg[language]);
+  //     return;
+  //   } else if (boatImageList.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.imagesMsg[language]);
+  //   } else if (capNameEnglish.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.capNameEngMsg[language]);
+  //     return;
+  //   }
+  //   // else if (capNameArabic.isEmpty) {
+  //   //   SnackBarToastMessage.showSnackBar(
+  //   //       context, AppLanguage.capNameArabMsg[language]);
+  //   //   return;
+  //   // }
+  //   else if (number.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.captainNumberMessage[language]);
+  //     return;
+  //   } else if (number.length < 7) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.captainNumbervalidMessage[language]);
+  //     return;
+  //   } else if (gender.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.genderMsg[language]);
+  //     return;
+  //   } else if (nationality.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.nationalityMsg[language]);
+  //     return;
+  //   } else if (destination.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.selectDestinationMsg[language]);
+  //     return;
+  //   } else if (activity.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.activityMsg[language]);
+  //     return;
+  //   } else if (boat.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(context, AppLanguage.boatMsg[language]);
+  //     return;
+  //   } else if (pickUpPoint.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.pickupMsg[language]);
+  //     return;
+  //   } else if (city.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(context, AppLanguage.cityMsg[language]);
+  //     return;
+  //   } else if (numOfPeople.isEmpty) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.maxPeopleMsg[language]);
+  //     return;
+  //   } else if (int.parse(numOfPeople.trim()) <= 0) {
+  //     SnackBarToastMessage.showSnackBar(
+  //         context, AppLanguage.minPeopleMsg[language]);
+  //     return;
+  //   } else if (int.parse(numOfPeople.trim()) > int.parse(boatCapacity)) {
+  //     SnackBarToastMessage.showSnackBar(context,
+  //         "${AppLanguage.maxPeopleExceededMsg[language]}$boatCapacity");
+  //     return;
+  //   }
+  //   //  else if (descEnglish.isEmpty) {
+  //   //   SnackBarToastMessage.showSnackBar(
+  //   //       context, AppLanguage.descEngMsg[language]);
+  //   //   return;
+  //   // } else if (descArabic.isEmpty) {
+  //   //   SnackBarToastMessage.showSnackBar(
+  //   //       context, AppLanguage.descArabMsg[language]);
+  //   //   return;
+  //   // }
+  //   else if (couponCode.isNotEmpty) {
+  //     if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(couponCode)) {
+  //       SnackBarToastMessage.showSnackBar(
+  //           context, AppLanguage.couponCodeValidMsg[language]);
+  //       return;
+  //     } else if (couponCode.length != 8) {
+  //       SnackBarToastMessage.showSnackBar(
+  //           context, AppLanguage.couponCodeLengthMsg[language]);
+  //       return;
+  //     } else if (!isCouponExist) {
+  //       SnackBarToastMessage.showSnackBar(
+  //           context, AppLanguage.couponAlreadyExistMsg[language]);
+  //       return;
+  //     } else if (startDate.isEmpty) {
+  //       SnackBarToastMessage.showSnackBar(
+  //           context, AppLanguage.selectStartDateMsg[language]);
+  //       return;
+  //     } else if (endDate.isEmpty) {
+  //       SnackBarToastMessage.showSnackBar(
+  //           context, AppLanguage.selectEndDateMsg[language]);
+  //       return;
+  //     } else if (couponDiscount.isEmpty) {
+  //       SnackBarToastMessage.showSnackBar(
+  //           context, AppLanguage.couponDiscountMsg[language]);
+  //       return;
+  //     } else if (couponDiscount == "0" || couponDiscount == "0.0") {
+  //       SnackBarToastMessage.showSnackBar(
+  //           context, AppLanguage.couponDiscountGreaterMsg[language]);
+  //       return;
+  //     } else if (int.parse(couponDiscount) >= 100) {
+  //       SnackBarToastMessage.showSnackBar(
+  //           context, AppLanguage.couponDiscountLessMsg[language]);
+  //       return;
+  //     } else if (discount.isNotEmpty) {
+  //       if (discount == "0" || discount == "0.0") {
+  //         SnackBarToastMessage.showSnackBar(
+  //             context, AppLanguage.discountGreaterMsg[language]);
+  //         return;
+  //       } else if (int.parse(discount) >= 100) {
+  //         SnackBarToastMessage.showSnackBar(
+  //             context, AppLanguage.discountLesserMsg[language]);
+  //         return;
+  //       } else {
+  //         Navigator.push(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (context) => EditAdvertisementSecondScreen(
+  //               boatImageList: boatImageList,
+  //               tripId: tripDetails['trip_id'].toString(),
+  //               deleteIds: deleteId.join(','),
+  //               coverImage: coverImage,
+  //               serverImageList: serverImageList,
+  //               capNameEng: capNameEnglish,
+  //               capNameArab: capNameArabic,
+  //               number: number,
+  //               genderId: selectedGender.toString(),
+  //               nationalityId: isSelectedNationality.toString(),
+  //               destinationId: isSelectedDestination.toString(),
+  //               activityId: selectedActivityList.join(", "),
+  //               boatId: isSelectedBoat.toString(),
+  //               pickup: pickUpPoint,
+  //               lat: latitudex.toString(),
+  //               long: longtitudex.toString(),
+  //               cityId: isSelectedCity.toString(),
+  //               members: numOfPeople,
+  //               descEng: descEnglish,
+  //               descArab: descArabic,
+  //               isPrivate: isToggle.toString(),
+  //               tripDetails: tripDetails,
+  //               couponDiscount: couponDiscount,
+  //               discount: discount,
+  //               couponCode: couponCode,
+  //               startDate: sendStartDate,
+  //               endDate: sendEndDate,
+  //             ),
+  //           ),
+  //         );
+  //       }
+  //       // SnackBarToastMessage.showSnackBar(
+  //       //     context, AppLanguage.discountMsg[language]);
+  //     } else {
+  //       Navigator.push(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => EditAdvertisementSecondScreen(
+  //             boatImageList: boatImageList,
+  //             tripId: tripDetails['trip_id'].toString(),
+  //             deleteIds: deleteId.join(','),
+  //             coverImage: coverImage,
+  //             serverImageList: serverImageList,
+  //             capNameEng: capNameEnglish,
+  //             capNameArab: capNameArabic,
+  //             number: number,
+  //             genderId: selectedGender.toString(),
+  //             nationalityId: isSelectedNationality.toString(),
+  //             destinationId: isSelectedDestination.toString(),
+  //             activityId: selectedActivityList.join(", "),
+  //             boatId: isSelectedBoat.toString(),
+  //             pickup: pickUpPoint,
+  //             lat: latitudex.toString(),
+  //             long: longtitudex.toString(),
+  //             cityId: isSelectedCity.toString(),
+  //             members: numOfPeople,
+  //             descEng: descEnglish,
+  //             descArab: descArabic,
+  //             isPrivate: isToggle.toString(),
+  //             tripDetails: tripDetails,
+  //             couponDiscount: couponDiscount,
+  //             discount: discount,
+  //             couponCode: couponCode,
+  //             startDate: sendStartDate,
+  //             endDate: sendEndDate,
+  //           ),
+  //         ),
+  //       );
+  //     }
+  //   } else if (discount.isNotEmpty) {
+  //     if (discount == "0" || discount == "0.0") {
+  //       SnackBarToastMessage.showSnackBar(
+  //           context, AppLanguage.discountGreaterMsg[language]);
+  //       return;
+  //     } else if (int.parse(discount) >= 100) {
+  //       SnackBarToastMessage.showSnackBar(
+  //           context, AppLanguage.discountLesserMsg[language]);
+  //       return;
+  //     } else {
+  //       Navigator.push(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => EditAdvertisementSecondScreen(
+  //             boatImageList: boatImageList,
+  //             tripId: tripDetails['trip_id'].toString(),
+  //             deleteIds: deleteId.join(','),
+  //             coverImage: coverImage,
+  //             serverImageList: serverImageList,
+  //             capNameEng: capNameEnglish,
+  //             capNameArab: capNameArabic,
+  //             number: number,
+  //             genderId: selectedGender.toString(),
+  //             nationalityId: isSelectedNationality.toString(),
+  //             destinationId: isSelectedDestination.toString(),
+  //             activityId: selectedActivityList.join(", "),
+  //             boatId: isSelectedBoat.toString(),
+  //             pickup: pickUpPoint,
+  //             lat: latitudex.toString(),
+  //             long: longtitudex.toString(),
+  //             cityId: isSelectedCity.toString(),
+  //             members: numOfPeople,
+  //             descEng: descEnglish,
+  //             descArab: descArabic,
+  //             isPrivate: isToggle.toString(),
+  //             tripDetails: tripDetails,
+  //             couponDiscount: couponDiscount,
+  //             discount: discount,
+  //             couponCode: couponCode,
+  //             startDate: sendStartDate,
+  //             endDate: sendEndDate,
+  //           ),
+  //         ),
+  //       );
+  //     }
+  //     // SnackBarToastMessage.showSnackBar(
+  //     //     context, AppLanguage.discountMsg[language]);
+  //   }
+  //   // else if (couponDiscount.isEmpty) {
+  //   //   SnackBarToastMessage.showSnackBar(
+  //   //       context, AppLanguage.couponDiscountMsg[language]);
+  //   // }
+  //   else {
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (context) => EditAdvertisementSecondScreen(
+  //           boatImageList: boatImageList,
+  //           tripId: tripDetails['trip_id'].toString(),
+  //           deleteIds: deleteId.join(','),
+  //           coverImage: coverImage,
+  //           serverImageList: serverImageList,
+  //           capNameEng: capNameEnglish,
+  //           capNameArab: capNameArabic,
+  //           number: number,
+  //           genderId: selectedGender.toString(),
+  //           nationalityId: isSelectedNationality.toString(),
+  //           destinationId: isSelectedDestination.toString(),
+  //           activityId: selectedActivityList.join(", "),
+  //           boatId: isSelectedBoat.toString(),
+  //           pickup: pickUpPoint,
+  //           lat: latitudex.toString(),
+  //           long: longtitudex.toString(),
+  //           cityId: isSelectedCity.toString(),
+  //           members: numOfPeople,
+  //           descEng: descEnglish,
+  //           descArab: descArabic,
+  //           isPrivate: isToggle.toString(),
+  //           tripDetails: tripDetails,
+  //           couponDiscount: couponDiscount,
+  //           discount: discount,
+  //           couponCode: couponCode,
+  //           startDate: sendStartDate,
+  //           endDate: sendEndDate,
+  //         ),
+  //       ),
+  //     );
+  //   }
+  // }
+
+// Simplified validation method
+  void editAdvertisementValidation(
+      XFile? coverImage,
+      List<XFile> serverImageList,
+      String capNameEnglish,
+      String capNameArabic,
+      String number,
+      String gender,
+      String nationality,
+      String destination,
+      String activity,
+      String boat,
+      String pickUpPoint,
+      String city,
+      String numOfPeople,
+      String descEnglish,
+      String descArabic,
+      String couponCode,
+      String startDate,
+      String endDate,
+      String couponDiscount,
+      String discount) {
+    // Perform all validations first
+    String? validationError = _validateInputs(
+      coverImage: coverImage,
+      capNameEnglish: capNameEnglish,
+      number: number,
+      gender: gender,
+      nationality: nationality,
+      destination: destination,
+      activity: activity,
+      boat: boat,
+      pickUpPoint: pickUpPoint,
+      city: city,
+      numOfPeople: numOfPeople,
+      couponCode: couponCode,
+      startDate: startDate,
+      endDate: endDate,
+      couponDiscount: couponDiscount,
+      discount: discount,
+    );
+
+    // If validation fails, show error and return
+    if (validationError != null) {
+      SnackBarToastMessage.showSnackBar(context, validationError);
+      return;
+    }
+
+    // If all validations pass, navigate to next screen
+    _navigateToSecondScreen(
+      coverImage,
+      serverImageList,
+      capNameEnglish,
+      capNameArabic,
+      number,
+      couponDiscount,
+      discount,
+      couponCode,
+      startDate,
+      endDate,
+    );
+  }
+
+// Separate validation logic
+  String? _validateInputs({
+    required XFile? coverImage,
+    required String capNameEnglish,
+    required String number,
+    required String gender,
+    required String nationality,
+    required String destination,
+    required String activity,
+    required String boat,
+    required String pickUpPoint,
+    required String city,
+    required String numOfPeople,
+    required String couponCode,
+    required String startDate,
+    required String endDate,
+    required String couponDiscount,
+    required String discount,
+  }) {
+    // Basic field validations
+    if (coverImage == null && showCoverImage.isEmpty) {
+      return AppLanguage.coverImageMsg[language];
+    }
+
+    if (boatImageList.isEmpty) {
+      return AppLanguage.imagesMsg[language];
+    }
+
+    if (capNameEnglish.isEmpty) {
+      return AppLanguage.capNameEngMsg[language];
+    }
+
+    if (number.isEmpty) {
+      return AppLanguage.captainNumberMessage[language];
+    }
+
+    if (number.length < 7) {
+      return AppLanguage.captainNumbervalidMessage[language];
+    }
+
+    if (gender.isEmpty) {
+      return AppLanguage.genderMsg[language];
+    }
+
+    if (nationality.isEmpty) {
+      return AppLanguage.nationalityMsg[language];
+    }
+
+    if (destination.isEmpty) {
+      return AppLanguage.selectDestinationMsg[language];
+    }
+
+    if (activity.isEmpty) {
+      return AppLanguage.activityMsg[language];
+    }
+
+    if (boat.isEmpty) {
+      return AppLanguage.boatMsg[language];
+    }
+
+    if (pickUpPoint.isEmpty) {
+      return AppLanguage.pickupMsg[language];
+    }
+
+    if (city.isEmpty) {
+      return AppLanguage.cityMsg[language];
+    }
+
+    if (numOfPeople.isEmpty) {
+      return AppLanguage.maxPeopleMsg[language];
+    }
+
+    // Number of people validations
+    int peopleCount = int.tryParse(numOfPeople.trim()) ?? 0;
+    if (peopleCount <= 0) {
+      return AppLanguage.minPeopleMsg[language];
+    }
+
+    int capacity = int.tryParse(boatCapacity) ?? 0;
+    if (peopleCount > capacity) {
+      return "${AppLanguage.maxPeopleExceededMsg[language]}$boatCapacity";
+    }
+
+    // Coupon validations (only if coupon code is provided)
+    if (couponCode.isNotEmpty) {
+      String? couponError =
+          _validateCoupon(couponCode, startDate, endDate, couponDiscount);
+      if (couponError != null) return couponError;
+    }
+
+    // Discount validation (only if discount is provided)
+    if (discount.isNotEmpty) {
+      String? discountError = _validateDiscount(discount);
+      if (discountError != null) return discountError;
+    }
+
+    return null; // All validations passed
+  }
+
+// Separate coupon validation
+  String? _validateCoupon(String couponCode, String startDate, String endDate,
+      String couponDiscount) {
+    if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(couponCode)) {
+      return AppLanguage.couponCodeValidMsg[language];
+    }
+
+    if (couponCode.length != 8) {
+      return AppLanguage.couponCodeLengthMsg[language];
+    }
+
+    if (!isCouponExist) {
+      return AppLanguage.couponAlreadyExistMsg[language];
+    }
+
+    if (startDate.isEmpty) {
+      return AppLanguage.selectStartDateMsg[language];
+    }
+
+    if (endDate.isEmpty) {
+      return AppLanguage.selectEndDateMsg[language];
+    }
+
+    if (couponDiscount.isEmpty) {
+      return AppLanguage.couponDiscountMsg[language];
+    }
+
+    if (couponDiscount == "0" || couponDiscount == "0.0") {
+      return AppLanguage.couponDiscountGreaterMsg[language];
+    }
+
+    int discountValue = int.tryParse(couponDiscount) ?? 0;
+    if (discountValue >= 100) {
+      return AppLanguage.couponDiscountLessMsg[language];
+    }
+
+    return null;
+  }
+
+// Separate discount validation
+  String? _validateDiscount(String discount) {
+    if (discount == "0" || discount == "0.0") {
+      return AppLanguage.discountGreaterMsg[language];
+    }
+
+    int discountValue = int.tryParse(discount) ?? 0;
+    if (discountValue >= 100) {
+      return AppLanguage.discountLesserMsg[language];
+    }
+
+    return null;
+  }
+
+// Separate navigation logic (no duplication)
+  void _navigateToSecondScreen(
+      XFile? coverImage,
+      List<XFile> serverImageList,
+      String capNameEnglish,
+      String capNameArabic,
+      String number,
+      String couponDiscount,
+      String discount,
+      String couponCode,
+      String startDate,
+      String endDate) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditAdvertisementSecondScreen(
+          boatImageList: boatImageList,
+          tripId: tripDetails['trip_id'].toString(),
+          deleteIds: deleteId.join(','),
+          coverImage: coverImage,
+          serverImageList: serverImageList,
+          capNameEng: capNameEnglish,
+          capNameArab: capNameArabic,
+          number: number,
+          genderId: selectedGender.toString(),
+          nationalityId: isSelectedNationality.toString(),
+          destinationId: isSelectedDestination.toString(),
+          activityId: selectedActivityList.join(", "),
+          boatId: isSelectedBoat.toString(),
+          pickup: pickUpTextEditingController.text,
+          lat: lat.toString(),
+          long: long.toString(),
+          cityId: isSelectedCity.toString(),
+          members: maxNumberTextController.text,
+          descEng: messageTextEditingController.text,
+          descArab: messageArabicTextEditingController.text,
+          isPrivate: isToggle.toString(),
+          tripDetails: tripDetails,
+          couponDiscount: couponDiscount,
+          discount: discount,
+          couponCode: couponCode,
+          startDate: sendStartDate,
+          endDate: sendEndDate,
+        ),
+      ),
+    );
+  }
+
+  var refreshKey = GlobalKey<RefreshIndicatorState>();
+
+  //--------------------REFRESH FUNCION-----------------------//
+  Future<Null> _refreshPage() async {
+    refreshKey.currentState?.show(atTop: false);
+    await Future.delayed(const Duration(seconds: 1));
+    // getTopStories(0);
+    getUserDetails();
+    return null;
+  }
+
+  // =====================remove==============//
+  removeItemFromList(index) {
+    print("index $index");
+    List itemListdemo = boatImageList;
+    List deleteData = deleteId;
+    if (boatImageList[index]['trip_image_id'] != 0) {
+      deleteData.add(boatImageList[index]['trip_image_id']);
+    }
+
+    print(deleteData);
+    print(itemListdemo);
+
+    List itemList1 = [];
+    if (itemListdemo.isNotEmpty) {
+      for (var i = 0; i < itemListdemo.length; i++) {
+        if (i != index) {
+          itemList1.add(itemListdemo[i]);
+        }
+      }
+    }
+    setState(() {
+      boatImageList = itemList1;
+    });
+  }
+
+  Future<void> selectStartDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: startDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate:
+          DateTime.now().add(const Duration(days: 365 * 5)), // 5 years from now
+      helpText: AppLanguage.selectStartDateText[language],
+      confirmText: AppLanguage.selectText[language],
+      cancelText: AppLanguage.cancelText[language],
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: AppColor.themeColor,
+                  onPrimary: Colors.white,
+                  surface: Colors.white,
+                  onSurface: Colors.black,
+                ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != startDate) {
+      setState(() {
+        startDate = picked;
+        startDateController.text = DateFormat('MMM dd, yyyy').format(picked);
+        sendStartDate = DateFormat('yyyy-MM-dd').format(picked);
+
+        // Clear end date if it's on or before the new start date
+        // Since end date must be at least one day after start date
+        final DateTime nextDayAfterNewStart =
+            picked.add(const Duration(days: 1));
+        if (endDate != null && endDate!.isBefore(nextDayAfterNewStart)) {
+          endDate = null;
+          endDateController.text = '';
+          sendEndDate = '';
+        }
+      });
+    }
+  }
+
+  Future<void> selectEndDate(BuildContext context) async {
+    if (startDate == null) {
+      SnackBarToastMessage.showSnackBar(
+          context, AppLanguage.selectStartDateFirstMsg[language]);
+      return;
+    }
+
+    // Calculate the next day after start date
+    final DateTime nextDayAfterStart = startDate!.add(const Duration(days: 1));
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: endDate ?? nextDayAfterStart,
+      firstDate:
+          nextDayAfterStart, // This ensures first selectable date is day after start date
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+      helpText: AppLanguage.selectEndDateText[language],
+      confirmText: AppLanguage.selectText[language],
+      cancelText: AppLanguage.cancelText[language],
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: AppColor.themeColor,
+                  onPrimary: Colors.white,
+                  surface: Colors.white,
+                  onSurface: Colors.black,
+                ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != endDate) {
+      setState(() {
+        endDate = picked;
+        endDateController.text = DateFormat('MMM dd, yyyy').format(picked);
+        sendEndDate = DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
+  }
+
+  //!=============Validate Coupon==================
+  Future<void> validateCouponApiCall(userId, couponCode) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}check_coupon_exist?user_id=$userId?&coupon_code=$couponCode");
+    print("url $url");
+    setState(() {
+      isApiCalling = true;
+    });
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      // return;
+    }
+
+    Map<String, String> headers = {'Authorization': 'Bearer $token'};
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          isCouponExist = res['exist_status'];
+          if (!isCouponExist) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          setState(() {
+            isApiCalling = false;
+          });
+          // ignore: use_build_context_synchronously
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const Login()));
+          }
+        }
+      } else {
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ProgressHUD(
+        inAsyncCall: isApiCalling,
+        opacity: 0.5,
+        child: _buildUIScreen(context));
+  }
+
+  Widget _buildUIScreen(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light));
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        backgroundColor: AppColor.secondaryColor,
+        body: RefreshIndicator(
+          onRefresh: _refreshPage,
+          color: AppColor.themeColor,
+          child: Directionality(
+            textDirection:
+                language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+            child: Container(
+              width: MediaQuery.of(context).size.width * 100 / 100,
+              height: MediaQuery.of(context).size.height * 100 / 100,
+              color: AppColor.secondaryColor,
+              child: Column(
+                children: [
+                  //image header
+                  Container(
+                    width: MediaQuery.of(context).size.width * 100 / 100,
+                    height: screenWidth > 600
+                        ? null
+                        : MediaQuery.of(context).size.height * 20 / 100,
+                    decoration: const BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage(AppImage.headerBgImage),
+                            fit: BoxFit.cover),
+                        // color: AppColor.themeColor,
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(50),
+                            bottomRight: Radius.circular(50))),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: AppConstant.deviceType == "ios"
+                              ? MediaQuery.of(context).size.height * 6 / 100
+                              : MediaQuery.of(context).size.height * 4 / 100,
+                        ),
+
+                        //!profile edit setting
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          alignment: Alignment.center,
+                          child: Row(
+                            children: [
+                              //back
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Transform.rotate(
+                                  angle: language == 1 ? 3.1416 : 0,
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    color: Colors.transparent,
+                                    width: MediaQuery.of(context).size.width *
+                                        15 /
+                                        100,
+                                    height: MediaQuery.of(context).size.width *
+                                        7 /
+                                        100,
+                                    child: Image.asset(AppImage.backIcon),
+                                  ),
+                                ),
+                              ),
+
+                              //profile
+                              Container(
+                                alignment: Alignment.center,
+                                width: MediaQuery.of(context).size.width *
+                                    70 /
+                                    100,
+                                child: Text(
+                                  AppLanguage.editAdvText[language],
+                                  style: const TextStyle(
+                                      color: AppColor.secondaryColor,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: AppFont.fontFamily),
+                                ),
+                              ),
+
+                              //setting
+                              Container(
+                                alignment: Alignment.center,
+                                width: MediaQuery.of(context).size.width *
+                                    15 /
+                                    100,
+                                height:
+                                    MediaQuery.of(context).size.width * 7 / 100,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 10 / 100,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 2 / 100,
+                  ),
+
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          buildCoverImage(screenWidth),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
+
+                          //!============upload image container
+                          if (boatImageList.length < 7)
+                            GestureDetector(
+                              onTap: () {
+                                imagePickerBottomSheet();
+                              },
+                              child: Container(
+                                width: MediaQuery.of(context).size.width *
+                                    90 /
+                                    100,
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                    color: AppColor.textColor,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20))),
+                                child: Column(
+                                  children: [
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              2 /
+                                              100,
+                                    ),
+                                    Container(
+                                      // color: Colors.red,
+                                      alignment: Alignment.center,
+                                      width: MediaQuery.of(context).size.width *
+                                          90 /
+                                          100,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10.0),
+                                        child: Text(
+                                          "${AppLanguage.uploadImageMsg[language]}*",
+                                          style: const TextStyle(
+                                              fontFamily: AppFont.fontFamily,
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.w400,
+                                              color: AppColor.secondaryColor),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          80 /
+                                          100,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              imagePickerBottomSheet();
+                                            },
+                                            child: SizedBox(
+                                              width: screenWidth > 600
+                                                  ? MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      10 /
+                                                      100
+                                                  : MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      15 /
+                                                      100,
+                                              height: screenWidth > 600
+                                                  ? MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      10 /
+                                                      100
+                                                  : MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      15 /
+                                                      100,
+                                              child: Image.asset(
+                                                AppImage.addImageIcon,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              2 /
+                                              100,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
+
+                          //!==============add image==========
+                          if (boatImageList.isNotEmpty)
+                            SizedBox(
+                              width:
+                                  MediaQuery.of(context).size.width * 90 / 100,
+                              child: Text(
+                                AppLanguage.addMoreText[language],
+                                style: const TextStyle(
+                                    fontFamily: AppFont.fontFamily,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColor.primaryColor),
+                              ),
+                            ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
+
+                          //!list
+                          if (boatImageList.isNotEmpty)
+                            SizedBox(
+                              width:
+                                  MediaQuery.of(context).size.width * 100 / 100,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      left: screenWidth > 600 ? 38 : 20.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: List.generate(
+                                        boatImageList.length, (index) {
+                                      return Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 6.0),
+                                        child: Column(
+                                          children: [
+                                            SizedBox(
+                                              // color: Colors.red,
+                                              width: screenWidth > 600
+                                                  ? MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      12 /
+                                                      100
+                                                  : MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      17 /
+                                                      100,
+                                              height: screenWidth > 600
+                                                  ? screenHeight <= 800
+                                                      ? MediaQuery.of(context)
+                                                              .size
+                                                              .height *
+                                                          10 /
+                                                          100
+                                                      : MediaQuery.of(context)
+                                                              .size
+                                                              .height *
+                                                          7 /
+                                                          100
+                                                  : MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      8 /
+                                                      100,
+                                              child: Stack(
+                                                clipBehavior: Clip.none,
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  Container(
+                                                    child: boatImageList[index][
+                                                                'trip_image_id'] !=
+                                                            0
+                                                        ? Container(
+                                                            margin:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        5,
+                                                                    vertical:
+                                                                        5),
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                22 /
+                                                                100,
+                                                            height: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                22 /
+                                                                100,
+                                                            child: ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            10),
+                                                                child: Image
+                                                                    .network(
+                                                                  "${AppConfigProvider.imageURL}${"/"}${boatImageList[index]['image']}",
+                                                                  fit: BoxFit
+                                                                      .cover,
+                                                                )),
+                                                          )
+                                                        : Container(
+                                                            margin:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        5,
+                                                                    vertical:
+                                                                        5),
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                22 /
+                                                                100,
+                                                            height: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                22 /
+                                                                100,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10),
+                                                              image:
+                                                                  DecorationImage(
+                                                                image: FileImage(
+                                                                    boatImageList[
+                                                                            index]
+                                                                        [
+                                                                        'image']),
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                  ),
+
+                                                  //cancel button
+                                                  Positioned(
+                                                    right: 0,
+                                                    top: 0,
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        removeItemFromList(
+                                                            index);
+                                                      },
+                                                      child: SizedBox(
+                                                        width: screenWidth > 600
+                                                            ? MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                4 /
+                                                                100
+                                                            : MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                5 /
+                                                                100,
+                                                        height: screenWidth >
+                                                                600
+                                                            ? MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                4 /
+                                                                100
+                                                            : MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                5 /
+                                                                100,
+                                                        child: Image.asset(
+                                                          AppImage.cancelIcon,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!==============language==========
+                          // Container(
+                          //   width: MediaQuery.of(context).size.width * 90 / 100,
+                          //   child: Text(
+                          //     AppLanguage.languageText[language],
+                          //     style: const TextStyle(
+                          //         fontFamily: AppFont.fontFamily,
+                          //         fontSize: 22,
+                          //         fontWeight: FontWeight.w600,
+                          //         color: AppColor.primaryColor),
+                          //   ),
+                          // ),
+                          // //select lang
+                          // SizedBox(
+                          //   width: MediaQuery.of(context).size.width * 90 / 100,
+                          //   height: MediaQuery.of(context).size.height * 5.5 / 100,
+                          //   child: TextFormField(
+                          //     readOnly: true,
+                          //     style: const TextStyle(
+                          //         height: 1.1,
+                          //         color: AppColor.textColor,
+                          //         fontSize: 16,
+                          //         fontWeight: FontWeight.w400),
+                          //     textAlignVertical: TextAlignVertical.center,
+                          //     controller: languageTextEditingController,
+                          //     onTap: () {
+                          //       dropDownModelForLanguage(context, screenWidth);
+                          //     },
+                          //     decoration: InputDecoration(
+                          //         border: const UnderlineInputBorder(
+                          //           // Use UnderlineInputBorder
+                          //           borderSide:
+                          //               BorderSide(color: AppColor.boaderColor),
+                          //         ),
+                          //         enabledBorder: const UnderlineInputBorder(
+                          //           borderSide:
+                          //               BorderSide(color: AppColor.boaderColor),
+                          //         ),
+                          //         focusedBorder: const UnderlineInputBorder(
+                          //           borderSide: BorderSide(
+                          //               color: AppColor.themeColor, width: 1),
+                          //         ),
+                          //         contentPadding:
+                          //             const EdgeInsets.symmetric(vertical: 10),
+                          //         fillColor: Colors.transparent,
+                          //         filled: true,
+                          //         counterText: '',
+                          //         hintText: AppLanguage.selectLanguageText[language],
+                          //         hintStyle: const TextStyle(
+                          //             color: AppColor.textColor,
+                          //             fontWeight: FontWeight.w400,
+                          //             fontSize: 16),
+                          //         suffix: Container(
+                          //           width:
+                          //               MediaQuery.of(context).size.width * 4 / 100,
+                          //           height:
+                          //               MediaQuery.of(context).size.height * 2 / 100,
+                          //           child: Image.asset(AppImage.dropDownIcon),
+                          //         )),
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //     height: MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!==============advertisement type==========
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: Text(
+                              AppLanguage.advTypeText[language],
+                              style: const TextStyle(
+                                  fontFamily: AppFont.fontFamily,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColor.primaryColor),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!public private
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                //private
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      isToggle = 0;
+                                    });
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    // width:
+                                    //     MediaQuery.of(context).size.width * 35 / 100,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            width: 1,
+                                            color: AppColor.boaderColor),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(10))),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 8.0,
+                                          horizontal:
+                                              screenWidth > 600 ? 50 : 15),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                6 /
+                                                100,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                6 /
+                                                100,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              child: Image.asset(
+                                                isToggle == 0
+                                                    ? AppImage.markedCircleIcon
+                                                    : AppImage.circleIcon,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                2 /
+                                                100,
+                                          ),
+                                          Container(
+                                            // width: MediaQuery.of(context).size.width *
+                                            //     15 /
+                                            //     100,
+                                            child: Text(
+                                              AppLanguage.privateText[language],
+                                              style: const TextStyle(
+                                                  fontFamily:
+                                                      AppFont.fontFamily,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: AppColor.textColor),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width *
+                                      5 /
+                                      100,
+                                ),
+
+                                //public
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      isToggle = 1;
+                                    });
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    // width:
+                                    //     MediaQuery.of(context).size.width * 35 / 100,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            width: 1,
+                                            color: AppColor.boaderColor),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(10))),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 8.0,
+                                          horizontal:
+                                              screenWidth > 600 ? 50 : 15),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                6 /
+                                                100,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                6 /
+                                                100,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              child: Image.asset(
+                                                isToggle == 1
+                                                    ? AppImage.markedCircleIcon
+                                                    : AppImage.circleIcon,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                2 /
+                                                100,
+                                          ),
+                                          Container(
+                                            // width: MediaQuery.of(context).size.width *
+                                            //     15 /
+                                            //     100,
+                                            child: Text(
+                                              AppLanguage.publicText[language],
+                                              style: const TextStyle(
+                                                  fontFamily:
+                                                      AppFont.fontFamily,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: AppColor.textColor),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!================Enter Captain Name in English field
+                          CustomTextFormFieldBlackWidth(
+                              controller: captainEnglishNameTextController,
+                              hintText:
+                                  "${AppLanguage.enterCaptainNameText[language]}*",
+                              keyboardtype: TextInputType.text,
+                              maxLength: AppConstant.fullnameLength,
+                              fillColorStatus: 0,
+                              width:
+                                  MediaQuery.of(context).size.width * 90 / 100,
+                              readOnly: false),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!================Enter Captain Name in arabic field
+                          CustomTextFormFieldBlackWidth(
+                              controller: captainArabicNameTextController,
+                              hintText: AppLanguage
+                                  .enterCaptainArabicNameText[language],
+                              keyboardtype: TextInputType.text,
+                              maxLength: AppConstant.fullnameLength,
+                              fillColorStatus: 0,
+                              width:
+                                  MediaQuery.of(context).size.width * 90 / 100,
+                              readOnly: false),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!================enter captain number field
+                          CustomTextFormFieldBlackWidth(
+                              controller: captainNumberTextController,
+                              hintText:
+                                  "${AppLanguage.enterCaptainNumberText[language]}*",
+                              keyboardtype: TextInputType.number,
+                              maxLength: AppConstant.mobileLength,
+                              fillColorStatus: 0,
+                              width:
+                                  MediaQuery.of(context).size.width * 90 / 100,
+                              readOnly: false),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!=============gender text===============
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: Text(
+                              AppLanguage.genderText[language],
+                              style: const TextStyle(
+                                  fontFamily: AppFont.fontFamily,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColor.textColor),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 3 / 100),
+
+                          //!gender selection
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: Row(
+                              children: [
+                                //male
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedGender = 0;
+                                      isSelectedGender = genderList[0];
+                                    });
+                                  },
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        30 /
+                                        100,
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              6 /
+                                              100,
+                                          child: Image.asset(
+                                            selectedGender == 0
+                                                ? AppImage.markedCircleIcon
+                                                : AppImage.circleIcon,
+                                            color: AppColor.primaryColor,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              4 /
+                                              100,
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              20 /
+                                              100,
+                                          child: Text(
+                                            AppLanguage.maleText[language],
+                                            style: const TextStyle(
+                                                fontFamily: AppFont.fontFamily,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w400,
+                                                color: AppColor.textColor),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                //!female
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedGender = 1;
+                                      isSelectedGender = genderList[1];
+                                    });
+                                  },
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        30 /
+                                        100,
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              6 /
+                                              100,
+                                          child: Image.asset(
+                                            selectedGender == 1
+                                                ? AppImage.markedCircleIcon
+                                                : AppImage.circleIcon,
+                                            color: AppColor.primaryColor,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              4 /
+                                              100,
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              20 /
+                                              100,
+                                          child: Text(
+                                            AppLanguage.femaleText[language],
+                                            style: const TextStyle(
+                                                fontFamily: AppFont.fontFamily,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w400,
+                                                color: AppColor.textColor),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                //!company
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedGender = 2;
+                                      isSelectedGender = genderList[2];
+                                    });
+                                  },
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        30 /
+                                        100,
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              6 /
+                                              100,
+                                          child: Image.asset(
+                                            selectedGender == 2
+                                                ? AppImage.markedCircleIcon
+                                                : AppImage.circleIcon,
+                                            color: AppColor.primaryColor,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              4 /
+                                              100,
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              20 /
+                                              100,
+                                          child: Text(
+                                            AppLanguage.otherText[language],
+                                            style: const TextStyle(
+                                                fontFamily: AppFont.fontFamily,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w400,
+                                                color: AppColor.textColor),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
+
+                          //!line
+                          Container(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            height:
+                                MediaQuery.of(context).size.height * .1 / 100,
+                            color: AppColor.boaderColor,
+                          ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 1 / 100,
+                          ),
+
+                          //!=== nationality===
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            height:
+                                MediaQuery.of(context).size.height * 5.5 / 100,
+                            child: TextFormField(
+                              readOnly: true,
+                              style: const TextStyle(
+                                  height: 1.1,
+                                  color: AppColor.textColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400),
+                              textAlignVertical: TextAlignVertical.center,
+                              controller: nationalityTextEditingController,
+                              onTap: () {
+                                dropDownModelForNationality(
+                                    context, screenWidth);
+                              },
+                              decoration: InputDecoration(
+                                  border: const UnderlineInputBorder(
+                                    // Use UnderlineInputBorder
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
+                                  ),
+                                  enabledBorder: const UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
+                                  ),
+                                  focusedBorder: const UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: AppColor.themeColor, width: 1),
+                                  ),
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  fillColor: Colors.transparent,
+                                  filled: true,
+                                  counterText: '',
+                                  hintText:
+                                      "${AppLanguage.nationalityText[language]}*",
+                                  hintStyle: const TextStyle(
+                                      color: AppColor.textColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16),
+                                  suffixIcon: IconButton(
+                                    icon: Container(
+                                      alignment: language == 0
+                                          ? Alignment.centerRight
+                                          : Alignment.centerLeft,
+                                      width: MediaQuery.of(context).size.width *
+                                          20 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              5 /
+                                              100,
+                                      child: Image.asset(
+                                        AppImage.dropDownIcon,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      dropDownModelForNationality(
+                                          context, screenWidth);
+                                    },
+                                  )),
+                            ),
+                          ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
+
+                          //!=== select destination===
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            height:
+                                MediaQuery.of(context).size.height * 5.5 / 100,
+                            child: TextFormField(
+                              readOnly: true,
+                              style: const TextStyle(
+                                  height: 1.1,
+                                  color: AppColor.textColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400),
+                              textAlignVertical: TextAlignVertical.center,
+                              controller: destinationTextEditingController,
+                              onTap: () {
+                                dropDownModelForDestination(
+                                    context, screenWidth);
+                              },
+                              decoration: InputDecoration(
+                                  border: const UnderlineInputBorder(
+                                    // Use UnderlineInputBorder
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
+                                  ),
+                                  enabledBorder: const UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
+                                  ),
+                                  focusedBorder: const UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: AppColor.themeColor, width: 1),
+                                  ),
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  fillColor: Colors.transparent,
+                                  filled: true,
+                                  counterText: '',
+                                  hintText:
+                                      "${AppLanguage.selectDestinationText[language]}*",
+                                  hintStyle: const TextStyle(
+                                      color: AppColor.textColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16),
+                                  suffixIcon: IconButton(
+                                    icon: Container(
+                                      alignment: language == 0
+                                          ? Alignment.centerRight
+                                          : Alignment.centerLeft,
+                                      width: MediaQuery.of(context).size.width *
+                                          20 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              5 /
+                                              100,
+                                      child: Image.asset(
+                                        AppImage.dropDownIcon,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      dropDownModelForDestination(
+                                          context, screenWidth);
+                                    },
+                                  )),
+                            ),
+                          ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
+
+                          //!=== select activity===
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            height:
+                                MediaQuery.of(context).size.height * 5.5 / 100,
+                            child: TextFormField(
+                              readOnly: true,
+                              style: const TextStyle(
+                                  height: 1.1,
+                                  color: AppColor.textColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400),
+                              textAlignVertical: TextAlignVertical.center,
+                              controller: activityTextEditingController,
+                              onTap: () {
+                                if (destinationTextEditingController
+                                    .text.isEmpty) {
+                                  SnackBarToastMessage.showSnackBar(
+                                      context,
+                                      AppLanguage
+                                          .selectDestinationMsg[language]);
+                                } else {
+                                  dropDownModelForTrip(
+                                      context, screenWidth, screenHeight);
+                                }
+                              },
+                              decoration: InputDecoration(
+                                  border: const UnderlineInputBorder(
+                                    // Use UnderlineInputBorder
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
+                                  ),
+                                  enabledBorder: const UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
+                                  ),
+                                  focusedBorder: const UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: AppColor.themeColor, width: 1),
+                                  ),
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  fillColor: Colors.transparent,
+                                  filled: true,
+                                  counterText: '',
+                                  hintText:
+                                      "${AppLanguage.selectActivityText[language]}*",
+                                  hintStyle: const TextStyle(
+                                      color: AppColor.textColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16),
+                                  suffixIcon: IconButton(
+                                    icon: Container(
+                                      alignment: language == 0
+                                          ? Alignment.centerRight
+                                          : Alignment.centerLeft,
+                                      width: MediaQuery.of(context).size.width *
+                                          20 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              5 /
+                                              100,
+                                      child: Image.asset(
+                                        AppImage.dropDownIcon,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      if (destinationTextEditingController
+                                          .text.isEmpty) {
+                                        SnackBarToastMessage.showSnackBar(
+                                            context,
+                                            AppLanguage.selectDestinationMsg[
+                                                language]);
+                                      } else {
+                                        dropDownModelForTrip(
+                                            context, screenWidth, screenHeight);
+                                      }
+                                    },
+                                  )),
+                            ),
+                          ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
+
+                          //!=== select boat===
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            height:
+                                MediaQuery.of(context).size.height * 5.5 / 100,
+                            child: TextFormField(
+                              readOnly: true,
+                              style: const TextStyle(
+                                  height: 1.1,
+                                  color: AppColor.textColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400),
+                              textAlignVertical: TextAlignVertical.center,
+                              controller: boatTextEditingController,
+                              onTap: () {
+                                dropDownModelForBoat(context, screenWidth);
+                              },
+                              decoration: InputDecoration(
+                                  border: const UnderlineInputBorder(
+                                    // Use UnderlineInputBorder
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
+                                  ),
+                                  enabledBorder: const UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
+                                  ),
+                                  focusedBorder: const UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: AppColor.themeColor, width: 1),
+                                  ),
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  fillColor: Colors.transparent,
+                                  filled: true,
+                                  counterText: '',
+                                  hintText:
+                                      "${AppLanguage.chooseBoatText[language]}*",
+                                  hintStyle: const TextStyle(
+                                      color: AppColor.textColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16),
+                                  suffixIcon: IconButton(
+                                    icon: Container(
+                                      alignment: language == 0
+                                          ? Alignment.centerRight
+                                          : Alignment.centerLeft,
+                                      width: MediaQuery.of(context).size.width *
+                                          20 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              5 /
+                                              100,
+                                      child: Image.asset(
+                                        AppImage.dropDownIcon,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      dropDownModelForBoat(
+                                          context, screenWidth);
+                                    },
+                                  )),
+                            ),
+                          ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
+
+                          //!=== select pickup===
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            height:
+                                MediaQuery.of(context).size.height * 5.5 / 100,
+                            child: TextFormField(
+                              readOnly: true,
+                              style: const TextStyle(
+                                  height: 1.1,
+                                  color: AppColor.textColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400),
+                              textAlignVertical: TextAlignVertical.center,
+                              controller: pickUpTextEditingController,
+                              onTap: () {
+                                setState(() {
+                                  mapshow = true;
+                                });
+                                alertBoxsearch(context);
+                              },
+                              decoration: InputDecoration(
+                                  border: const UnderlineInputBorder(
+                                    // Use UnderlineInputBorder
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
+                                  ),
+                                  enabledBorder: const UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
+                                  ),
+                                  focusedBorder: const UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: AppColor.themeColor, width: 1),
+                                  ),
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  fillColor: Colors.transparent,
+                                  filled: true,
+                                  counterText: '',
+                                  hintText:
+                                      "${AppLanguage.enterPickUpText[language]}*",
+                                  hintStyle: const TextStyle(
+                                      color: AppColor.textColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16),
+                                  suffixIcon: IconButton(
+                                    icon: Container(
+                                      alignment: language == 0
+                                          ? Alignment.centerRight
+                                          : Alignment.centerLeft,
+                                      width: MediaQuery.of(context).size.width *
+                                          20 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              5 /
+                                              100,
+                                      child: Image.asset(
+                                        AppImage.mapIcon,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        mapshow = true;
+                                      });
+
+                                      alertBoxsearch(context);
+                                    },
+                                  )),
+                            ),
+                          ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
+
+                          //!=== select city===
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            height:
+                                MediaQuery.of(context).size.height * 5.5 / 100,
+                            child: TextFormField(
+                              readOnly: true,
+                              style: const TextStyle(
+                                  height: 1.1,
+                                  color: AppColor.textColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400),
+                              textAlignVertical: TextAlignVertical.center,
+                              controller: cityTextEditingController,
+                              onTap: () {
+                                String text =
+                                    nationalityTextEditingController.text;
+                                if (text.isEmpty) {
+                                  SnackBarToastMessage.showSnackBar(context,
+                                      AppLanguage.nationalityMsg[language]);
+                                } else {
+                                  dropDownModelForCity(context, screenWidth);
+                                }
+                              },
+                              decoration: InputDecoration(
+                                border: const UnderlineInputBorder(
+                                  // Use UnderlineInputBorder
+                                  borderSide:
+                                      BorderSide(color: AppColor.boaderColor),
+                                ),
+                                enabledBorder: const UnderlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: AppColor.boaderColor),
+                                ),
+                                focusedBorder: const UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: AppColor.themeColor, width: 1),
+                                ),
+                                contentPadding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                fillColor: Colors.transparent,
+                                filled: true,
+                                counterText: '',
+                                hintText:
+                                    "${AppLanguage.selectCityText[language]}*",
+                                hintStyle: const TextStyle(
+                                    color: AppColor.textColor,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16),
+                                suffixIcon: IconButton(
+                                  icon: Container(
+                                    alignment: language == 0
+                                        ? Alignment.centerRight
+                                        : Alignment.centerLeft,
+                                    width: MediaQuery.of(context).size.width *
+                                        20 /
+                                        100,
+                                    height: MediaQuery.of(context).size.width *
+                                        5 /
+                                        100,
+                                    child: Image.asset(
+                                      AppImage.dropDownIcon,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    String text =
+                                        nationalityTextEditingController.text;
+                                    if (text.isEmpty) {
+                                      SnackBarToastMessage.showSnackBar(context,
+                                          AppLanguage.nationalityMsg[language]);
+                                    } else {
+                                      dropDownModelForCity(
+                                          context, screenWidth);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
+
+                          //!================enter number of people
+                          CustomTextFormFieldBlackWidth(
+                              controller: maxNumberTextController,
+                              hintText:
+                                  "${AppLanguage.enterMaxNumPeopleText[language]}*",
+                              keyboardtype: TextInputType.number,
+                              maxLength: AppConstant.mobileLength,
+                              fillColorStatus: 0,
+                              width:
+                                  MediaQuery.of(context).size.width * 90 / 100,
+                              readOnly: false),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!==============description in english==========
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: Text(
+                              AppLanguage.descriptionEnglishText[language],
+                              style: const TextStyle(
+                                  fontFamily: AppFont.fontFamily,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColor.primaryColor),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 1 / 100),
+
+                          //! ----------- Message Input -------------
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: TextFormField(
+                              style: const TextStyle(
+                                  height: 1,
+                                  color: AppColor.textColor,
+                                  fontSize: 16),
+                              keyboardType: TextInputType.multiline,
+                              controller: messageTextEditingController,
+                              maxLines: 7,
+                              maxLength: AppConstant.describeLength,
+                              decoration: InputDecoration(
+                                  border: const OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: AppColor.boaderColor,
+                                    ),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5)),
+                                  ),
+                                  enabledBorder: const OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: AppColor.boaderColor,
+                                    ),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5)),
+                                  ),
+                                  focusedBorder: const OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: AppColor.themeColor,
+                                    ),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5)),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 20, horizontal: 15),
+                                  fillColor: AppColor.secondaryColor,
+                                  filled: true,
+                                  counterText: '',
+                                  hintText: AppLanguage
+                                      .descriptionEnglishText[language],
+                                  hintStyle: const TextStyle(
+                                      color: AppColor.textColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16)),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!=============descriptionin arabic==========
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: Text(
+                              AppLanguage.descriptionArabicText[language],
+                              style: const TextStyle(
+                                  fontFamily: AppFont.fontFamily,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColor.primaryColor),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 1 / 100),
+
+                          // !----------- Message Input -------------
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: TextFormField(
+                              style: const TextStyle(
+                                  height: 1,
+                                  color: AppColor.textColor,
+                                  fontSize: 16),
+                              keyboardType: TextInputType.multiline,
+                              controller: messageArabicTextEditingController,
+                              maxLines: 7,
+                              maxLength: AppConstant.describeLength,
+                              decoration: InputDecoration(
+                                  border: const OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: AppColor.boaderColor,
+                                    ),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5)),
+                                  ),
+                                  enabledBorder: const OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: AppColor.boaderColor,
+                                    ),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5)),
+                                  ),
+                                  focusedBorder: const OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: AppColor.themeColor,
+                                    ),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5)),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 20, horizontal: 15),
+                                  fillColor: AppColor.secondaryColor,
+                                  filled: true,
+                                  counterText: '',
+                                  hintText: AppLanguage
+                                      .descriptionArabicText[language],
+                                  hintStyle: const TextStyle(
+                                      color: AppColor.textColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16)),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!================enter coupon code
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            height:
+                                MediaQuery.of(context).size.height * 5.5 / 100,
+                            child: TextFormField(
+                              readOnly: false,
+                              style: const TextStyle(
+                                height: 1.1,
+                                color: AppColor.primaryColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              textAlignVertical: TextAlignVertical.center,
+                              keyboardType: TextInputType.text,
+                              controller: couponCodeTextEditingController,
+                              maxLength: 8,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'[a-zA-Z0-9]')),
+                              ],
+                              onChanged: (value) {
+                                if (value.length == 8) {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  validateCouponApiCall(userId, value);
+                                }
+                              },
+                              decoration: InputDecoration(
+                                border: const UnderlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: AppColor.boaderColor),
+                                ),
+                                enabledBorder: const UnderlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: AppColor.boaderColor),
+                                ),
+                                focusedBorder: const UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: AppColor.themeColor, width: 1),
+                                ),
+                                contentPadding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                fillColor: Colors.transparent,
+                                filled: true,
+                                counterText: '',
+                                hintText:
+                                    AppLanguage.enterCouponCodeText[language],
+                                hintStyle: AppConstant.textFilledStyle,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!Start end date pickers
+                          if (isCouponExist)
+                            Column(
+                              children: [
+                                //! Start Date Field
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width *
+                                      90 /
+                                      100,
+                                  child: TextFormField(
+                                    controller: startDateController,
+                                    readOnly: true,
+                                    onTap: () => selectStartDate(context),
+                                    decoration: InputDecoration(
+                                        border: const UnderlineInputBorder(
+                                          // Use UnderlineInputBorder
+                                          borderSide: BorderSide(
+                                              color: AppColor.boaderColor),
+                                        ),
+                                        enabledBorder:
+                                            const UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: AppColor.boaderColor),
+                                        ),
+                                        focusedBorder:
+                                            const UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: AppColor.themeColor,
+                                              width: 1),
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                vertical: 10),
+                                        fillColor: Colors.transparent,
+                                        filled: true,
+                                        counterText: '',
+                                        hintText:
+                                            "${AppLanguage.selectStartDateText[language]}*",
+                                        hintStyle: const TextStyle(
+                                            color: AppColor.textColor,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 16),
+                                        suffixIcon: IconButton(
+                                          icon: Container(
+                                            alignment: language == 0
+                                                ? Alignment.centerRight
+                                                : Alignment.centerLeft,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                20 /
+                                                100,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                5 /
+                                                100,
+                                            child: Image.asset(
+                                              AppImage.calenderDeactiveIcon,
+                                            ),
+                                          ),
+                                          onPressed: () =>
+                                              selectStartDate(context),
+                                        )),
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        2 /
+                                        100),
+
+                                //! End Date Field
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width *
+                                      90 /
+                                      100,
+                                  child: TextFormField(
+                                    controller: endDateController,
+                                    readOnly: true,
+                                    onTap: () => selectEndDate(context),
+                                    decoration: InputDecoration(
+                                        border: const UnderlineInputBorder(
+                                          // Use UnderlineInputBorder
+                                          borderSide: BorderSide(
+                                              color: AppColor.boaderColor),
+                                        ),
+                                        enabledBorder:
+                                            const UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: AppColor.boaderColor),
+                                        ),
+                                        focusedBorder:
+                                            const UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: AppColor.themeColor,
+                                              width: 1),
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                vertical: 10),
+                                        fillColor: Colors.transparent,
+                                        filled: true,
+                                        counterText: '',
+                                        hintText:
+                                            "${AppLanguage.selectEndDateText[language]}*",
+                                        hintStyle: const TextStyle(
+                                            color: AppColor.textColor,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 16),
+                                        suffixIcon: IconButton(
+                                          icon: Container(
+                                            alignment: language == 0
+                                                ? Alignment.centerRight
+                                                : Alignment.centerLeft,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                20 /
+                                                100,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                5 /
+                                                100,
+                                            child: Image.asset(
+                                              AppImage.calenderDeactiveIcon,
+                                            ),
+                                          ),
+                                          onPressed: () =>
+                                              selectEndDate(context),
+                                        )),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: startDate == null
+                                          ? Colors.grey[500]
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        2 /
+                                        100),
+                              ],
+                            ),
+
+                          //!======enter coupon discount=============
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width *
+                                      60 /
+                                      100,
+                                  child: Text(
+                                    AppLanguage.enterCoupanDisText[language],
+                                    style: const TextStyle(
+                                        fontFamily: AppFont.fontFamily,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: AppColor.textColor),
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 6.0),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          25 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              5 /
+                                              100,
+                                      child: TextFormField(
+                                        readOnly: false,
+                                        style: const TextStyle(
+                                            height: 1.1,
+                                            color: AppColor.textColor,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400),
+                                        textAlignVertical:
+                                            TextAlignVertical.center,
+                                        keyboardType: TextInputType.number,
+                                        controller:
+                                            coupanDiscountTextEditingController,
+                                        maxLength: 2,
+                                        decoration: const InputDecoration(
+                                            prefixIcon: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                SizedBox(
+                                                  child: Text(
+                                                    "%",
+                                                    style: TextStyle(
+                                                        fontFamily:
+                                                            AppFont.fontFamily,
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color:
+                                                            AppColor.textColor),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: AppColor.boaderColor),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10)),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: AppColor.boaderColor),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10)),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: AppColor.themeColor),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10)),
+                                            ),
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    vertical: 0, horizontal: 7),
+                                            fillColor: AppColor.secondaryColor,
+                                            filled: true,
+                                            counterText: '',
+                                            hintText: "",
+                                            hintStyle: TextStyle(
+                                                color: AppColor.textColor,
+                                                fontWeight: FontWeight.w400,
+                                                fontSize: 10)),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          //!================enter discount
+                          CustomTextFormFieldBlackWidth(
+                              controller: discountTextEditingController,
+                              hintText:
+                                  "${AppLanguage.enterDiscountText[language]}%",
+                              keyboardtype: TextInputType.number,
+                              maxLength: 2,
+                              fillColorStatus: 0,
+                              width:
+                                  MediaQuery.of(context).size.width * 90 / 100,
+                              readOnly: false),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 5 / 100),
+
+                          //!============next button=================//
+                          AppButton(
+                            text: AppLanguage.nextText[language],
+                            onPress: () {
+                              editAdvertisementValidation(
+                                  coverImage,
+                                  serverImageList,
+                                  captainEnglishNameTextController.text,
+                                  captainArabicNameTextController.text,
+                                  captainNumberTextController.text,
+                                  isSelectedGender,
+                                  nationalityTextEditingController.text,
+                                  destinationTextEditingController.text,
+                                  activityTextEditingController.text,
+                                  boatTextEditingController.text,
+                                  pickUpTextEditingController.text,
+                                  cityTextEditingController.text,
+                                  maxNumberTextController.text,
+                                  messageTextEditingController.text,
+                                  messageArabicTextEditingController.text,
+                                  couponCodeTextEditingController.text,
+                                  startDateController.text,
+                                  endDateController.text,
+                                  coupanDiscountTextEditingController.text,
+                                  discountTextEditingController.text);
+                            },
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 3 / 100),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const NoInternetBanner(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildCoverImage(screenWidth) {
+    if (coverImage == null && showCoverImage == "") {
+      // Case 1: No image selected or shown yet
+      return GestureDetector(
+        onTap: () {
+          coverImagePickerBottomSheet();
+        },
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+            color: AppColor.textColor,
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: Text(
+                  "${AppLanguage.uploadCoverImageMsg[language]}*",
+                  style: const TextStyle(
+                    fontFamily: AppFont.fontFamily,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w400,
+                    color: AppColor.secondaryColor,
+                  ),
+                ),
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {
+                    coverImagePickerBottomSheet();
+                  },
+                  child: SizedBox(
+                    width: screenWidth > 600
+                        ? MediaQuery.of(context).size.width * 0.1
+                        : MediaQuery.of(context).size.width * 0.15,
+                    height: screenWidth > 600
+                        ? MediaQuery.of(context).size.width * 0.1
+                        : MediaQuery.of(context).size.width * 0.15,
+                    child:
+                        Image.asset(AppImage.addImageIcon, fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            ],
+          ),
+        ),
+      );
+    } else if (coverImage == null && showCoverImage != "") {
+      // Case 2: Show image from URL
+      return Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
+              height: MediaQuery.of(context).size.height * 0.18,
+              child: Image.network(
+                "${AppConfigProvider.imageURL}$showCoverImage",
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Shimmer.fromColors(
+                    baseColor: Colors.grey.shade300,
+                    highlightColor: Colors.grey.shade100,
+                    child: Container(color: Colors.grey.shade300),
+                  );
+                },
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: MediaQuery.of(context).size.width * 0.01,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  showCoverImage = "";
+                });
+              },
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.06,
+                child: Image.asset(AppImage.crossIcon),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else {
+      // Case 3: Local image picked
+      return Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
+              height: MediaQuery.of(context).size.height * 0.18,
+              child: Image.file(
+                File(coverImage!.path),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: MediaQuery.of(context).size.width * 0.01,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  coverImage = null;
+                  showCoverImage = "";
+                });
+              },
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.06,
+                child: Image.asset(AppImage.crossIcon),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+  }
+
+  void dropDownModelForNationality(BuildContext context, screenWidth) {
+    showModalBottomSheet<void>(
+      constraints: BoxConstraints.expand(width: screenWidth),
+      isScrollControlled: true,
+      isDismissible: true,
+      context: context,
+      backgroundColor: AppColor.secondaryColor,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Directionality(
+              textDirection:
+                  language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+              child: GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: Padding(
+                  padding: MediaQuery.of(context).viewInsets,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      color: AppColor.secondaryColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 4 / 100,
+                        ),
+
+                        AppHeaderOrange(
+                            text: AppLanguage.nationalityText[language],
+                            onPress: () {
+                              Navigator.pop(context);
+                            }),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 4 / 100,
+                        ),
+
+                        // Search field
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          height:
+                              MediaQuery.of(context).size.height * 6.5 / 100,
+                          child: TextFormField(
+                            style: const TextStyle(
+                              height: 1.1,
+                              color: AppColor.primaryColor,
+                              fontFamily: AppFont.fontFamily,
+                            ),
+                            textAlignVertical: TextAlignVertical.center,
+                            readOnly: false,
+                            keyboardType: TextInputType.text,
+                            controller: searchCountryTextEditingController,
+                            maxLength: 50,
+                            decoration: InputDecoration(
+                              border: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.boaderColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              enabledBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.boaderColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              focusedBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.themeColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              contentPadding:
+                                  const EdgeInsets.only(right: 10, left: 10),
+                              fillColor: Colors.white,
+                              filled: true,
+                              counterText: '',
+                              hintText: AppLanguage.searchText[language],
+                              hintStyle: AppConstant.textFilledStyle,
+                            ),
+                            onChanged: (input) {
+                              setState(() {
+                                if (input.isNotEmpty) {
+                                  searchResultCountry(input);
+                                } else {
+                                  nationsList = nationsSearchList;
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 2 / 100,
+                        ),
+
+                        // List
+                        Flexible(
+                          child: ListView.builder(
+                            itemCount: nationsList.length,
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        2 /
+                                        100,
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        isSelectedNationality =
+                                            nationsList[index]["country_id"];
+                                        nationalityTextEditingController.text =
+                                            nationsList[index]['country_name'];
+                                        getCitiesApi(userId);
+                                        cityTextEditingController.clear();
+                                        isSelectedCity = 0;
+                                        Navigator.pop(context);
+                                      });
+                                    },
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          90 /
+                                          100,
+                                      color: AppColor.secondaryColor,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            nationsList[index]['country_name'],
+                                            style: const TextStyle(
+                                              fontFamily: AppFont.fontFamily,
+                                              fontSize: 17,
+                                              color: AppColor.primaryColor,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                5 /
+                                                100,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                5 /
+                                                100,
+                                            child: isSelectedNationality ==
+                                                    nationsList[index]
+                                                        ["country_id"]
+                                                ? Image.asset(
+                                                    AppImage.tickOrangeIcon,
+                                                    fit: BoxFit.fill,
+                                                  )
+                                                : null,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        2 /
+                                        100,
+                                  ),
+                                  if (index < nationsList.length)
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          90 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              .2 /
+                                              100,
+                                      color: AppColor.textColor,
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // void dropDownModelForGender(BuildContext context) {
+  //   showModalBottomSheet<void>(
+  //     isScrollControlled: true,
+  //     isDismissible: true,
+  //     context: context,
+  //     backgroundColor: Colors.transparent,
+  //     builder: (BuildContext context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setState) {
+  //           return GestureDetector(
+  //             onTap: () => Navigator.pop(context),
+  //             child: Padding(
+  //               padding: MediaQuery.of(context).viewInsets,
+  //               child: GestureDetector(
+  //                 onTap: () {
+  //                   Navigator.pop(context);
+  //                 },
+  //                 child: Container(
+  //                   alignment: Alignment.center,
+  //                   width: MediaQuery.of(context).size.width,
+  //                   height: MediaQuery.of(context).size.height,
+  //                   child: Container(
+  //                     width: MediaQuery.of(context).size.width * 80 / 100,
+  //                     height: MediaQuery.of(context).size.height * 19 / 100,
+  //                     decoration: BoxDecoration(
+  //                       color: AppColor.secondaryColor,
+  //                       borderRadius: BorderRadius.circular(10),
+  //                     ),
+  //                     child: Column(
+  //                       children: [
+  //                         SizedBox(
+  //                           height:
+  //                               MediaQuery.of(context).size.height * 1 / 100,
+  //                         ),
+  //                         // List
+  //                         Flexible(
+  //                           child: ListView.builder(
+  //                             itemCount: genderList.length,
+  //                             itemBuilder: (context, index) {
+  //                               return Column(
+  //                                 children: [
+  //                                   SizedBox(
+  //                                     height:
+  //                                         MediaQuery.of(context).size.height *
+  //                                             2 /
+  //                                             100,
+  //                                   ),
+  //                                   GestureDetector(
+  //                                     onTap: () {
+  //                                       setState(() {
+  //                                         genderTextEditingController.text =
+  //                                             genderList[index];
+  //                                         isSelectedGender = genderList[index];
+  //                                         Navigator.pop(context);
+  //                                       });
+  //                                     },
+  //                                     child: Container(
+  //                                       width:
+  //                                           MediaQuery.of(context).size.width *
+  //                                               70 /
+  //                                               100,
+  //                                       color: AppColor.secondaryColor,
+  //                                       child: Row(
+  //                                         mainAxisAlignment:
+  //                                             MainAxisAlignment.spaceBetween,
+  //                                         children: [
+  //                                           Text(
+  //                                             genderList[index],
+  //                                             style: const TextStyle(
+  //                                               fontFamily: AppFont.fontFamily,
+  //                                               fontSize: 17,
+  //                                               color: AppColor.primaryColor,
+  //                                               fontWeight: FontWeight.w600,
+  //                                             ),
+  //                                           ),
+  //                                           Container(
+  //                                             width: MediaQuery.of(context)
+  //                                                     .size
+  //                                                     .width *
+  //                                                 5 /
+  //                                                 100,
+  //                                             height: MediaQuery.of(context)
+  //                                                     .size
+  //                                                     .width *
+  //                                                 5 /
+  //                                                 100,
+  //                                             child: isSelectedGender ==
+  //                                                     genderList[index]
+  //                                                 ? Image.asset(
+  //                                                     AppImage.tickOrangeIcon,
+  //                                                     fit: BoxFit.fill,
+  //                                                   )
+  //                                                 : null,
+  //                                           ),
+  //                                         ],
+  //                                       ),
+  //                                     ),
+  //                                   ),
+  //                                 ],
+  //                               );
+  //                             },
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
+  // void dropDownModelForLanguage(BuildContext context, screenWidth) {
+  //   showModalBottomSheet<void>(
+  //     constraints: BoxConstraints.expand(width: screenWidth),
+  //     isScrollControlled: true,
+  //     isDismissible: true,
+  //     context: context,
+  //     backgroundColor: AppColor.secondaryColor,
+  //     builder: (BuildContext context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setState) {
+  //           return GestureDetector(
+  //             onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+  //             child: Padding(
+  //               padding: MediaQuery.of(context).viewInsets,
+  //               child: Container(
+  //                 width: MediaQuery.of(context).size.width,
+  //                 height: MediaQuery.of(context).size.height,
+  //                 decoration: BoxDecoration(
+  //                   color: AppColor.secondaryColor,
+  //                   borderRadius: BorderRadius.circular(10),
+  //                 ),
+  //                 child: Stack(
+  //                   children: [
+  //                     Column(
+  //                       children: [
+  //                         Expanded(
+  //                           flex: 1,
+  //                           child: SingleChildScrollView(
+  //                             physics: const NeverScrollableScrollPhysics(),
+  //                             child: Column(
+  //                               children: [
+  //                                 SizedBox(
+  //                                   height: MediaQuery.of(context).size.height *
+  //                                       4 /
+  //                                       100,
+  //                                 ),
+  //                                 //image header
+  //                                 Container(
+  //                                   width: MediaQuery.of(context).size.width *
+  //                                       100 /
+  //                                       100,
+  //                                   height: screenWidth > 600
+  //                                       ? null
+  //                                       : MediaQuery.of(context).size.height *
+  //                                           20 /
+  //                                           100,
+  //                                   decoration: const BoxDecoration(
+  //                                       image: DecorationImage(
+  //                                           image: AssetImage(
+  //                                               AppImage.headerBgImage),
+  //                                           fit: BoxFit.cover),
+  //                                       // color: AppColor.themeColor,
+  //                                       borderRadius: BorderRadius.only(
+  //                                           bottomLeft: Radius.circular(50),
+  //                                           bottomRight: Radius.circular(50))),
+  //                                   child: Column(
+  //                                     children: [
+  //                                       SizedBox(
+  //                                         height:
+  //                                             AppConstant.deviceType == "ios"
+  //                                                 ? MediaQuery.of(context)
+  //                                                         .size
+  //                                                         .height *
+  //                                                     6 /
+  //                                                     100
+  //                                                 : MediaQuery.of(context)
+  //                                                         .size
+  //                                                         .height *
+  //                                                     4 /
+  //                                                     100,
+  //                                       ),
+  //                                       //change lang
+  //                                       Container(
+  //                                         width: MediaQuery.of(context)
+  //                                                 .size
+  //                                                 .width *
+  //                                             100 /
+  //                                             100,
+  //                                         alignment: Alignment.center,
+  //                                         child: Row(
+  //                                           children: [
+  //                                             //edit
+  //                                             GestureDetector(
+  //                                               onTap: () {
+  //                                                 Navigator.pop(context);
+  //                                               },
+  //                                               child: Container(
+  //                                                 color: Colors.transparent,
+  //                                                 alignment: Alignment.center,
+  //                                                 width: MediaQuery.of(context)
+  //                                                         .size
+  //                                                         .width *
+  //                                                     15 /
+  //                                                     100,
+  //                                                 height: MediaQuery.of(context)
+  //                                                         .size
+  //                                                         .width *
+  //                                                     7 /
+  //                                                     100,
+  //                                                 child: Image.asset(
+  //                                                     AppImage.backIcon),
+  //                                               ),
+  //                                             ),
+  //                                             //profile
+  //                                             Container(
+  //                                               alignment: Alignment.center,
+  //                                               width: MediaQuery.of(context)
+  //                                                       .size
+  //                                                       .width *
+  //                                                   70 /
+  //                                                   100,
+  //                                               child: Text(
+  //                                                 AppLanguage
+  //                                                         .changeLanguageText[
+  //                                                     language],
+  //                                                 style: const TextStyle(
+  //                                                     color: AppColor
+  //                                                         .secondaryColor,
+  //                                                     fontSize: 20,
+  //                                                     fontWeight:
+  //                                                         FontWeight.w600,
+  //                                                     fontFamily:
+  //                                                         AppFont.fontFamily),
+  //                                               ),
+  //                                             ),
+  //                                             Container(
+  //                                               alignment:
+  //                                                   Alignment.centerRight,
+  //                                               width: MediaQuery.of(context)
+  //                                                       .size
+  //                                                       .width *
+  //                                                   15 /
+  //                                                   100,
+  //                                               height: MediaQuery.of(context)
+  //                                                       .size
+  //                                                       .width *
+  //                                                   7 /
+  //                                                   100,
+  //                                             ),
+  //                                           ],
+  //                                         ),
+  //                                       ),
+  //                                       SizedBox(
+  //                                         height: MediaQuery.of(context)
+  //                                                 .size
+  //                                                 .height *
+  //                                             10 /
+  //                                             100,
+  //                                       ),
+  //                                     ],
+  //                                   ),
+  //                                 ),
+  //                                 SizedBox(
+  //                                   height: MediaQuery.of(context).size.height *
+  //                                       2 /
+  //                                       100,
+  //                                 ),
+  //                                 //language list
+  //                                 Wrap(
+  //                                   children: [
+  //                                     ...List.generate(languageList.length,
+  //                                         (index) {
+  //                                       return Column(
+  //                                         crossAxisAlignment:
+  //                                             CrossAxisAlignment.center,
+  //                                         children: [
+  //                                           GestureDetector(
+  //                                             onTap: () {
+  //                                               setState(() {
+  //                                                 selectedLanguage =
+  //                                                     languageList[index]['id'];
+  //                                                 languageTextEditingController
+  //                                                         .text =
+  //                                                     languageList[index]
+  //                                                         ['title'];
+  //                                               });
+  //                                             },
+  //                                             child: Container(
+  //                                               width: MediaQuery.of(context)
+  //                                                       .size
+  //                                                       .width *
+  //                                                   90 /
+  //                                                   100,
+  //                                               decoration: BoxDecoration(
+  //                                                   color: selectedLanguage ==
+  //                                                           languageList[index]
+  //                                                               ['id']
+  //                                                       ? AppColor.themeColor
+  //                                                       : AppColor
+  //                                                           .secondaryColor,
+  //                                                   borderRadius:
+  //                                                       BorderRadius.circular(
+  //                                                           10),
+  //                                                   border: Border.all(
+  //                                                       width: 1,
+  //                                                       color: AppColor
+  //                                                           .boaderColor)),
+  //                                               child: Container(
+  //                                                 width: MediaQuery.of(context)
+  //                                                         .size
+  //                                                         .width *
+  //                                                     80 /
+  //                                                     100,
+  //                                                 child: Padding(
+  //                                                   padding: const EdgeInsets
+  //                                                       .symmetric(
+  //                                                       vertical: 10.0,
+  //                                                       horizontal: 18),
+  //                                                   child: Text(
+  //                                                     languageList[index]
+  //                                                         ['title'],
+  //                                                     style: TextStyle(
+  //                                                         color: selectedLanguage ==
+  //                                                                 languageList[
+  //                                                                         index]
+  //                                                                     ['id']
+  //                                                             ? AppColor
+  //                                                                 .secondaryColor
+  //                                                             : AppColor
+  //                                                                 .primaryColor,
+  //                                                         fontSize: 20,
+  //                                                         fontWeight:
+  //                                                             FontWeight.w400,
+  //                                                         fontFamily: AppFont
+  //                                                             .fontFamily),
+  //                                                   ),
+  //                                                 ),
+  //                                               ),
+  //                                             ),
+  //                                           ),
+  //                                           SizedBox(
+  //                                             height: MediaQuery.of(context)
+  //                                                     .size
+  //                                                     .height *
+  //                                                 2 /
+  //                                                 100,
+  //                                           ),
+  //                                         ],
+  //                                       );
+  //                                     }),
+  //                                   ],
+  //                                 ),
+  //                               ],
+  //                             ),
+  //                           ),
+  //                         )
+  //                       ],
+  //                     ),
+  //                     Positioned(
+  //                       bottom: MediaQuery.of(context).size.height * 6 / 100,
+  //                       child: Column(
+  //                         children: [
+  //                           Container(
+  //                             alignment: Alignment.center,
+  //                             width:
+  //                                 MediaQuery.of(context).size.width * 100 / 100,
+  //                             child: AppButton(
+  //                                 text: AppLanguage.doneText[language],
+  //                                 onPress: () {
+  //                                   Navigator.pop(context);
+  //                                 }),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     )
+  //                   ],
+  //                 ),
+  //               ),
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
+  void dropDownModelForTrip(BuildContext context, screenWidth, screenHeight) {
+    showModalBottomSheet<void>(
+      constraints: BoxConstraints.expand(width: screenWidth),
+      isScrollControlled: true,
+      isDismissible: true,
+      context: context,
+      backgroundColor: AppColor.secondaryColor,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Directionality(
+              textDirection:
+                  language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+              child: GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: Padding(
+                  padding: MediaQuery.of(context).viewInsets,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      color: AppColor.secondaryColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: SingleChildScrollView(
+                            physics: const NeverScrollableScrollPhysics(),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: MediaQuery.of(context).size.height *
+                                      4 /
+                                      100,
+                                ),
+                                //image header
+                                Container(
+                                  width: MediaQuery.of(context).size.width *
+                                      100 /
+                                      100,
+                                  height: screenWidth > 600
+                                      ? null
+                                      : MediaQuery.of(context).size.height *
+                                          20 /
+                                          100,
+                                  decoration: const BoxDecoration(
+                                      image: DecorationImage(
+                                          image: AssetImage(
+                                              AppImage.headerBgImage),
+                                          fit: BoxFit.cover),
+                                      // color: AppColor.themeColor,
+                                      borderRadius: BorderRadius.only(
+                                          bottomLeft: Radius.circular(50),
+                                          bottomRight: Radius.circular(50))),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        height: AppConstant.deviceType == "ios"
+                                            ? MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                6 /
+                                                100
+                                            : MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                4 /
+                                                100,
+                                      ),
+
+                                      //change lang
+                                      Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                100 /
+                                                100,
+                                        alignment: Alignment.center,
+                                        child: Row(
+                                          children: [
+                                            //edit
+                                            GestureDetector(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Transform.rotate(
+                                                angle:
+                                                    language == 1 ? 3.1416 : 0,
+                                                child: Container(
+                                                  color: Colors.transparent,
+                                                  alignment: Alignment.center,
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      15 /
+                                                      100,
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      7 /
+                                                      100,
+                                                  child: Image.asset(
+                                                      AppImage.backIcon),
+                                                ),
+                                              ),
+                                            ),
+
+                                            //profile
+                                            Container(
+                                              alignment: Alignment.center,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  70 /
+                                                  100,
+                                              child: Text(
+                                                AppLanguage
+                                                    .activityText[language],
+                                                style: const TextStyle(
+                                                    color:
+                                                        AppColor.secondaryColor,
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontFamily:
+                                                        AppFont.fontFamily),
+                                              ),
+                                            ),
+
+                                            Container(
+                                              alignment: Alignment.centerRight,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  15 /
+                                                  100,
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  7 /
+                                                  100,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                10 /
+                                                100,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: MediaQuery.of(context).size.height *
+                                      2 /
+                                      100,
+                                ),
+
+                                //trip list
+                                if (activityList.isNotEmpty)
+                                  Wrap(
+                                    children: [
+                                      ...List.generate(activityList.length,
+                                          (index) {
+                                        return Column(
+                                          children: [
+                                            SizedBox(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  2 /
+                                                  100,
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  if (selectedActivityList
+                                                      .contains(activityList[
+                                                                  index]
+                                                              ["trip_type_id"]
+                                                          .toString())) {
+                                                    selectedActivityList.remove(
+                                                        activityList[index]
+                                                                ["trip_type_id"]
+                                                            .toString());
+                                                    selectedActivityNameList
+                                                        .remove(activityList[
+                                                                    index]
+                                                                ['name_english']
+                                                            [language]);
+                                                  } else {
+                                                    selectedActivityList.add(
+                                                        activityList[index]
+                                                                ["trip_type_id"]
+                                                            .toString());
+                                                    selectedActivityNameList
+                                                        .add(activityList[index]
+                                                                ['name_english']
+                                                            [language]);
+                                                  }
+                                                  print(
+                                                      "selectedActivityList$selectedActivityList");
+                                                  activityTextEditingController
+                                                          .text =
+                                                      selectedActivityNameList
+                                                          .join(", ");
+                                                  // Navigator.pop(context);
+                                                });
+                                              },
+                                              child: Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    90 /
+                                                    100,
+                                                color: AppColor.secondaryColor,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                      activityList[index]
+                                                              ['name_english']
+                                                          [language],
+                                                      style: const TextStyle(
+                                                        fontFamily:
+                                                            AppFont.fontFamily,
+                                                        fontSize: 17,
+                                                        color: AppColor
+                                                            .primaryColor,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              5 /
+                                                              100,
+                                                      height:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              5 /
+                                                              100,
+                                                      child: selectedActivityList
+                                                              .contains(activityList[
+                                                                          index]
+                                                                      [
+                                                                      "trip_type_id"]
+                                                                  .toString())
+                                                          ? Image.asset(
+                                                              AppImage
+                                                                  .tickOrangeIcon,
+                                                              fit: BoxFit.fill,
+                                                            )
+                                                          : null,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  2 /
+                                                  100,
+                                            ),
+                                            if (index < activityList.length)
+                                              Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    90 /
+                                                    100,
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    .2 /
+                                                    100,
+                                                color: AppColor.textColor,
+                                              ),
+                                            if (index ==
+                                                activityList.length - 1)
+                                              SizedBox(
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    8 /
+                                                    100,
+                                              ),
+                                          ],
+                                        );
+                                      }),
+                                    ],
+                                  ),
+
+                                if (activityList.isEmpty)
+                                  Column(
+                                    children: [
+                                      SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              20 /
+                                              100),
+                                      SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                20 /
+                                                100,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                                20 /
+                                                100,
+                                        child: Image.asset(
+                                          AppImage.noDataIcon,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        AppButton(
+                            text: AppLanguage.continueText[language],
+                            onPress: () {
+                              Navigator.pop(context);
+                            }),
+                        SizedBox(
+                          height: screenHeight * 3 / 100,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void dropDownModelForBoat(BuildContext context, screenWidth) {
+    showModalBottomSheet<void>(
+      constraints: BoxConstraints.expand(width: screenWidth),
+      isScrollControlled: true,
+      isDismissible: true,
+      context: context,
+      backgroundColor: AppColor.secondaryColor,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Directionality(
+              textDirection:
+                  language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+              child: GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: Padding(
+                  padding: MediaQuery.of(context).viewInsets,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      color: AppColor.secondaryColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 4 / 100,
+                        ),
+                        AppHeaderOrange(
+                            text: AppLanguage.chooseBoatText[language],
+                            onPress: () {
+                              Navigator.pop(context);
+                            }),
+                        Expanded(
+                            child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height *
+                                    3 /
+                                    100,
+                              ),
+                              Wrap(
+                                children: [
+                                  ...List.generate(boatList.length, (index) {
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        //coupon card
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  3 /
+                                                  100,
+                                            ),
+                                            Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    90 /
+                                                    100,
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                  boxShadow: const [
+                                                    BoxShadow(
+                                                      color: AppColor
+                                                          .textLightColor,
+                                                      blurRadius: 2.0,
+                                                      offset: Offset(0, 4),
+                                                    ),
+                                                  ], //BoxShadow
+                                                  color: isSelectedBoat ==
+                                                          boatList[index]
+                                                              ['boat_id']
+                                                      ? AppColor.themeColor
+                                                      : AppColor.secondaryColor,
+                                                  border: Border.all(
+                                                      width: 1,
+                                                      color: AppColor
+                                                          .textLightColor),
+                                                  borderRadius:
+                                                      BorderRadius.circular(15),
+                                                ),
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    selectBoat(index);
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            80 /
+                                                            100,
+                                                    child: Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 8.0),
+                                                      child: Row(
+                                                        children: [
+                                                          //left side
+                                                          SizedBox(
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                45 /
+                                                                100,
+                                                            child: Column(
+                                                              children: [
+                                                                SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      45 /
+                                                                      100,
+                                                                  child: Text(
+                                                                    "${AppLanguage.yearText[language]}-${boatList[index]['boat_year']}",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            20,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w500,
+                                                                        color: isSelectedBoat == boatList[index]['boat_id']
+                                                                            ? AppColor
+                                                                                .secondaryColor
+                                                                            : AppColor
+                                                                                .primaryColor,
+                                                                        fontFamily:
+                                                                            AppFont.fontFamily),
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      45 /
+                                                                      100,
+                                                                  child: Text(
+                                                                    "Capacity-${boatList[index]['boat_capacity']}",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w400,
+                                                                        color: isSelectedBoat == boatList[index]['boat_id']
+                                                                            ? AppColor
+                                                                                .secondaryColor
+                                                                            : AppColor
+                                                                                .primaryColor,
+                                                                        fontFamily:
+                                                                            AppFont.fontFamily),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+
+                                                          //right side
+                                                          Container(
+                                                            alignment: Alignment
+                                                                .centerRight,
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                35 /
+                                                                100,
+                                                            //color: Colors.amber,
+                                                            child: Row(
+                                                              children: [
+                                                                SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      35 /
+                                                                      100,
+                                                                  // color: Colors.black,
+                                                                  child:
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                        .only(
+                                                                        bottom:
+                                                                            2.0),
+                                                                    child: Text(
+                                                                      boatList[
+                                                                              index]
+                                                                          [
+                                                                          'boat_name_english'],
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .end,
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              20,
+                                                                          fontWeight: FontWeight
+                                                                              .w400,
+                                                                          color: isSelectedBoat == boatList[index]['boat_id']
+                                                                              ? AppColor.secondaryColor
+                                                                              : AppColor.primaryColor,
+                                                                          fontFamily: AppFont.fontFamily),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )),
+                                            SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  3 /
+                                                  100,
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              3 /
+                                              100,
+                                        )
+                                      ],
+                                    );
+                                  }),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ))
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  selectBoat(index) {
+    setState(() {
+      isSelectedBoat = boatList[index]['boat_id'];
+      boatTextEditingController.text = boatList[index]['boat_name_english'];
+      boatCapacity = boatList[index]['boat_capacity'].toString().trim();
+    });
+  }
+
+  void dropDownModelForCity(BuildContext context, screenWidth) {
+    showModalBottomSheet<void>(
+      constraints: BoxConstraints.expand(width: screenWidth),
+      isScrollControlled: true,
+      isDismissible: true,
+      context: context,
+      backgroundColor: AppColor.secondaryColor,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Directionality(
+              textDirection:
+                  language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+              child: GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: Padding(
+                  padding: MediaQuery.of(context).viewInsets,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      color: AppColor.secondaryColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: SingleChildScrollView(
+                            physics: const NeverScrollableScrollPhysics(),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: MediaQuery.of(context).size.height *
+                                      4 /
+                                      100,
+                                ),
+                                //image header
+                                Container(
+                                  width: MediaQuery.of(context).size.width *
+                                      100 /
+                                      100,
+                                  height: screenWidth > 600
+                                      ? null
+                                      : MediaQuery.of(context).size.height *
+                                          20 /
+                                          100,
+                                  decoration: const BoxDecoration(
+                                      image: DecorationImage(
+                                          image: AssetImage(
+                                              AppImage.headerBgImage),
+                                          fit: BoxFit.cover),
+                                      // color: AppColor.themeColor,
+                                      borderRadius: BorderRadius.only(
+                                          bottomLeft: Radius.circular(50),
+                                          bottomRight: Radius.circular(50))),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        height: AppConstant.deviceType == "ios"
+                                            ? MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                6 /
+                                                100
+                                            : MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                4 /
+                                                100,
+                                      ),
+
+                                      //change lang
+                                      Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                100 /
+                                                100,
+                                        alignment: Alignment.center,
+                                        child: Row(
+                                          children: [
+                                            //edit
+                                            GestureDetector(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Transform.rotate(
+                                                angle:
+                                                    language == 1 ? 3.1416 : 0,
+                                                child: Container(
+                                                  color: Colors.transparent,
+                                                  alignment: Alignment.center,
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      15 /
+                                                      100,
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      7 /
+                                                      100,
+                                                  child: Image.asset(
+                                                      AppImage.backIcon),
+                                                ),
+                                              ),
+                                            ),
+
+                                            //profile
+                                            Container(
+                                              alignment: Alignment.center,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  70 /
+                                                  100,
+                                              child: Text(
+                                                AppLanguage.cityText[language],
+                                                style: const TextStyle(
+                                                    color:
+                                                        AppColor.secondaryColor,
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontFamily:
+                                                        AppFont.fontFamily),
+                                              ),
+                                            ),
+
+                                            Container(
+                                              alignment: Alignment.centerRight,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  15 /
+                                                  100,
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  7 /
+                                                  100,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                10 /
+                                                100,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: MediaQuery.of(context).size.height *
+                                      2 /
+                                      100,
+                                ),
+
+                                //trip list
+                                Wrap(
+                                  children: [
+                                    ...List.generate(cityList.length, (index) {
+                                      return Column(
+                                        children: [
+                                          SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                2 /
+                                                100,
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                isSelectedCity =
+                                                    cityList[index]["city_id"];
+                                                cityTextEditingController.text =
+                                                    cityList[index]
+                                                        ['city_name'];
+                                                Navigator.pop(context);
+                                              });
+                                            },
+                                            child: Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  90 /
+                                                  100,
+                                              color: AppColor.secondaryColor,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    cityList[index]
+                                                        ['city_name'],
+                                                    style: const TextStyle(
+                                                      fontFamily:
+                                                          AppFont.fontFamily,
+                                                      fontSize: 17,
+                                                      color:
+                                                          AppColor.primaryColor,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            5 /
+                                                            100,
+                                                    height:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            5 /
+                                                            100,
+                                                    child: isSelectedCity ==
+                                                            cityList[index]
+                                                                ["city_id"]
+                                                        ? Image.asset(
+                                                            AppImage
+                                                                .tickOrangeIcon,
+                                                            fit: BoxFit.fill,
+                                                          )
+                                                        : null,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                2 /
+                                                100,
+                                          ),
+                                          if (index < cityList.length)
+                                            Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  90 /
+                                                  100,
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  .2 /
+                                                  100,
+                                              color: AppColor.textColor,
+                                            ),
+                                        ],
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void dropDownModelForDestination(BuildContext context, screenWidth) {
+    showModalBottomSheet<void>(
+      constraints: BoxConstraints.expand(width: screenWidth),
+      isScrollControlled: true,
+      isDismissible: true,
+      context: context,
+      backgroundColor: AppColor.secondaryColor,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Directionality(
+              textDirection:
+                  language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+              child: GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: Padding(
+                  padding: MediaQuery.of(context).viewInsets,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      color: AppColor.secondaryColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: SingleChildScrollView(
+                            physics: const NeverScrollableScrollPhysics(),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: MediaQuery.of(context).size.height *
+                                      4 /
+                                      100,
+                                ),
+                                //image header
+                                Container(
+                                  width: MediaQuery.of(context).size.width *
+                                      100 /
+                                      100,
+                                  height: screenWidth > 600
+                                      ? null
+                                      : MediaQuery.of(context).size.height *
+                                          20 /
+                                          100,
+                                  decoration: const BoxDecoration(
+                                      image: DecorationImage(
+                                          image: AssetImage(
+                                              AppImage.headerBgImage),
+                                          fit: BoxFit.cover),
+                                      // color: AppColor.themeColor,
+                                      borderRadius: BorderRadius.only(
+                                          bottomLeft: Radius.circular(50),
+                                          bottomRight: Radius.circular(50))),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        height: AppConstant.deviceType == "ios"
+                                            ? MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                6 /
+                                                100
+                                            : MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                4 /
+                                                100,
+                                      ),
+
+                                      //change lang
+                                      Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                100 /
+                                                100,
+                                        alignment: Alignment.center,
+                                        child: Row(
+                                          children: [
+                                            //edit
+                                            GestureDetector(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Transform.rotate(
+                                                angle:
+                                                    language == 1 ? 3.1416 : 0,
+                                                child: Container(
+                                                  color: Colors.transparent,
+                                                  alignment: Alignment.center,
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      15 /
+                                                      100,
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      7 /
+                                                      100,
+                                                  child: Image.asset(
+                                                      AppImage.backIcon),
+                                                ),
+                                              ),
+                                            ),
+
+                                            //profile
+                                            Container(
+                                              alignment: Alignment.center,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  70 /
+                                                  100,
+                                              child: Text(
+                                                AppLanguage
+                                                    .destinationText[language],
+                                                style: const TextStyle(
+                                                    color:
+                                                        AppColor.secondaryColor,
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontFamily:
+                                                        AppFont.fontFamily),
+                                              ),
+                                            ),
+
+                                            Container(
+                                              alignment: Alignment.centerRight,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  15 /
+                                                  100,
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  7 /
+                                                  100,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                10 /
+                                                100,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: MediaQuery.of(context).size.height *
+                                      2 /
+                                      100,
+                                ),
+
+                                //trip list
+
+                                Wrap(
+                                  children: [
+                                    ...List.generate(destinationList.length,
+                                        (index) {
+                                      return Column(
+                                        children: [
+                                          SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                2 /
+                                                100,
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                isSelectedDestination =
+                                                    destinationList[index]
+                                                        ["destination_id"];
+                                                destinationTextEditingController
+                                                        .text =
+                                                    destinationList[index]
+                                                            ['destination']
+                                                        [language];
+                                                // activityTextEditingController
+                                                //     .clear();
+                                                // selectedActivityNameList.clear();
+                                                // selectedActivityList.clear();
+                                                // getActivityApi(userId);
+                                                Navigator.pop(context);
+                                              });
+                                            },
+                                            child: Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  90 /
+                                                  100,
+                                              color: AppColor.secondaryColor,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    destinationList[index]
+                                                            ['destination']
+                                                        [language],
+                                                    style: const TextStyle(
+                                                      fontFamily:
+                                                          AppFont.fontFamily,
+                                                      fontSize: 17,
+                                                      color:
+                                                          AppColor.primaryColor,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            5 /
+                                                            100,
+                                                    height:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            5 /
+                                                            100,
+                                                    child: isSelectedDestination ==
+                                                            destinationList[
+                                                                    index][
+                                                                "destination_id"]
+                                                        ? Image.asset(
+                                                            AppImage
+                                                                .tickOrangeIcon,
+                                                            fit: BoxFit.fill,
+                                                          )
+                                                        : null,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                2 /
+                                                100,
+                                          ),
+                                          if (index < destinationList.length)
+                                            Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  90 /
+                                                  100,
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  .2 /
+                                                  100,
+                                              color: AppColor.textColor,
+                                            ),
+                                        ],
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void alertBoxsearch(BuildContext context) {
+    print("Opening bottom sheet...");
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: false,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, StateSetter modalSetState) {
+            return Scaffold(
+              backgroundColor: Colors.white,
+              body: SafeArea(
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  color: Colors.white,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 3 / 100,
+                      ),
+                      AppHeader(
+                        text: AppLanguage.locationText[language],
+                        onPress: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            if (mapshow)
+                              GoogleMap(
+                                myLocationButtonEnabled: false,
+                                zoomControlsEnabled: false,
+                                mapType: MapType.normal,
+                                initialCameraPosition: CameraPosition(
+                                  target: initialPosition,
+                                  zoom: 15.0,
+                                ),
+                                onMapCreated: (controller) {
+                                  modalSetState(() {
+                                    mapController = controller;
+                                  });
+                                },
+                                onTap: (LatLng tappedLocation) {
+                                  // When user taps on map, move pin and get address
+                                  modalSetState(() {
+                                    latitudex = tappedLocation.latitude;
+                                    longtitudex = tappedLocation.longitude;
+                                    initialPosition = tappedLocation;
+                                  });
+                                  _getAddressFromLatLng(
+                                    Position(
+                                      longitude: tappedLocation.longitude,
+                                      latitude: tappedLocation.latitude,
+                                      timestamp: DateTime.now(),
+                                      accuracy: 0,
+                                      altitude: 0,
+                                      altitudeAccuracy: 0,
+                                      heading: 0,
+                                      speed: 0,
+                                      speedAccuracy: 0,
+                                      headingAccuracy: 0,
+                                    ),
+                                    modalSetState,
+                                  );
+                                },
+                                markers: {
+                                  Marker(
+                                    markerId: MarkerId('selected_location'),
+                                    position: LatLng(latitudex, longtitudex),
+                                    draggable: true,
+                                    icon: BitmapDescriptor.defaultMarkerWithHue(
+                                        BitmapDescriptor.hueRed),
+                                    onDragEnd: (LatLng newPosition) {
+                                      modalSetState(() {
+                                        latitudex = newPosition.latitude;
+                                        longtitudex = newPosition.longitude;
+                                        initialPosition = newPosition;
+                                      });
+                                      _getAddressFromLatLng(
+                                        Position(
+                                          longitude: newPosition.longitude,
+                                          latitude: newPosition.latitude,
+                                          timestamp: DateTime.now(),
+                                          accuracy: 0,
+                                          altitude: 0,
+                                          altitudeAccuracy: 0,
+                                          heading: 0,
+                                          speed: 0,
+                                          speedAccuracy: 0,
+                                          headingAccuracy: 0,
+                                        ),
+                                        modalSetState,
+                                      );
+                                      FocusManager.instance.primaryFocus
+                                          ?.unfocus();
+                                    },
+                                  ),
+                                },
+                              ),
+                            Column(
+                              children: [
+                                const SizedBox(height: 15),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 8,
+                                          offset: Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: TextField(
+                                      controller: searchController,
+                                      decoration: InputDecoration(
+                                        contentPadding: const EdgeInsets.only(
+                                            left: 16,
+                                            top: 14,
+                                            bottom: 14,
+                                            right: 10),
+                                        border: InputBorder.none,
+                                        hintText: AppLanguage
+                                            .searchLocation[language],
+                                        hintStyle:
+                                            TextStyle(color: Colors.grey[600]),
+                                        prefixIcon: Icon(Icons.search,
+                                            color: Colors.grey[600]),
+                                        suffixIcon: IconButton(
+                                          icon: const Icon(Icons.clear),
+                                          onPressed: () {
+                                            modalSetState(() {
+                                              searchController.clear();
+                                              predictions.clear();
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      onChanged: (value) {
+                                        fetchPlaceSuggestionsWithCallback(
+                                            value, modalSetState);
+                                        if (_debounce?.isActive ?? false)
+                                          _debounce!.cancel();
+                                        _debounce = Timer(
+                                          const Duration(milliseconds: 300),
+                                          () {},
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (predictions.isNotEmpty)
+                              Positioned(
+                                top: 85,
+                                left: 15,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 8,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.9,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.4,
+                                  child: ListView.builder(
+                                    itemCount: predictions.length,
+                                    itemBuilder: (context, index) {
+                                      final suggestion = predictions[index];
+                                      return ListTile(
+                                        leading: const Icon(Icons.location_on,
+                                            color: Colors.red),
+                                        title: Text(suggestion['description']),
+                                        onTap: () async {
+                                          searchController.text =
+                                              suggestion['description'];
+                                          final placeId =
+                                              suggestion['place_id'];
+                                          final apiKey = AppConstant.mapkey;
+
+                                          final detailsUrl =
+                                              'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey';
+                                          final response = await http
+                                              .get(Uri.parse(detailsUrl));
+
+                                          if (response.statusCode == 200) {
+                                            final data =
+                                                json.decode(response.body);
+                                            final location = data['result']
+                                                ['geometry']['location'];
+                                            FocusManager.instance.primaryFocus
+                                                ?.unfocus();
+
+                                            modalSetState(() {
+                                              latitudex = location['lat'];
+                                              longtitudex = location['lng'];
+                                              initialPosition = LatLng(
+                                                  latitudex, longtitudex);
+                                              predictions.clear();
+                                            });
+
+                                            mapController?.animateCamera(
+                                              CameraUpdate.newCameraPosition(
+                                                CameraPosition(
+                                                  target: initialPosition,
+                                                  zoom: 16,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0, vertical: 20.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () => _getCurrentPosition(
+                                              modalSetState),
+                                          child: Container(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.13,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.13,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: Colors.black26,
+                                                  blurRadius: 8,
+                                                  offset: Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.my_location,
+                                                color: Colors.blue,
+                                                size: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.06,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 20),
+                                    AppButton(
+                                      text: AppLanguage.continueText[language],
+                                      onPress: () {
+                                        print(searchController.text);
+                                        if (searchController.text.isEmpty) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              backgroundColor:
+                                                  AppColor.themeColor,
+                                              content: Text(
+                                                AppLanguage
+                                                    .locationMessage[language],
+                                                style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                            ),
+                                          );
+                                          return;
+                                        } else {
+                                          locationAdreesSet();
+                                        }
+                                      },
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.03),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> fetchPlaceSuggestionsWithCallback(
+      String input, Function modalSetState) async {
+    if (input.isEmpty) {
+      modalSetState(() => predictions = []);
+      return;
+    }
+
+    final apiKey = AppConstant.mapkey;
+    final url =
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        modalSetState(() {
+          predictions = data['predictions'];
+        });
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  Future<void> _getCurrentPosition([StateSetter? modalSetState]) async {
+    setState(() {
+      isApiCalling = true;
+    });
+    final hasPermission = await _handleLocationPermission();
+
+    if (!hasPermission) return;
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) {
+      if (modalSetState != null) {
+        // Called from modal
+        _getAddressFromLatLng(position, modalSetState);
+      } else {
+        // Called from initState
+        // setState(() => _currentPosition = position);
+        _getAddressFromLatLng(position);
+      }
+    }).catchError((e) {
+      print("Line 71");
+      debugPrint(e);
+    });
+  }
+
+  Future<bool> _handleLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text("${AppLanguage.loctionPermissionenableText[language]}")));
+      return false;
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        setLoction();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLanguage.LoctionPermissiondenaiedText[language])));
+        return false;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      Geolocator.openLocationSettings();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              AppLanguage.LoctionpermissionpemanebtdeletedText[language])));
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _getAddressFromLatLng(Position position,
+      [StateSetter? modalSetState]) async {
+    await placemarkFromCoordinates(position.latitude, position.longitude)
+        .then((List<Placemark> placemarks) {
+      Placemark place = placemarks[0];
+      print("Line 95${position.latitude}");
+
+      final addressText =
+          '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
+
+      if (modalSetState != null) {
+        modalSetState(() {
+          latitudex = position.latitude;
+          longtitudex = position.longitude;
+          initialPosition = LatLng(position.latitude, position.longitude);
+          searchController.text = addressText;
+        });
+
+        mapController?.animateCamera(CameraUpdate.newCameraPosition(
+            CameraPosition(
+                target: LatLng(position.latitude, position.longitude),
+                zoom: 16.0)));
+      } else {
+        setState(() {
+          mapshow = true;
+          long = position.longitude;
+          lat = position.latitude;
+          initialPosition = LatLng(position.latitude, position.longitude);
+          latitudex = position.latitude;
+          longtitudex = position.longitude;
+          searchController.text = addressText;
+          isApiCalling = false;
+        });
+
+        mapController?.animateCamera(CameraUpdate.newCameraPosition(
+            CameraPosition(target: initialPosition, zoom: 16.0)));
+      }
+
+      print("Line 95${mapshow}");
+    }).catchError((e) {
+      print("Line 95");
+      debugPrint(e);
+    });
+  }
+
+  setLoction() {
+    setState(() {
+      latitudex = 32.44745630896057;
+      longtitudex = 14.723027497529984;
+      lat = 32.44745630896057;
+      long = 14.723027497529984;
+      initialPosition = LatLng(32.44745630896057, 14.723027497529984);
+      isApiCalling = false;
+      mapshow = true;
+    });
+  }
+
+  locationAdreesSet() {
+    setState(() {
+      pickUpTextEditingController.text = searchController.text;
+      lat = latitudex;
+      long = longtitudex;
+      print("latlong: $lat $long");
+    });
+    Navigator.pop(context);
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+}
