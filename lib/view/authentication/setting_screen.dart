@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../utilities/route_observer.dart';
 import '/utilities/app_footer.dart';
 import '/view/authentication/contact_us_screen.dart';
 import '../content_screen/content_screen.dart';
@@ -32,7 +33,7 @@ class SettingScreen extends StatefulWidget {
   State<SettingScreen> createState() => SettingScreenScreenState();
 }
 
-class SettingScreenScreenState extends State<SettingScreen> {
+class SettingScreenScreenState extends State<SettingScreen> with RouteAware {
   List accountOptionsList = [
     {
       "id": 1,
@@ -150,8 +151,8 @@ class SettingScreenScreenState extends State<SettingScreen> {
 
 //-----------------GET CONTENT API CALL-----------------//
   Future<void> getAllContent() async {
-    Uri url =
-        Uri.parse('${AppConfigProvider.apiUrl}/get_all_content?language_id=0');
+    Uri url = Uri.parse(
+        '${AppConfigProvider.apiUrl}/get_all_content?language_id=$language');
     print("url $url");
 
     try {
@@ -261,6 +262,22 @@ class SettingScreenScreenState extends State<SettingScreen> {
       await launch(url,
           forceSafariVC: inApp, forceWebView: inApp, enableJavaScript: true);
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  void didPopNext() {
+    getAllContent();
   }
 
   @override

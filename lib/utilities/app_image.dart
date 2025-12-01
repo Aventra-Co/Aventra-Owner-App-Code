@@ -15,7 +15,8 @@ class AppImage {
   static const leftArrowIcon = "./assets/icons/ic_leftArrow.png";
   static const tickOrangeIcon = "./assets/icons/ic_tickCheckBox.png";
   static const deactiveNotificationIcon = "./assets/icons/ic_notification.png";
-  static const activeNotificationIcon = "./assets/icons/ic_notificationActive.png";
+  static const activeNotificationIcon =
+      "./assets/icons/ic_notificationActive.png";
   static const cloudIcon = "./assets/icons/ic_cloud.png";
   static const tripsActiveIcon = "./assets/icons/ic_steeringWheel.png";
   static const tripsDeactiveIcon =
@@ -98,4 +99,7 @@ class AppImage {
       './assets/icons/ic_currentLocationLogo.png';
   static const imageFrame = './assets/icons/ic_image_frame.png';
   static const clockIconOrange = './assets/icons/ic_clock.png';
+  static const discountStrip = './assets/icons/ic_discountStrip.png';
+  static const discountStripInverted =
+      './assets/icons/ic_discountStripInverted.png';
 }

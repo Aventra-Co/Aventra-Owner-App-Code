@@ -1010,4 +1010,13 @@ class AppLanguage {
     "Ticket(s)",
     "تذكرة (تذاكر)",
   ];
+static const noCitiesMsg = [
+  "No cities found!",
+  "لم يتم العثور على مدن!",
+];
+  static const offText = [
+    "OFF",
+    "خصم",
+  ];
+
 }

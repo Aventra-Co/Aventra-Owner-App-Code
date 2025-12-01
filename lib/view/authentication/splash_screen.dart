@@ -83,6 +83,17 @@ class _SplashState extends State<Splash> {
     _checkPendingNotifications();
 
     final prefs = await SharedPreferences.getInstance();
+    dynamic langId = prefs.getString("language_id");
+    if (langId != null) {
+      langId = int.parse(langId);
+      if (langId == 0) {
+        language = 0;
+      } else {
+        language = 1;
+      }
+    } else {
+      langId = 0;
+    }
     dynamic userDetails = prefs.getString("userDetails");
     dynamic password = prefs.getString("password");
     log("$userDetails");

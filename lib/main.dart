@@ -8,6 +8,7 @@ import 'utilities/app_connectivity.dart';
 import 'utilities/app_constant.dart';
 import 'utilities/app_font.dart';
 import 'utilities/one_signal_service.dart';
+import 'utilities/route_observer.dart';
 import 'utilities/routes.dart';
 import 'view/authentication/splash_screen.dart';
 
@@ -80,6 +81,7 @@ class MyApp extends StatelessWidget {
             create: (_) => ConnectionProvider()..initialize()),
       ],
       child: MaterialApp(
+        navigatorObservers: [routeObserver],
         title: 'Aventra Owner',
         debugShowCheckedModeBanner: false,
         navigatorKey: navigatorKey, // Make sure this is set

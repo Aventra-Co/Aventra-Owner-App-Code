@@ -67,7 +67,7 @@ class AppHeaderOrange extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width * 100 / 100,
-      height: MediaQuery.of(context).size.height * 12 / 100,
+      height: MediaQuery.of(context).size.height * 16 / 100,
       decoration: const BoxDecoration(
           color: AppColor.themeColor,
           borderRadius: BorderRadius.only(

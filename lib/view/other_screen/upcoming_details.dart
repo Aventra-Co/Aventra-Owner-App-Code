@@ -546,6 +546,40 @@ class _DetailsScreen extends State<UpcomingDetailsScreen> {
                               height:
                                   MediaQuery.of(context).size.height * 2 / 100),
 
+                          //!Adv Type
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 85 / 100,
+                            child: Text(
+                              AppLanguage.advertisementTypeText[language],
+                              style: const TextStyle(
+                                  fontFamily: AppFont.fontFamily,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColor.primaryColor),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!Type Text
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 85 / 100,
+                            child: Text(
+                              tripDetails['advertisement_type'] == 0
+                                  ? AppLanguage.privateText[language]
+                                  : AppLanguage.publicText[language],
+                              style: const TextStyle(
+                                  fontFamily: AppFont.fontFamily,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColor.primaryColor),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
                           //!location address
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 85 / 100,
@@ -1238,7 +1272,7 @@ class _DetailsScreen extends State<UpcomingDetailsScreen> {
                                             ? Alignment.centerLeft
                                             : Alignment.centerRight,
                                         child: Text(
-                                          "${tripDetails['price_per_hour'] * (tripDetails['hours'] * totalSlotsCount)} KWD",
+                                          "${tripDetails['price_per_hour'] * totalSlotsCount} KWD",
                                           style: const TextStyle(
                                               fontFamily: AppFont.fontFamily,
                                               fontSize: 16,
@@ -1254,7 +1288,7 @@ class _DetailsScreen extends State<UpcomingDetailsScreen> {
                                       85 /
                                       100,
                                   child: Text(
-                                    "${AppLanguage.priceText[language]}: ${tripDetails['price_per_hour']}KWD/Hr",
+                                    "${AppLanguage.priceText[language]}: ${tripDetails['price_per_hour']}KWD",
                                     style: const TextStyle(
                                         fontFamily: AppFont.fontFamily,
                                         fontSize: 10,
@@ -1328,7 +1362,7 @@ class _DetailsScreen extends State<UpcomingDetailsScreen> {
                                     height: MediaQuery.of(context).size.height *
                                         .5 /
                                         100),
-                              
+
                                 SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       85 /

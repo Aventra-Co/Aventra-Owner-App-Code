@@ -10,7 +10,7 @@ import 'app_constant.dart';
 
 class OneSignalService {
   // Static variable to store pending notification data
-  static Map<String, dynamic>? _pendingNotificationData;
+static Map<String, dynamic>? _pendingNotificationData;
   static bool _hasPendingBroadcast = false;
   static bool _isAppInitialized = false;
 

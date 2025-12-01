@@ -327,7 +327,9 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
                           children: [
                             textTile(
                                 AppLanguage.advertisementTypeText[language],
-                                adDetails['advertisement_type']),
+                                adDetails['advertisement_type'] == 0
+                                    ? AppLanguage.privateText[language]
+                                    : AppLanguage.publicText[language]),
                             // textTile(AppLanguage.customerTypeText[language],
                             //     "MahmoudAlbandar"),
                             // textTile(AppLanguage.bookDateText[language], "2025-01-01"),
@@ -341,7 +343,7 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
                                 adDetails['max_people'].toString()),
                             // textTile(AppLanguage.tripHoursText[language], "4 hr"),
                             textTile(AppLanguage.slotPriceText[language],
-                                "${adDetails['price_per_hour']} KWD/Hour"),
+                                "${adDetails['price_per_hour']} KWD"),
                             textTile(AppLanguage.captainNameText[language],
                                 "${adDetails['captain_name_english'][language]}"),
 

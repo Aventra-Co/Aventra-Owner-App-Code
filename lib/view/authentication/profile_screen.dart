@@ -478,7 +478,6 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               //wallet button
-
                               GestureDetector(
                                 onTap: () {
                                   if (userType == 3 ||

@@ -184,9 +184,12 @@ class _RatingDetailsScreenState extends State<RatingDetailsScreen> {
                                   MediaQuery.of(context).size.width * 15 / 100,
                               height:
                                   MediaQuery.of(context).size.width * 8 / 100,
-                              child: Image.asset(
-                                AppImage.leftArrowIcon,
-                                color: AppColor.secondaryColor,
+                              child: Transform.rotate(
+                                angle: language == 1 ? 3.1416 : 0,
+                                child: Image.asset(
+                                  AppImage.leftArrowIcon,
+                                  color: AppColor.secondaryColor,
+                                ),
                               ),
                             ),
                           ),

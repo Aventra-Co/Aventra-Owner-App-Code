@@ -59,6 +59,12 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   TextEditingController discountTextEditingController = TextEditingController();
   TextEditingController searchCountryTextEditingController =
       TextEditingController();
+  TextEditingController searchCityTextEditingController =
+      TextEditingController();
+  TextEditingController searchActivityTextEditingController =
+      TextEditingController();
+  TextEditingController searchDestinationTextEditingController =
+      TextEditingController();
   TextEditingController nationalityTextEditingController =
       TextEditingController();
   TextEditingController destinationTextEditingController =
@@ -112,8 +118,11 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   List activityList = <dynamic>[];
   List nationsList = <dynamic>[];
   List nationsSearchList = <dynamic>[];
+  List citySearchList = <dynamic>[];
+  List activitySearchList = <dynamic>[];
   List cityList = <dynamic>[];
   List destinationList = <dynamic>[];
+  List searchDestinationList = <dynamic>[];
   List<dynamic> boatList = <dynamic>[];
   int userId = 0;
   dynamic userDetails;
@@ -230,17 +239,19 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
     captainNumberTextController.text = tripDetails["contact_number"];
     selectedGender = tripDetails["gender"];
     isSelectedGender = genderList[selectedGender];
-    nationalityTextEditingController.text = tripDetails["country_name"];
+    nationalityTextEditingController.text =
+        tripDetails["country_name"][language];
     isSelectedNationality = tripDetails["country_id"];
     isSelectedDestination = tripDetails["destination_id"];
     destinationTextEditingController.text = tripDetails["destinaton"][language];
     isSelectedCity = tripDetails["city_id"];
-    cityTextEditingController.text = tripDetails["city_name"];
+    cityTextEditingController.text = tripDetails["city_name"][language];
     isSelectedBoat = tripDetails["boat_id"];
     boatTextEditingController.text = tripDetails["boat_name_english"];
     selectedActivityList = tripDetails["activity_ids"] != null
         ? tripDetails["activity_ids"].split(',')
         : [];
+
     print("selectedActivityList$selectedActivityList");
     pickUpTextEditingController.text = tripDetails["pickup_point"];
     maxNumberTextController.text = tripDetails["max_people"].toString();
@@ -274,9 +285,13 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
     );
     boatCapacity = tripDetails['boat_capacity'].toString().trim();
     print("boatCapacity$boatCapacity");
+    print('tripDetails["activity"]${tripDetails["activity"]}');
     activityTextEditingController.text = language == 0
         ? tripDetails["activity"][0]['english'][0]
         : tripDetails["activity"][0]['arabic'][0];
+    selectedActivityNameList = language == 0
+        ? tripDetails["activity"][0]['english']
+        : tripDetails["activity"][0]['arabic'];
     getCitiesApi(userId);
     print("selectedActivityList$selectedActivityList");
     print("selectedActivityList${selectedActivityList[0].runtimeType}");
@@ -288,7 +303,7 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
     print(query);
 
     var results1 = nationsSearchList
-        .where((value) => value['country_name']
+        .where((value) => value['country_name'][language]
             .toString()
             .toLowerCase()
             .contains(query.toLowerCase()))
@@ -299,6 +314,66 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
     nationsList = [];
 
     nationsList = results1;
+
+    setState(() {});
+  }
+
+  //---------------------SEARCH FUNCTION COUNTRY--------------------///
+  searchResultCity(String query) {
+    print(query);
+
+    var results1 = citySearchList
+        .where((value) => value['city_name'][language]
+            .toString()
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+        .toList();
+
+    print("results1 $results1");
+
+    cityList = [];
+
+    cityList = results1;
+
+    setState(() {});
+  }
+
+  //---------------------SEARCH FUNCTION COUNTRY--------------------///
+  searchResultDestination(String query) {
+    print(query);
+
+    var results1 = searchDestinationList
+        .where((value) => value['destination'][language]
+            .toString()
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+        .toList();
+
+    print("results1 $results1");
+
+    destinationList = [];
+
+    destinationList = results1;
+
+    setState(() {});
+  }
+
+  //---------------------SEARCH FUNCTION COUNTRY--------------------///
+  searchResultActivity(String query) {
+    print(query);
+
+    var results1 = activitySearchList
+        .where((value) => value['name_english'][language]
+            .toString()
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+        .toList();
+
+    print("results1 $results1");
+
+    activityList = [];
+
+    activityList = results1;
 
     setState(() {});
   }
@@ -602,7 +677,7 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
         if (res['success'] == true) {
           var item = res['tripTypes'];
           activityList = (item != "NA") ? item : [];
-          // activitySearchList = (item != "NA") ? item : [];
+          activitySearchList = (item != "NA") ? item : [];
 
           setState(() {
             isApiCalling = false;
@@ -741,7 +816,7 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
         if (res['success'] == true) {
           var item = res['city_arr'];
           cityList = (item != "NA") ? item : [];
-          // activitySearchList = (item != "NA") ? item : [];
+          citySearchList = (item != "NA") ? item : [];
 
           setState(() {
             isApiCalling = false;
@@ -806,7 +881,7 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
         if (res['success'] == true) {
           var item = res['destination_arr'];
           destinationList = (item != "NA") ? item : [];
-          // activitySearchList = (item != "NA") ? item : [];
+          searchDestinationList = (item != "NA") ? item : [];
 
           setState(() {
             isApiCalling = false;
@@ -3633,9 +3708,9 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                     ),
                     child: Column(
                       children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 4 / 100,
-                        ),
+                        // SizedBox(
+                        //   height: MediaQuery.of(context).size.height * 4 / 100,
+                        // ),
 
                         AppHeaderOrange(
                             text: AppLanguage.nationalityText[language],
@@ -3722,9 +3797,11 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                         isSelectedNationality =
                                             nationsList[index]["country_id"];
                                         nationalityTextEditingController.text =
-                                            nationsList[index]['country_name'];
+                                            nationsList[index]['country_name']
+                                                [language];
                                         getCitiesApi(userId);
                                         cityTextEditingController.clear();
+                                        searchCityTextEditingController.clear();
                                         isSelectedCity = 0;
                                         Navigator.pop(context);
                                       });
@@ -3739,7 +3816,8 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            nationsList[index]['country_name'],
+                                            nationsList[index]['country_name']
+                                                [language],
                                             style: const TextStyle(
                                               fontFamily: AppFont.fontFamily,
                                               fontSize: 17,
@@ -3804,398 +3882,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
     );
   }
 
-  // void dropDownModelForGender(BuildContext context) {
-  //   showModalBottomSheet<void>(
-  //     isScrollControlled: true,
-  //     isDismissible: true,
-  //     context: context,
-  //     backgroundColor: Colors.transparent,
-  //     builder: (BuildContext context) {
-  //       return StatefulBuilder(
-  //         builder: (context, setState) {
-  //           return GestureDetector(
-  //             onTap: () => Navigator.pop(context),
-  //             child: Padding(
-  //               padding: MediaQuery.of(context).viewInsets,
-  //               child: GestureDetector(
-  //                 onTap: () {
-  //                   Navigator.pop(context);
-  //                 },
-  //                 child: Container(
-  //                   alignment: Alignment.center,
-  //                   width: MediaQuery.of(context).size.width,
-  //                   height: MediaQuery.of(context).size.height,
-  //                   child: Container(
-  //                     width: MediaQuery.of(context).size.width * 80 / 100,
-  //                     height: MediaQuery.of(context).size.height * 19 / 100,
-  //                     decoration: BoxDecoration(
-  //                       color: AppColor.secondaryColor,
-  //                       borderRadius: BorderRadius.circular(10),
-  //                     ),
-  //                     child: Column(
-  //                       children: [
-  //                         SizedBox(
-  //                           height:
-  //                               MediaQuery.of(context).size.height * 1 / 100,
-  //                         ),
-  //                         // List
-  //                         Flexible(
-  //                           child: ListView.builder(
-  //                             itemCount: genderList.length,
-  //                             itemBuilder: (context, index) {
-  //                               return Column(
-  //                                 children: [
-  //                                   SizedBox(
-  //                                     height:
-  //                                         MediaQuery.of(context).size.height *
-  //                                             2 /
-  //                                             100,
-  //                                   ),
-  //                                   GestureDetector(
-  //                                     onTap: () {
-  //                                       setState(() {
-  //                                         genderTextEditingController.text =
-  //                                             genderList[index];
-  //                                         isSelectedGender = genderList[index];
-  //                                         Navigator.pop(context);
-  //                                       });
-  //                                     },
-  //                                     child: Container(
-  //                                       width:
-  //                                           MediaQuery.of(context).size.width *
-  //                                               70 /
-  //                                               100,
-  //                                       color: AppColor.secondaryColor,
-  //                                       child: Row(
-  //                                         mainAxisAlignment:
-  //                                             MainAxisAlignment.spaceBetween,
-  //                                         children: [
-  //                                           Text(
-  //                                             genderList[index],
-  //                                             style: const TextStyle(
-  //                                               fontFamily: AppFont.fontFamily,
-  //                                               fontSize: 17,
-  //                                               color: AppColor.primaryColor,
-  //                                               fontWeight: FontWeight.w600,
-  //                                             ),
-  //                                           ),
-  //                                           Container(
-  //                                             width: MediaQuery.of(context)
-  //                                                     .size
-  //                                                     .width *
-  //                                                 5 /
-  //                                                 100,
-  //                                             height: MediaQuery.of(context)
-  //                                                     .size
-  //                                                     .width *
-  //                                                 5 /
-  //                                                 100,
-  //                                             child: isSelectedGender ==
-  //                                                     genderList[index]
-  //                                                 ? Image.asset(
-  //                                                     AppImage.tickOrangeIcon,
-  //                                                     fit: BoxFit.fill,
-  //                                                   )
-  //                                                 : null,
-  //                                           ),
-  //                                         ],
-  //                                       ),
-  //                                     ),
-  //                                   ),
-  //                                 ],
-  //                               );
-  //                             },
-  //                           ),
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
-
-  // void dropDownModelForLanguage(BuildContext context, screenWidth) {
-  //   showModalBottomSheet<void>(
-  //     constraints: BoxConstraints.expand(width: screenWidth),
-  //     isScrollControlled: true,
-  //     isDismissible: true,
-  //     context: context,
-  //     backgroundColor: AppColor.secondaryColor,
-  //     builder: (BuildContext context) {
-  //       return StatefulBuilder(
-  //         builder: (context, setState) {
-  //           return GestureDetector(
-  //             onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-  //             child: Padding(
-  //               padding: MediaQuery.of(context).viewInsets,
-  //               child: Container(
-  //                 width: MediaQuery.of(context).size.width,
-  //                 height: MediaQuery.of(context).size.height,
-  //                 decoration: BoxDecoration(
-  //                   color: AppColor.secondaryColor,
-  //                   borderRadius: BorderRadius.circular(10),
-  //                 ),
-  //                 child: Stack(
-  //                   children: [
-  //                     Column(
-  //                       children: [
-  //                         Expanded(
-  //                           flex: 1,
-  //                           child: SingleChildScrollView(
-  //                             physics: const NeverScrollableScrollPhysics(),
-  //                             child: Column(
-  //                               children: [
-  //                                 SizedBox(
-  //                                   height: MediaQuery.of(context).size.height *
-  //                                       4 /
-  //                                       100,
-  //                                 ),
-  //                                 //image header
-  //                                 Container(
-  //                                   width: MediaQuery.of(context).size.width *
-  //                                       100 /
-  //                                       100,
-  //                                   height: screenWidth > 600
-  //                                       ? null
-  //                                       : MediaQuery.of(context).size.height *
-  //                                           20 /
-  //                                           100,
-  //                                   decoration: const BoxDecoration(
-  //                                       image: DecorationImage(
-  //                                           image: AssetImage(
-  //                                               AppImage.headerBgImage),
-  //                                           fit: BoxFit.cover),
-  //                                       // color: AppColor.themeColor,
-  //                                       borderRadius: BorderRadius.only(
-  //                                           bottomLeft: Radius.circular(50),
-  //                                           bottomRight: Radius.circular(50))),
-  //                                   child: Column(
-  //                                     children: [
-  //                                       SizedBox(
-  //                                         height:
-  //                                             AppConstant.deviceType == "ios"
-  //                                                 ? MediaQuery.of(context)
-  //                                                         .size
-  //                                                         .height *
-  //                                                     6 /
-  //                                                     100
-  //                                                 : MediaQuery.of(context)
-  //                                                         .size
-  //                                                         .height *
-  //                                                     4 /
-  //                                                     100,
-  //                                       ),
-  //                                       //change lang
-  //                                       Container(
-  //                                         width: MediaQuery.of(context)
-  //                                                 .size
-  //                                                 .width *
-  //                                             100 /
-  //                                             100,
-  //                                         alignment: Alignment.center,
-  //                                         child: Row(
-  //                                           children: [
-  //                                             //edit
-  //                                             GestureDetector(
-  //                                               onTap: () {
-  //                                                 Navigator.pop(context);
-  //                                               },
-  //                                               child: Container(
-  //                                                 color: Colors.transparent,
-  //                                                 alignment: Alignment.center,
-  //                                                 width: MediaQuery.of(context)
-  //                                                         .size
-  //                                                         .width *
-  //                                                     15 /
-  //                                                     100,
-  //                                                 height: MediaQuery.of(context)
-  //                                                         .size
-  //                                                         .width *
-  //                                                     7 /
-  //                                                     100,
-  //                                                 child: Image.asset(
-  //                                                     AppImage.backIcon),
-  //                                               ),
-  //                                             ),
-  //                                             //profile
-  //                                             Container(
-  //                                               alignment: Alignment.center,
-  //                                               width: MediaQuery.of(context)
-  //                                                       .size
-  //                                                       .width *
-  //                                                   70 /
-  //                                                   100,
-  //                                               child: Text(
-  //                                                 AppLanguage
-  //                                                         .changeLanguageText[
-  //                                                     language],
-  //                                                 style: const TextStyle(
-  //                                                     color: AppColor
-  //                                                         .secondaryColor,
-  //                                                     fontSize: 20,
-  //                                                     fontWeight:
-  //                                                         FontWeight.w600,
-  //                                                     fontFamily:
-  //                                                         AppFont.fontFamily),
-  //                                               ),
-  //                                             ),
-  //                                             Container(
-  //                                               alignment:
-  //                                                   Alignment.centerRight,
-  //                                               width: MediaQuery.of(context)
-  //                                                       .size
-  //                                                       .width *
-  //                                                   15 /
-  //                                                   100,
-  //                                               height: MediaQuery.of(context)
-  //                                                       .size
-  //                                                       .width *
-  //                                                   7 /
-  //                                                   100,
-  //                                             ),
-  //                                           ],
-  //                                         ),
-  //                                       ),
-  //                                       SizedBox(
-  //                                         height: MediaQuery.of(context)
-  //                                                 .size
-  //                                                 .height *
-  //                                             10 /
-  //                                             100,
-  //                                       ),
-  //                                     ],
-  //                                   ),
-  //                                 ),
-  //                                 SizedBox(
-  //                                   height: MediaQuery.of(context).size.height *
-  //                                       2 /
-  //                                       100,
-  //                                 ),
-  //                                 //language list
-  //                                 Wrap(
-  //                                   children: [
-  //                                     ...List.generate(languageList.length,
-  //                                         (index) {
-  //                                       return Column(
-  //                                         crossAxisAlignment:
-  //                                             CrossAxisAlignment.center,
-  //                                         children: [
-  //                                           GestureDetector(
-  //                                             onTap: () {
-  //                                               setState(() {
-  //                                                 selectedLanguage =
-  //                                                     languageList[index]['id'];
-  //                                                 languageTextEditingController
-  //                                                         .text =
-  //                                                     languageList[index]
-  //                                                         ['title'];
-  //                                               });
-  //                                             },
-  //                                             child: Container(
-  //                                               width: MediaQuery.of(context)
-  //                                                       .size
-  //                                                       .width *
-  //                                                   90 /
-  //                                                   100,
-  //                                               decoration: BoxDecoration(
-  //                                                   color: selectedLanguage ==
-  //                                                           languageList[index]
-  //                                                               ['id']
-  //                                                       ? AppColor.themeColor
-  //                                                       : AppColor
-  //                                                           .secondaryColor,
-  //                                                   borderRadius:
-  //                                                       BorderRadius.circular(
-  //                                                           10),
-  //                                                   border: Border.all(
-  //                                                       width: 1,
-  //                                                       color: AppColor
-  //                                                           .boaderColor)),
-  //                                               child: Container(
-  //                                                 width: MediaQuery.of(context)
-  //                                                         .size
-  //                                                         .width *
-  //                                                     80 /
-  //                                                     100,
-  //                                                 child: Padding(
-  //                                                   padding: const EdgeInsets
-  //                                                       .symmetric(
-  //                                                       vertical: 10.0,
-  //                                                       horizontal: 18),
-  //                                                   child: Text(
-  //                                                     languageList[index]
-  //                                                         ['title'],
-  //                                                     style: TextStyle(
-  //                                                         color: selectedLanguage ==
-  //                                                                 languageList[
-  //                                                                         index]
-  //                                                                     ['id']
-  //                                                             ? AppColor
-  //                                                                 .secondaryColor
-  //                                                             : AppColor
-  //                                                                 .primaryColor,
-  //                                                         fontSize: 20,
-  //                                                         fontWeight:
-  //                                                             FontWeight.w400,
-  //                                                         fontFamily: AppFont
-  //                                                             .fontFamily),
-  //                                                   ),
-  //                                                 ),
-  //                                               ),
-  //                                             ),
-  //                                           ),
-  //                                           SizedBox(
-  //                                             height: MediaQuery.of(context)
-  //                                                     .size
-  //                                                     .height *
-  //                                                 2 /
-  //                                                 100,
-  //                                           ),
-  //                                         ],
-  //                                       );
-  //                                     }),
-  //                                   ],
-  //                                 ),
-  //                               ],
-  //                             ),
-  //                           ),
-  //                         )
-  //                       ],
-  //                     ),
-  //                     Positioned(
-  //                       bottom: MediaQuery.of(context).size.height * 6 / 100,
-  //                       child: Column(
-  //                         children: [
-  //                           Container(
-  //                             alignment: Alignment.center,
-  //                             width:
-  //                                 MediaQuery.of(context).size.width * 100 / 100,
-  //                             child: AppButton(
-  //                                 text: AppLanguage.doneText[language],
-  //                                 onPress: () {
-  //                                   Navigator.pop(context);
-  //                                 }),
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     )
-  //                   ],
-  //                 ),
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
-
   void dropDownModelForTrip(BuildContext context, screenWidth, screenHeight) {
     showModalBottomSheet<void>(
       constraints: BoxConstraints.expand(width: screenWidth),
@@ -4222,140 +3908,173 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                     ),
                     child: Column(
                       children: [
+                        // SizedBox(
+                        //   height: MediaQuery.of(context).size.height * 4 / 100,
+                        // ),
+                        //image header
+                        Container(
+                          width: MediaQuery.of(context).size.width * 100 / 100,
+                          height: screenWidth > 600
+                              ? null
+                              : MediaQuery.of(context).size.height * 20 / 100,
+                          decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                  image: AssetImage(AppImage.headerBgImage),
+                                  fit: BoxFit.cover),
+                              // color: AppColor.themeColor,
+                              borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(50),
+                                  bottomRight: Radius.circular(50))),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: AppConstant.deviceType == "ios"
+                                    ? MediaQuery.of(context).size.height *
+                                        6 /
+                                        100
+                                    : MediaQuery.of(context).size.height *
+                                        6 /
+                                        100,
+                              ),
+
+                              //change lang
+                              Container(
+                                width: MediaQuery.of(context).size.width *
+                                    100 /
+                                    100,
+                                alignment: Alignment.center,
+                                child: Row(
+                                  children: [
+                                    //edit
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Transform.rotate(
+                                        angle: language == 1 ? 3.1416 : 0,
+                                        child: Container(
+                                          color: Colors.transparent,
+                                          alignment: Alignment.center,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              15 /
+                                              100,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              7 /
+                                              100,
+                                          child: Image.asset(AppImage.backIcon),
+                                        ),
+                                      ),
+                                    ),
+
+                                    //profile
+                                    Container(
+                                      alignment: Alignment.center,
+                                      width: MediaQuery.of(context).size.width *
+                                          70 /
+                                          100,
+                                      child: Text(
+                                        AppLanguage.activityText[language],
+                                        style: const TextStyle(
+                                            color: AppColor.secondaryColor,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: AppFont.fontFamily),
+                                      ),
+                                    ),
+
+                                    Container(
+                                      alignment: Alignment.centerRight,
+                                      width: MediaQuery.of(context).size.width *
+                                          15 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              7 /
+                                              100,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height *
+                                    10 /
+                                    100,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 2 / 100,
+                        ),
+
+                        // Search field
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          height:
+                              MediaQuery.of(context).size.height * 6.5 / 100,
+                          child: TextFormField(
+                            style: const TextStyle(
+                              height: 1.1,
+                              color: AppColor.primaryColor,
+                              fontFamily: AppFont.fontFamily,
+                            ),
+                            textAlignVertical: TextAlignVertical.center,
+                            readOnly: false,
+                            keyboardType: TextInputType.text,
+                            controller: searchActivityTextEditingController,
+                            maxLength: 50,
+                            decoration: InputDecoration(
+                              border: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.boaderColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              enabledBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.boaderColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              focusedBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.themeColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              contentPadding:
+                                  const EdgeInsets.only(right: 10, left: 10),
+                              fillColor: Colors.white,
+                              filled: true,
+                              counterText: '',
+                              hintText: AppLanguage.searchText[language],
+                              hintStyle: AppConstant.textFilledStyle,
+                            ),
+                            onChanged: (input) {
+                              setState(() {
+                                if (input.isNotEmpty) {
+                                  searchResultActivity(input);
+                                } else {
+                                  activityList = activitySearchList;
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 2 / 100,
+                        ),
+
                         Expanded(
                           flex: 1,
                           child: SingleChildScrollView(
-                            physics: const NeverScrollableScrollPhysics(),
+                            physics: const AlwaysScrollableScrollPhysics(),
                             child: Column(
                               children: [
-                                SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      4 /
-                                      100,
-                                ),
-                                //image header
-                                Container(
-                                  width: MediaQuery.of(context).size.width *
-                                      100 /
-                                      100,
-                                  height: screenWidth > 600
-                                      ? null
-                                      : MediaQuery.of(context).size.height *
-                                          20 /
-                                          100,
-                                  decoration: const BoxDecoration(
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              AppImage.headerBgImage),
-                                          fit: BoxFit.cover),
-                                      // color: AppColor.themeColor,
-                                      borderRadius: BorderRadius.only(
-                                          bottomLeft: Radius.circular(50),
-                                          bottomRight: Radius.circular(50))),
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                        height: AppConstant.deviceType == "ios"
-                                            ? MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                6 /
-                                                100
-                                            : MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                4 /
-                                                100,
-                                      ),
-
-                                      //change lang
-                                      Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                100 /
-                                                100,
-                                        alignment: Alignment.center,
-                                        child: Row(
-                                          children: [
-                                            //edit
-                                            GestureDetector(
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Transform.rotate(
-                                                angle:
-                                                    language == 1 ? 3.1416 : 0,
-                                                child: Container(
-                                                  color: Colors.transparent,
-                                                  alignment: Alignment.center,
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      15 /
-                                                      100,
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      7 /
-                                                      100,
-                                                  child: Image.asset(
-                                                      AppImage.backIcon),
-                                                ),
-                                              ),
-                                            ),
-
-                                            //profile
-                                            Container(
-                                              alignment: Alignment.center,
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  70 /
-                                                  100,
-                                              child: Text(
-                                                AppLanguage
-                                                    .activityText[language],
-                                                style: const TextStyle(
-                                                    color:
-                                                        AppColor.secondaryColor,
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontFamily:
-                                                        AppFont.fontFamily),
-                                              ),
-                                            ),
-
-                                            Container(
-                                              alignment: Alignment.centerRight,
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  15 /
-                                                  100,
-                                              height: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  7 /
-                                                  100,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                10 /
-                                                100,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      2 /
-                                      100,
-                                ),
-
                                 //trip list
                                 if (activityList.isNotEmpty)
                                   Wrap(
@@ -4383,23 +4102,37 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                                         activityList[index]
                                                                 ["trip_type_id"]
                                                             .toString());
-                                                    selectedActivityNameList
-                                                        .remove(activityList[
-                                                                    index]
-                                                                ['name_english']
-                                                            [language]);
                                                   } else {
                                                     selectedActivityList.add(
                                                         activityList[index]
                                                                 ["trip_type_id"]
                                                             .toString());
+                                                  }
+
+                                                  if (selectedActivityNameList
+                                                      .contains(activityList[
+                                                                      index][
+                                                                  'name_english']
+                                                              [language]
+                                                          .trim())) {
+                                                    selectedActivityNameList
+                                                        .remove(activityList[
+                                                                        index][
+                                                                    'name_english']
+                                                                [language]
+                                                            .trim());
+                                                  } else {
                                                     selectedActivityNameList
                                                         .add(activityList[index]
-                                                                ['name_english']
-                                                            [language]);
+                                                                    [
+                                                                    'name_english']
+                                                                [language]
+                                                            .trim());
                                                   }
+                                                  activityTextEditingController
+                                                      .clear();
                                                   print(
-                                                      "selectedActivityList$selectedActivityList");
+                                                      "selectedActivityList$selectedActivityList and selectedActivityNameList$selectedActivityNameList");
                                                   activityTextEditingController
                                                           .text =
                                                       selectedActivityNameList
@@ -4574,9 +4307,9 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                     ),
                     child: Column(
                       children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 4 / 100,
-                        ),
+                        // SizedBox(
+                        //   height: MediaQuery.of(context).size.height * 4 / 100,
+                        // ),
                         AppHeaderOrange(
                             text: AppLanguage.chooseBoatText[language],
                             onPress: () {
@@ -4843,139 +4576,173 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                     ),
                     child: Column(
                       children: [
+                        // SizedBox(
+                        //   height: MediaQuery.of(context).size.height * 4 / 100,
+                        // ),
+                        //image header
+                        Container(
+                          width: MediaQuery.of(context).size.width * 100 / 100,
+                          height: screenWidth > 600
+                              ? null
+                              : MediaQuery.of(context).size.height * 20 / 100,
+                          decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                  image: AssetImage(AppImage.headerBgImage),
+                                  fit: BoxFit.cover),
+                              // color: AppColor.themeColor,
+                              borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(50),
+                                  bottomRight: Radius.circular(50))),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: AppConstant.deviceType == "ios"
+                                    ? MediaQuery.of(context).size.height *
+                                        6 /
+                                        100
+                                    : MediaQuery.of(context).size.height *
+                                        6 /
+                                        100,
+                              ),
+
+                              //change lang
+                              Container(
+                                width: MediaQuery.of(context).size.width *
+                                    100 /
+                                    100,
+                                alignment: Alignment.center,
+                                child: Row(
+                                  children: [
+                                    //edit
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Transform.rotate(
+                                        angle: language == 1 ? 3.1416 : 0,
+                                        child: Container(
+                                          color: Colors.transparent,
+                                          alignment: Alignment.center,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              15 /
+                                              100,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              7 /
+                                              100,
+                                          child: Image.asset(AppImage.backIcon),
+                                        ),
+                                      ),
+                                    ),
+
+                                    //profile
+                                    Container(
+                                      alignment: Alignment.center,
+                                      width: MediaQuery.of(context).size.width *
+                                          70 /
+                                          100,
+                                      child: Text(
+                                        AppLanguage.cityText[language],
+                                        style: const TextStyle(
+                                            color: AppColor.secondaryColor,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: AppFont.fontFamily),
+                                      ),
+                                    ),
+
+                                    Container(
+                                      alignment: Alignment.centerRight,
+                                      width: MediaQuery.of(context).size.width *
+                                          15 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              7 /
+                                              100,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height *
+                                    10 /
+                                    100,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 2 / 100,
+                        ),
+
+                        // Search field
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          height:
+                              MediaQuery.of(context).size.height * 6.5 / 100,
+                          child: TextFormField(
+                            style: const TextStyle(
+                              height: 1.1,
+                              color: AppColor.primaryColor,
+                              fontFamily: AppFont.fontFamily,
+                            ),
+                            textAlignVertical: TextAlignVertical.center,
+                            readOnly: false,
+                            keyboardType: TextInputType.text,
+                            controller: searchCityTextEditingController,
+                            maxLength: 50,
+                            decoration: InputDecoration(
+                              border: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.boaderColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              enabledBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.boaderColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              focusedBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.themeColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              contentPadding:
+                                  const EdgeInsets.only(right: 10, left: 10),
+                              fillColor: Colors.white,
+                              filled: true,
+                              counterText: '',
+                              hintText: AppLanguage.searchText[language],
+                              hintStyle: AppConstant.textFilledStyle,
+                            ),
+                            onChanged: (input) {
+                              setState(() {
+                                if (input.isNotEmpty) {
+                                  searchResultCity(input);
+                                } else {
+                                  cityList = citySearchList;
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 2 / 100,
+                        ),
+
                         Expanded(
                           flex: 1,
                           child: SingleChildScrollView(
-                            physics: const NeverScrollableScrollPhysics(),
+                            physics: const AlwaysScrollableScrollPhysics(),
                             child: Column(
                               children: [
-                                SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      4 /
-                                      100,
-                                ),
-                                //image header
-                                Container(
-                                  width: MediaQuery.of(context).size.width *
-                                      100 /
-                                      100,
-                                  height: screenWidth > 600
-                                      ? null
-                                      : MediaQuery.of(context).size.height *
-                                          20 /
-                                          100,
-                                  decoration: const BoxDecoration(
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              AppImage.headerBgImage),
-                                          fit: BoxFit.cover),
-                                      // color: AppColor.themeColor,
-                                      borderRadius: BorderRadius.only(
-                                          bottomLeft: Radius.circular(50),
-                                          bottomRight: Radius.circular(50))),
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                        height: AppConstant.deviceType == "ios"
-                                            ? MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                6 /
-                                                100
-                                            : MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                4 /
-                                                100,
-                                      ),
-
-                                      //change lang
-                                      Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                100 /
-                                                100,
-                                        alignment: Alignment.center,
-                                        child: Row(
-                                          children: [
-                                            //edit
-                                            GestureDetector(
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Transform.rotate(
-                                                angle:
-                                                    language == 1 ? 3.1416 : 0,
-                                                child: Container(
-                                                  color: Colors.transparent,
-                                                  alignment: Alignment.center,
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      15 /
-                                                      100,
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      7 /
-                                                      100,
-                                                  child: Image.asset(
-                                                      AppImage.backIcon),
-                                                ),
-                                              ),
-                                            ),
-
-                                            //profile
-                                            Container(
-                                              alignment: Alignment.center,
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  70 /
-                                                  100,
-                                              child: Text(
-                                                AppLanguage.cityText[language],
-                                                style: const TextStyle(
-                                                    color:
-                                                        AppColor.secondaryColor,
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontFamily:
-                                                        AppFont.fontFamily),
-                                              ),
-                                            ),
-
-                                            Container(
-                                              alignment: Alignment.centerRight,
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  15 /
-                                                  100,
-                                              height: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  7 /
-                                                  100,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                10 /
-                                                100,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      2 /
-                                      100,
-                                ),
-
                                 //trip list
                                 Wrap(
                                   children: [
@@ -4995,8 +4762,8 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                                 isSelectedCity =
                                                     cityList[index]["city_id"];
                                                 cityTextEditingController.text =
-                                                    cityList[index]
-                                                        ['city_name'];
+                                                    cityList[index]['city_name']
+                                                        [language];
                                                 Navigator.pop(context);
                                               });
                                             },
@@ -5013,8 +4780,8 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                                         .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    cityList[index]
-                                                        ['city_name'],
+                                                    cityList[index]['city_name']
+                                                        [language],
                                                     style: const TextStyle(
                                                       fontFamily:
                                                           AppFont.fontFamily,
@@ -5078,6 +4845,22 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                     }),
                                   ],
                                 ),
+
+                                if (cityList.isEmpty) ...[
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        20 /
+                                        100,
+                                  ),
+                                  Text(
+                                    AppLanguage.noCitiesMsg[language],
+                                    style: const TextStyle(
+                                        fontFamily: AppFont.fontFamily,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColor.primaryColor),
+                                  ),
+                                ]
                               ],
                             ),
                           ),
@@ -5120,142 +4903,173 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                     ),
                     child: Column(
                       children: [
+                        // SizedBox(
+                        //   height: MediaQuery.of(context).size.height * 4 / 100,
+                        // ),
+                        //image header
+                        Container(
+                          width: MediaQuery.of(context).size.width * 100 / 100,
+                          height: screenWidth > 600
+                              ? null
+                              : MediaQuery.of(context).size.height * 20 / 100,
+                          decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                  image: AssetImage(AppImage.headerBgImage),
+                                  fit: BoxFit.cover),
+                              // color: AppColor.themeColor,
+                              borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(50),
+                                  bottomRight: Radius.circular(50))),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: AppConstant.deviceType == "ios"
+                                    ? MediaQuery.of(context).size.height *
+                                        6 /
+                                        100
+                                    : MediaQuery.of(context).size.height *
+                                        6 /
+                                        100,
+                              ),
+
+                              //change lang
+                              Container(
+                                width: MediaQuery.of(context).size.width *
+                                    100 /
+                                    100,
+                                alignment: Alignment.center,
+                                child: Row(
+                                  children: [
+                                    //edit
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Transform.rotate(
+                                        angle: language == 1 ? 3.1416 : 0,
+                                        child: Container(
+                                          color: Colors.transparent,
+                                          alignment: Alignment.center,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              15 /
+                                              100,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              7 /
+                                              100,
+                                          child: Image.asset(AppImage.backIcon),
+                                        ),
+                                      ),
+                                    ),
+
+                                    //profile
+                                    Container(
+                                      alignment: Alignment.center,
+                                      width: MediaQuery.of(context).size.width *
+                                          70 /
+                                          100,
+                                      child: Text(
+                                        AppLanguage.destinationText[language],
+                                        style: const TextStyle(
+                                            color: AppColor.secondaryColor,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: AppFont.fontFamily),
+                                      ),
+                                    ),
+
+                                    Container(
+                                      alignment: Alignment.centerRight,
+                                      width: MediaQuery.of(context).size.width *
+                                          15 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              7 /
+                                              100,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height *
+                                    10 /
+                                    100,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 2 / 100,
+                        ),
+
+                        // Search field
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          height:
+                              MediaQuery.of(context).size.height * 6.5 / 100,
+                          child: TextFormField(
+                            style: const TextStyle(
+                              height: 1.1,
+                              color: AppColor.primaryColor,
+                              fontFamily: AppFont.fontFamily,
+                            ),
+                            textAlignVertical: TextAlignVertical.center,
+                            readOnly: false,
+                            keyboardType: TextInputType.text,
+                            controller: searchDestinationTextEditingController,
+                            maxLength: 50,
+                            decoration: InputDecoration(
+                              border: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.boaderColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              enabledBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.boaderColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              focusedBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.themeColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              contentPadding:
+                                  const EdgeInsets.only(right: 10, left: 10),
+                              fillColor: Colors.white,
+                              filled: true,
+                              counterText: '',
+                              hintText: AppLanguage.searchText[language],
+                              hintStyle: AppConstant.textFilledStyle,
+                            ),
+                            onChanged: (input) {
+                              setState(() {
+                                if (input.isNotEmpty) {
+                                  searchResultDestination(input);
+                                } else {
+                                  destinationList = searchDestinationList;
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 2 / 100,
+                        ),
                         Expanded(
                           flex: 1,
                           child: SingleChildScrollView(
-                            physics: const NeverScrollableScrollPhysics(),
+                            physics: const AlwaysScrollableScrollPhysics(),
                             child: Column(
                               children: [
-                                SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      4 /
-                                      100,
-                                ),
-                                //image header
-                                Container(
-                                  width: MediaQuery.of(context).size.width *
-                                      100 /
-                                      100,
-                                  height: screenWidth > 600
-                                      ? null
-                                      : MediaQuery.of(context).size.height *
-                                          20 /
-                                          100,
-                                  decoration: const BoxDecoration(
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              AppImage.headerBgImage),
-                                          fit: BoxFit.cover),
-                                      // color: AppColor.themeColor,
-                                      borderRadius: BorderRadius.only(
-                                          bottomLeft: Radius.circular(50),
-                                          bottomRight: Radius.circular(50))),
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                        height: AppConstant.deviceType == "ios"
-                                            ? MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                6 /
-                                                100
-                                            : MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                4 /
-                                                100,
-                                      ),
-
-                                      //change lang
-                                      Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                100 /
-                                                100,
-                                        alignment: Alignment.center,
-                                        child: Row(
-                                          children: [
-                                            //edit
-                                            GestureDetector(
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Transform.rotate(
-                                                angle:
-                                                    language == 1 ? 3.1416 : 0,
-                                                child: Container(
-                                                  color: Colors.transparent,
-                                                  alignment: Alignment.center,
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      15 /
-                                                      100,
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      7 /
-                                                      100,
-                                                  child: Image.asset(
-                                                      AppImage.backIcon),
-                                                ),
-                                              ),
-                                            ),
-
-                                            //profile
-                                            Container(
-                                              alignment: Alignment.center,
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  70 /
-                                                  100,
-                                              child: Text(
-                                                AppLanguage
-                                                    .destinationText[language],
-                                                style: const TextStyle(
-                                                    color:
-                                                        AppColor.secondaryColor,
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontFamily:
-                                                        AppFont.fontFamily),
-                                              ),
-                                            ),
-
-                                            Container(
-                                              alignment: Alignment.centerRight,
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  15 /
-                                                  100,
-                                              height: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  7 /
-                                                  100,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                10 /
-                                                100,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      2 /
-                                      100,
-                                ),
-
                                 //trip list
-
                                 Wrap(
                                   children: [
                                     ...List.generate(destinationList.length,
@@ -5868,3 +5682,396 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
     super.dispose();
   }
 }
+
+
+  // void dropDownModelForGender(BuildContext context) {
+  //   showModalBottomSheet<void>(
+  //     isScrollControlled: true,
+  //     isDismissible: true,
+  //     context: context,
+  //     backgroundColor: Colors.transparent,
+  //     builder: (BuildContext context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setState) {
+  //           return GestureDetector(
+  //             onTap: () => Navigator.pop(context),
+  //             child: Padding(
+  //               padding: MediaQuery.of(context).viewInsets,
+  //               child: GestureDetector(
+  //                 onTap: () {
+  //                   Navigator.pop(context);
+  //                 },
+  //                 child: Container(
+  //                   alignment: Alignment.center,
+  //                   width: MediaQuery.of(context).size.width,
+  //                   height: MediaQuery.of(context).size.height,
+  //                   child: Container(
+  //                     width: MediaQuery.of(context).size.width * 80 / 100,
+  //                     height: MediaQuery.of(context).size.height * 19 / 100,
+  //                     decoration: BoxDecoration(
+  //                       color: AppColor.secondaryColor,
+  //                       borderRadius: BorderRadius.circular(10),
+  //                     ),
+  //                     child: Column(
+  //                       children: [
+  //                         SizedBox(
+  //                           height:
+  //                               MediaQuery.of(context).size.height * 1 / 100,
+  //                         ),
+  //                         // List
+  //                         Flexible(
+  //                           child: ListView.builder(
+  //                             itemCount: genderList.length,
+  //                             itemBuilder: (context, index) {
+  //                               return Column(
+  //                                 children: [
+  //                                   SizedBox(
+  //                                     height:
+  //                                         MediaQuery.of(context).size.height *
+  //                                             2 /
+  //                                             100,
+  //                                   ),
+  //                                   GestureDetector(
+  //                                     onTap: () {
+  //                                       setState(() {
+  //                                         genderTextEditingController.text =
+  //                                             genderList[index];
+  //                                         isSelectedGender = genderList[index];
+  //                                         Navigator.pop(context);
+  //                                       });
+  //                                     },
+  //                                     child: Container(
+  //                                       width:
+  //                                           MediaQuery.of(context).size.width *
+  //                                               70 /
+  //                                               100,
+  //                                       color: AppColor.secondaryColor,
+  //                                       child: Row(
+  //                                         mainAxisAlignment:
+  //                                             MainAxisAlignment.spaceBetween,
+  //                                         children: [
+  //                                           Text(
+  //                                             genderList[index],
+  //                                             style: const TextStyle(
+  //                                               fontFamily: AppFont.fontFamily,
+  //                                               fontSize: 17,
+  //                                               color: AppColor.primaryColor,
+  //                                               fontWeight: FontWeight.w600,
+  //                                             ),
+  //                                           ),
+  //                                           Container(
+  //                                             width: MediaQuery.of(context)
+  //                                                     .size
+  //                                                     .width *
+  //                                                 5 /
+  //                                                 100,
+  //                                             height: MediaQuery.of(context)
+  //                                                     .size
+  //                                                     .width *
+  //                                                 5 /
+  //                                                 100,
+  //                                             child: isSelectedGender ==
+  //                                                     genderList[index]
+  //                                                 ? Image.asset(
+  //                                                     AppImage.tickOrangeIcon,
+  //                                                     fit: BoxFit.fill,
+  //                                                   )
+  //                                                 : null,
+  //                                           ),
+  //                                         ],
+  //                                       ),
+  //                                     ),
+  //                                   ),
+  //                                 ],
+  //                               );
+  //                             },
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
+  // void dropDownModelForLanguage(BuildContext context, screenWidth) {
+  //   showModalBottomSheet<void>(
+  //     constraints: BoxConstraints.expand(width: screenWidth),
+  //     isScrollControlled: true,
+  //     isDismissible: true,
+  //     context: context,
+  //     backgroundColor: AppColor.secondaryColor,
+  //     builder: (BuildContext context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setState) {
+  //           return GestureDetector(
+  //             onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+  //             child: Padding(
+  //               padding: MediaQuery.of(context).viewInsets,
+  //               child: Container(
+  //                 width: MediaQuery.of(context).size.width,
+  //                 height: MediaQuery.of(context).size.height,
+  //                 decoration: BoxDecoration(
+  //                   color: AppColor.secondaryColor,
+  //                   borderRadius: BorderRadius.circular(10),
+  //                 ),
+  //                 child: Stack(
+  //                   children: [
+  //                     Column(
+  //                       children: [
+  //                         Expanded(
+  //                           flex: 1,
+  //                           child: SingleChildScrollView(
+  //                             physics: const NeverScrollableScrollPhysics(),
+  //                             child: Column(
+  //                               children: [
+  //                                 SizedBox(
+  //                                   height: MediaQuery.of(context).size.height *
+  //                                       4 /
+  //                                       100,
+  //                                 ),
+  //                                 //image header
+  //                                 Container(
+  //                                   width: MediaQuery.of(context).size.width *
+  //                                       100 /
+  //                                       100,
+  //                                   height: screenWidth > 600
+  //                                       ? null
+  //                                       : MediaQuery.of(context).size.height *
+  //                                           20 /
+  //                                           100,
+  //                                   decoration: const BoxDecoration(
+  //                                       image: DecorationImage(
+  //                                           image: AssetImage(
+  //                                               AppImage.headerBgImage),
+  //                                           fit: BoxFit.cover),
+  //                                       // color: AppColor.themeColor,
+  //                                       borderRadius: BorderRadius.only(
+  //                                           bottomLeft: Radius.circular(50),
+  //                                           bottomRight: Radius.circular(50))),
+  //                                   child: Column(
+  //                                     children: [
+  //                                       SizedBox(
+  //                                         height:
+  //                                             AppConstant.deviceType == "ios"
+  //                                                 ? MediaQuery.of(context)
+  //                                                         .size
+  //                                                         .height *
+  //                                                     6 /
+  //                                                     100
+  //                                                 : MediaQuery.of(context)
+  //                                                         .size
+  //                                                         .height *
+  //                                                     4 /
+  //                                                     100,
+  //                                       ),
+  //                                       //change lang
+  //                                       Container(
+  //                                         width: MediaQuery.of(context)
+  //                                                 .size
+  //                                                 .width *
+  //                                             100 /
+  //                                             100,
+  //                                         alignment: Alignment.center,
+  //                                         child: Row(
+  //                                           children: [
+  //                                             //edit
+  //                                             GestureDetector(
+  //                                               onTap: () {
+  //                                                 Navigator.pop(context);
+  //                                               },
+  //                                               child: Container(
+  //                                                 color: Colors.transparent,
+  //                                                 alignment: Alignment.center,
+  //                                                 width: MediaQuery.of(context)
+  //                                                         .size
+  //                                                         .width *
+  //                                                     15 /
+  //                                                     100,
+  //                                                 height: MediaQuery.of(context)
+  //                                                         .size
+  //                                                         .width *
+  //                                                     7 /
+  //                                                     100,
+  //                                                 child: Image.asset(
+  //                                                     AppImage.backIcon),
+  //                                               ),
+  //                                             ),
+  //                                             //profile
+  //                                             Container(
+  //                                               alignment: Alignment.center,
+  //                                               width: MediaQuery.of(context)
+  //                                                       .size
+  //                                                       .width *
+  //                                                   70 /
+  //                                                   100,
+  //                                               child: Text(
+  //                                                 AppLanguage
+  //                                                         .changeLanguageText[
+  //                                                     language],
+  //                                                 style: const TextStyle(
+  //                                                     color: AppColor
+  //                                                         .secondaryColor,
+  //                                                     fontSize: 20,
+  //                                                     fontWeight:
+  //                                                         FontWeight.w600,
+  //                                                     fontFamily:
+  //                                                         AppFont.fontFamily),
+  //                                               ),
+  //                                             ),
+  //                                             Container(
+  //                                               alignment:
+  //                                                   Alignment.centerRight,
+  //                                               width: MediaQuery.of(context)
+  //                                                       .size
+  //                                                       .width *
+  //                                                   15 /
+  //                                                   100,
+  //                                               height: MediaQuery.of(context)
+  //                                                       .size
+  //                                                       .width *
+  //                                                   7 /
+  //                                                   100,
+  //                                             ),
+  //                                           ],
+  //                                         ),
+  //                                       ),
+  //                                       SizedBox(
+  //                                         height: MediaQuery.of(context)
+  //                                                 .size
+  //                                                 .height *
+  //                                             10 /
+  //                                             100,
+  //                                       ),
+  //                                     ],
+  //                                   ),
+  //                                 ),
+  //                                 SizedBox(
+  //                                   height: MediaQuery.of(context).size.height *
+  //                                       2 /
+  //                                       100,
+  //                                 ),
+  //                                 //language list
+  //                                 Wrap(
+  //                                   children: [
+  //                                     ...List.generate(languageList.length,
+  //                                         (index) {
+  //                                       return Column(
+  //                                         crossAxisAlignment:
+  //                                             CrossAxisAlignment.center,
+  //                                         children: [
+  //                                           GestureDetector(
+  //                                             onTap: () {
+  //                                               setState(() {
+  //                                                 selectedLanguage =
+  //                                                     languageList[index]['id'];
+  //                                                 languageTextEditingController
+  //                                                         .text =
+  //                                                     languageList[index]
+  //                                                         ['title'];
+  //                                               });
+  //                                             },
+  //                                             child: Container(
+  //                                               width: MediaQuery.of(context)
+  //                                                       .size
+  //                                                       .width *
+  //                                                   90 /
+  //                                                   100,
+  //                                               decoration: BoxDecoration(
+  //                                                   color: selectedLanguage ==
+  //                                                           languageList[index]
+  //                                                               ['id']
+  //                                                       ? AppColor.themeColor
+  //                                                       : AppColor
+  //                                                           .secondaryColor,
+  //                                                   borderRadius:
+  //                                                       BorderRadius.circular(
+  //                                                           10),
+  //                                                   border: Border.all(
+  //                                                       width: 1,
+  //                                                       color: AppColor
+  //                                                           .boaderColor)),
+  //                                               child: Container(
+  //                                                 width: MediaQuery.of(context)
+  //                                                         .size
+  //                                                         .width *
+  //                                                     80 /
+  //                                                     100,
+  //                                                 child: Padding(
+  //                                                   padding: const EdgeInsets
+  //                                                       .symmetric(
+  //                                                       vertical: 10.0,
+  //                                                       horizontal: 18),
+  //                                                   child: Text(
+  //                                                     languageList[index]
+  //                                                         ['title'],
+  //                                                     style: TextStyle(
+  //                                                         color: selectedLanguage ==
+  //                                                                 languageList[
+  //                                                                         index]
+  //                                                                     ['id']
+  //                                                             ? AppColor
+  //                                                                 .secondaryColor
+  //                                                             : AppColor
+  //                                                                 .primaryColor,
+  //                                                         fontSize: 20,
+  //                                                         fontWeight:
+  //                                                             FontWeight.w400,
+  //                                                         fontFamily: AppFont
+  //                                                             .fontFamily),
+  //                                                   ),
+  //                                                 ),
+  //                                               ),
+  //                                             ),
+  //                                           ),
+  //                                           SizedBox(
+  //                                             height: MediaQuery.of(context)
+  //                                                     .size
+  //                                                     .height *
+  //                                                 2 /
+  //                                                 100,
+  //                                           ),
+  //                                         ],
+  //                                       );
+  //                                     }),
+  //                                   ],
+  //                                 ),
+  //                               ],
+  //                             ),
+  //                           ),
+  //                         )
+  //                       ],
+  //                     ),
+  //                     Positioned(
+  //                       bottom: MediaQuery.of(context).size.height * 6 / 100,
+  //                       child: Column(
+  //                         children: [
+  //                           Container(
+  //                             alignment: Alignment.center,
+  //                             width:
+  //                                 MediaQuery.of(context).size.width * 100 / 100,
+  //                             child: AppButton(
+  //                                 text: AppLanguage.doneText[language],
+  //                                 onPress: () {
+  //                                   Navigator.pop(context);
+  //                                 }),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     )
+  //                   ],
+  //                 ),
+  //               ),
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
