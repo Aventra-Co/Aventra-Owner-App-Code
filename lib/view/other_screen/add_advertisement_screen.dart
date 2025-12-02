@@ -424,6 +424,7 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
     });
 
     getCountriesApi(userId);
+    getCitiesApi(userId);
     getDestinationApi(userId);
     getBoatApi(userId, userType);
     getActivityApi(userId);
@@ -2908,14 +2909,15 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
                               textAlignVertical: TextAlignVertical.center,
                               controller: cityTextEditingController,
                               onTap: () {
-                                String text =
-                                    nationalityTextEditingController.text;
-                                if (text.isEmpty) {
-                                  SnackBarToastMessage.showSnackBar(context,
-                                      AppLanguage.nationalityMsg[language]);
-                                } else {
-                                  dropDownModelForCity(context, screenWidth);
-                                }
+                                // String text =
+                                //     nationalityTextEditingController.text;
+                                // if (text.isEmpty) {
+                                //   SnackBarToastMessage.showSnackBar(context,
+                                //       AppLanguage.nationalityMsg[language]);
+                                // } else {
+                                //   dropDownModelForCity(context, screenWidth);
+                                // }.
+                                dropDownModelForCity(context, screenWidth);
                               },
                               decoration: InputDecoration(
                                   border: const UnderlineInputBorder(
@@ -3624,10 +3626,9 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
                                         nationalityTextEditingController.text =
                                             nationsList[index]['country_name']
                                                 [language];
-                                        getCitiesApi(userId);
-                                        cityTextEditingController.clear();
-                                        searchCityTextEditingController.clear();
-                                        isSelectedCity = 0;
+                                        // cityTextEditingController.clear();
+                                        // searchCityTextEditingController.clear();
+                                        // isSelectedCity = 0;
                                         Navigator.pop(context);
                                       });
                                     },

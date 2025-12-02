@@ -716,7 +716,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                             children: [
                                                               Text(
                                                                 AppLanguage
-                                                                        .cityText[
+                                                                        .pickUpText[
                                                                     language],
                                                                 style: const TextStyle(
                                                                     fontSize:

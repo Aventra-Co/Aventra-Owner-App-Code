@@ -110,7 +110,8 @@ class _EditProfileScreenScreenState extends State<EditProfileScreen> {
       businessNameTextEditingController.text = data['company_name'] ?? "";
       merchantIdTextEditingController.text = data['merchant_id'] ?? "";
       genderTextEditingController.text = genderList[data["gender"]];
-      if (data['dob_formated'] != null) {
+      if (data['dob_formated'] != null &&
+          data['dob_formated'] != "Invalid date") {
         date = data["dob_formated"] ?? '';
         selectedDate = DateFormat("dd/MM/yyyy").parse(date);
         DateTime dateTime = DateFormat("dd/MM/yyyy").parse(date);
@@ -233,6 +234,7 @@ class _EditProfileScreenScreenState extends State<EditProfileScreen> {
     String businessName,
     String email,
     String mobile,
+    String merchantId,
     String fullName,
     String dob,
     String gender,
@@ -257,11 +259,15 @@ class _EditProfileScreenScreenState extends State<EditProfileScreen> {
       SnackBarToastMessage.showSnackBar(
           context, AppLanguage.mobilevalidMessage[language]);
       return;
+    } else if (merchantId.isEmpty) {
+      SnackBarToastMessage.showSnackBar(
+          context, AppLanguage.merchantIdMsg[language]);
+      return;
     } else if (fullName.isEmpty) {
       SnackBarToastMessage.showSnackBar(
           context, AppLanguage.fullNameMessage[language]);
       return;
-    } else if (date.isEmpty) {
+    } else if (sendDate.isEmpty) {
       SnackBarToastMessage.showSnackBar(
           context, AppLanguage.dobMessage[language]);
       return;
@@ -328,11 +334,11 @@ class _EditProfileScreenScreenState extends State<EditProfileScreen> {
       if (response.statusCode == 200) {
         print("res : $res");
         if (res['success'] == true) {
-          updateUser(res['user_details'], userId);
+          updateUser(res['userDataArray'], userId);
           FirebaseProvider.firebaseCreateUser(true);
-          APIs.userArry = res['user_details'];
-          APIs.user_id = res['user_details']['user_id'].toString();
-          if (await userExists(res['user_details']['user_id']) && mounted) {
+          APIs.userArry = res['userDataArray'];
+          APIs.user_id = res['userDataArray']['user_id'].toString();
+          if (await userExists(res['userDataArray']['user_id']) && mounted) {
             print("mounted $mounted");
 
             AppConstant.selectFooterIndex = 0;
@@ -343,7 +349,7 @@ class _EditProfileScreenScreenState extends State<EditProfileScreen> {
                           indexOfPage: 0,
                         )));
           } else {
-            createUser(res['user_details']['user_id'], res['user_details']);
+            createUser(res['userDataArray']['user_id'], res['userDataArray']);
           }
 
           print('Edited Details Fetched');
@@ -503,8 +509,9 @@ class _EditProfileScreenScreenState extends State<EditProfileScreen> {
                                   width: MediaQuery.of(context).size.width *
                                       15 /
                                       100,
-                                  height:
-                                      MediaQuery.of(context).size.width * 7 / 100,
+                                  height: MediaQuery.of(context).size.width *
+                                      7 /
+                                      100,
                                   child: Image.asset(AppImage.backIcon),
                                 ),
                               ),
@@ -869,8 +876,9 @@ class _EditProfileScreenScreenState extends State<EditProfileScreen> {
                               businessNameTextEditingController.text,
                               emailTextEditingController.text,
                               mobileTextEditingController.text,
+                              merchantIdTextEditingController.text,
                               fullNameTextController.text,
-                              dobDate,
+                              date,
                               genderTextEditingController.text,
                             );
                           }),

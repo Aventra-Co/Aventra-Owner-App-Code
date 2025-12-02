@@ -466,6 +466,7 @@ class AppLanguage {
     "يرجى إدخال الوصف"
   ];
   static const reasonMsg = ["Please enter reason", "يرجى إدخال السبب"];
+  static const merchantIdMsg = ["Please enter merchant ID", "يرجى إدخال معرّف التاجر"];
 
   static const photoGalleryText = ["Gallery", "المعرض"];
   static const cameraText = ["Camera", "الكاميرا"];
