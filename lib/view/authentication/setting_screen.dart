@@ -636,18 +636,7 @@ class SettingScreenScreenState extends State<SettingScreen> with RouteAware {
                               height:
                                   MediaQuery.of(context).size.width * 10 / 100,
                             ),
-                            // Container(
-                            //   margin: EdgeInsets.only(top: 10),
-                            //   alignment: Alignment.center,
-                            //   width:
-                            //       MediaQuery.of(context).size.width * 15 / 100,
-                            //   height:
-                            //       MediaQuery.of(context).size.width * 15 / 100,
-                            //   child: Image.asset(
-                            //     AppImage.deleteIcon,
-                            //     fit: BoxFit.cover,
-                            //   ),
-                            // ),
+                         
                             Container(
                               //color: Colors.amber,
                               alignment: Alignment.center,
@@ -825,18 +814,7 @@ class SettingScreenScreenState extends State<SettingScreen> with RouteAware {
                               height:
                                   MediaQuery.of(context).size.width * 10 / 100,
                             ),
-                            // Container(
-                            //   margin: EdgeInsets.only(top: 10),
-                            //   alignment: Alignment.center,
-                            //   width:
-                            //       MediaQuery.of(context).size.width * 15 / 100,
-                            //   height:
-                            //       MediaQuery.of(context).size.width * 15 / 100,
-                            //   child: Image.asset(
-                            //     AppImage.deleteIcon,
-                            //     fit: BoxFit.cover,
-                            //   ),
-                            // ),
+                        
                             Container(
                               //color: Colors.amber,
                               alignment: Alignment.center,

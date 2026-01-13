@@ -8,11 +8,7 @@ class SnackBarToastMessage {
         backgroundColor: Colors.black,
         duration: Duration(milliseconds: 3000),
         behavior: SnackBarBehavior.floating,
-        // shape: RoundedRectangleBorder(
-        //   borderRadius: BorderRadius.all(
-        //     Radius.circular(25),
-        //   ),
-        // ),
+
         content: Text("$message"),
       ),
     );

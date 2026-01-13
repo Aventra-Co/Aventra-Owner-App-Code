@@ -163,18 +163,7 @@ class CancelBookingState extends State<CancelBooking> {
                     onPress: () {
                       Navigator.pop(context);
                     }),
-                // SizedBox(
-                //     height: MediaQuery.of(context).size.height * 3 / 100),
-                // Container(
-                //   width: MediaQuery.of(context).size.width * 90 / 100,
-                //   child: Text(AppLanguage.deleteReasonText[language],
-                //       style: const TextStyle(
-                //         fontWeight: FontWeight.w400,
-                //         fontFamily: AppFont.fontFamily,
-                //         color: AppColor.primaryColor,
-                //         fontSize: 12,
-                //       )),
-                // ),
+              
 
                 SizedBox(height: MediaQuery.of(context).size.height * 3 / 100),
                 //----------- Message Input -------------

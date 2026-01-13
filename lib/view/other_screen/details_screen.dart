@@ -1450,67 +1450,7 @@ class _DetailsScreen extends State<DetailsScreen> {
                                         2 /
                                         100),
 
-                                //! Container(
-                                //!   width: MediaQuery.of(context).size.width *
-                                //!       85 /
-                                //!       100,
-                                //!   child: const Text(
-                                //!     "-------------------------------------------------------------------------------------------",
-                                //!     maxLines: 1,
-                                //!     style: TextStyle(
-                                //!         fontFamily: AppFont.fontFamily,
-                                //!         fontSize: 12,
-                                //!         fontWeight: FontWeight.w400,
-                                //!         color: AppColor.boaderColor),
-                                //!   ),
-                                //! ),
-                                //! SizedBox(
-                                //!     height: MediaQuery.of(context).size.height *
-                                //!         1 /
-                                //!         100),
-                                //! Container(
-                                //!   width: MediaQuery.of(context).size.width *
-                                //!       85 /
-                                //!       100,
-                                //!   child: Row(
-                                //!     children: [
-                                //!       Container(
-                                //!         width: MediaQuery.of(context).size.width *
-                                //!             42 /
-                                //!             100,
-                                //!         child: Text(
-                                //!           AppLanguage.captainFeesText[language],
-                                //!           style: const TextStyle(
-                                //!               fontFamily: AppFont.fontFamily,
-                                //!               fontSize: 16,
-                                //!               fontWeight: FontWeight.w500,
-                                //!               color: AppColor.textColor),
-                                //!         ),
-                                //!       ),
-                                //!       Container(
-                                //!         width: MediaQuery.of(context).size.width *
-                                //!             42 /
-                                //!             100,
-                                //!         alignment: language == 1
-                                //!             ? Alignment.centerLeft
-                                //!             : Alignment.centerRight,
-                                //!         child: const Text(
-                                //!           "10 KWD",
-                                //!           style: TextStyle(
-                                //!               fontFamily: AppFont.fontFamily,
-                                //!               fontSize: 16,
-                                //!               fontWeight: FontWeight.w600,
-                                //!               color: AppColor.primaryColor),
-                                //!         ),
-                                //!       ),
-                                //!     ],
-                                //!   ),
-                                //! ),
-                                //! SizedBox(
-                                //!     height: MediaQuery.of(context).size.height *
-                                //!         2 /
-                                //!         100),
-
+                             
                                 Container(
                                   width: MediaQuery.of(context).size.width *
                                       85 /

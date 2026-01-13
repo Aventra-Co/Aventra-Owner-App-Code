@@ -233,11 +233,6 @@ class _ChatScreenState extends State<ChatScreen> {
           });
         },
         child: Scaffold(
-          //app bar
-          // appBar: AppBar(
-          //   automaticallyImplyLeading: false,
-          //   flexibleSpace: _appBar(),
-          // ),
 
           backgroundColor: Colors.white,
 
@@ -500,87 +495,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  // bottom chat input field
-  // Widget _chatInput() {
-  //   return Padding(
-  //     padding: EdgeInsets.symmetric(),
-  //     child: Row(
-  //       children: [
-  //         //input field & buttons
-  //         Expanded(
-  //           child: Container(
-  //             height: MediaQuery.of(context).size.height * 8 / 100,
-  //             decoration: const BoxDecoration(
-  //               color: AppColor.white,
-  //               boxShadow: [
-  //                 BoxShadow(
-  //                   color: Color.fromARGB(255, 191, 195, 199), // Shadow color
-  //                   blurRadius: 6.0, // Blur intensity
-  //                   offset: Offset(0, -2), // Moves shadow 5px down
-  //                 ),
-  //               ],
-  //             ),
-  //             child: Row(
-  //               children: [
-  //                 //emoji button
-  //                 IconButton(
-  //                     onPressed: () {
-  //                       FocusScope.of(context).unfocus();
-  //                       imagePickerBottomSheet();
-  //                       // setState(() => _showEmoji = !_showEmoji);
-  //                     },
-  //                     icon: Image.asset(
-  //                       AppImage.sendImage,
-  //                       color: AppColor.themeColor,
-  //                       scale: 3,
-  //                     )),
-  //                 Expanded(
-  //                     child: TextField(
-  //                   controller: _textController,
-  //                   keyboardType: TextInputType.multiline,
-  //                   maxLines: null,
-  //                   onTap: () {},
-  //                   decoration: InputDecoration(
-  //                       hintText: '   Type Message...',
-  //                       contentPadding: EdgeInsets.only(left: 5, top: 9),
-  //                       hintStyle: const TextStyle(color: AppColor.black),
-  //                       suffixIcon: Container(
-  //                         height: MediaQuery.of(context).size.width * 5 / 100,
-  //                         width: MediaQuery.of(context).size.width * 5 / 100,
-  //                         child: MaterialButton(
-  //                           onPressed: () {
-  //                             if (_textController.text.isNotEmpty) {
-  //                               if (_list.isEmpty) {
-  //                                 //on first message (add user to my_user collection of chat user)
-  //                                 APIs.sendFirstMessage(widget.user,
-  //                                     _textController.text, Type.text);
-  //                               } else {
-  //                                 //simply send message
-  //                                 APIs.sendMessage(widget.user,
-  //                                     _textController.text, Type.text);
-  //                               }
-  //                               _textController.text = '';
-  //                             }
-  //                           },
-  //                           minWidth: 0,
-  //                           padding: const EdgeInsets.only(
-  //                               top: 10, bottom: 10, right: 5, left: 10),
-  //                           // shape: const CircleBorder(),
-  //                           // color: Colors.green,
-  //                           child: Image.asset(AppImage.sendImage),
-  //                         ),
-  //                       ),
-  //                       border: InputBorder.none),
-  //                 )),
-  //                 SizedBox(width: MediaQuery.of(context).size.width * .02),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+ 
 
   Widget _chatInput(screenWidth) {
     return Container(
@@ -737,7 +652,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       onTap: () {
                         _imgFromGallery();
                         setState(() {});
-                        // Navigator.of(context).pop();
                       }),
                   new ListTile(
                     leading: new Icon(Icons.photo_camera),
@@ -745,7 +659,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     onTap: () {
                       _imgFromCamera();
                       setState(() {});
-                      // Navigator.of(context).pop();
                     },
                   ),
                 ],
@@ -758,8 +671,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _imgFromCamera() async {
     dynamic image = await ImagePicker().pickImage(
         source: ImageSource.camera,
-        // maxHeight: 450.0,
-        // maxWidth: 450.0,
+
         imageQuality: 50);
 
     if (image != null) {
@@ -784,8 +696,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _imgFromGallery() async {
     dynamic image = await ImagePicker().pickImage(
         source: ImageSource.gallery,
-        // maxHeight: 450.0,
-        // maxWidth: 450.0,
+   
         imageQuality: 50);
 
     if (image != null) {
@@ -794,7 +705,6 @@ class _ChatScreenState extends State<ChatScreen> {
         setState(() {
           _imageSelect = image;
           fileName = image.path;
-          //  var _btnActive = true;
         });
         sendImageApiCall();
       });

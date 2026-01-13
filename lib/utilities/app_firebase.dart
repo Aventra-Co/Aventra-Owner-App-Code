@@ -62,12 +62,7 @@ class FirebaseProvider {
     String otherUserName,
     String message,
     String deviceToken,
-    // String otherUserNameIdentify,
-    // String acceptAt,
-    // String otherUserImage
   ) async {
-    // print("userId $userId");
-    // print("otherUserId $otherUserId");
 
     String userIdSend = 'u_$userId';
 
@@ -82,8 +77,6 @@ class FirebaseProvider {
     Timestamp currentTimestamp = Timestamp.fromDate(now);
 
     print(currentTimestamp.toString());
-
-    // print("myInbox :  ${"users/$userIdSend/myInbox/$otherUserIdSend"}");
 
     int messageCount = 0;
 
@@ -189,30 +182,14 @@ class FirebaseProvider {
           if (snapshot.exists) {
             Map data = snapshot.value as Map;
             if (data['chat_screen_status'] == "yes") {
-              // sendNotification(
-              //   message,
-              //   otherUserName,
-              //   deviceToken,
-              //   userId,
-              //   otherUserId,
 
-              // );
             }
           } else {
             print('No data available');
           }
         });
         FirebaseDatabase.instance.ref('users/').get().then((snapshot) {
-          //  if (chatScreenStatus == "yes") {
-          // sendNotification(
-          //   message,
-          //   otherUserName,
-          //   deviceToken,
-          //   userId,
-          //   otherUserId,
-
-          // );
-          // }
+ 
           return false;
           if (snapshot.exists) {
             Map value = snapshot.value as Map;

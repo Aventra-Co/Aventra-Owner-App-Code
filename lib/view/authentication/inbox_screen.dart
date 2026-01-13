@@ -94,11 +94,7 @@ class _InboxScreenState extends State<InboxScreen> {
 
     // print("userDetails $userDetails");
     if (data == null) {
-      // print("worked");
-      // SnackBarToastMessage.showSnackBar(
-      //     context, AppLanguage.notRegisteredMsg[language]);
-      // Navigator.push(
-      //     context, MaterialPageRoute(builder: (context) => const Login()));
+
     } else {
       userDataArr = jsonDecode(data);
       userId = userDataArr['user_id'] ?? 0;
@@ -268,82 +264,7 @@ class _InboxScreenState extends State<InboxScreen> {
                 ),
               ),
 
-              // Expanded(
-              //   child: SingleChildScrollView(
-              //     child: Column(
-              //       children: [
-              //         SizedBox(
-              //             height: MediaQuery.of(context).size.height * 2 / 100),
-              //         Wrap(
-              //           children: [
-              //             ...List.generate(chatList.length, (index) {
-              //               return GestureDetector(
-              //                 onTap: () {
-              //                   Navigator.push(
-              //                       context,
-              //                       MaterialPageRoute(
-              //                         builder: (context) => const ChatScreen(),
-              //                       ));
-              //                 },
-              //                 child: Container(
-              //                   width: MediaQuery.of(context).size.width *
-              //                       95 /
-              //                       100,
-              //                   child: ListTile(
-              //                     leading: CircleAvatar(
-              //                       backgroundImage:
-              //                           AssetImage(chatList[index]['image']),
-              //                     ),
-              //                     title: Text(
-              //                       chatList[index]['name'],
-              //                       style: const TextStyle(
-              //                           fontWeight: FontWeight.w600,
-              //                           fontFamily: AppFont.fontFamily,
-              //                           fontSize: 14,
-              //                           color: AppColor.primaryColor),
-              //                     ),
-              //                     subtitle: Text(
-              //                       chatList[index]['message'],
-              //                       style: const TextStyle(
-              //                           fontWeight: FontWeight.w400,
-              //                           fontFamily: AppFont.fontFamily,
-              //                           fontSize: 12,
-              //                           color: AppColor.primaryColor),
-              //                     ),
-              //                     trailing: Column(
-              //                       mainAxisAlignment: MainAxisAlignment.center,
-              //                       children: [
-              //                         Text(chatList[index]['time'],
-              //                             style: const TextStyle(
-              //                                 color: Colors.grey)),
-              //                         if (chatList[index]['unread'] > 0)
-              //                           Container(
-              //                             margin: const EdgeInsets.only(top: 4),
-              //                             padding: const EdgeInsets.all(6),
-              //                             decoration: const BoxDecoration(
-              //                               color: Colors.green,
-              //                               shape: BoxShape.circle,
-              //                             ),
-              //                             child: Text(
-              //                               chatList[index]['unread']
-              //                                   .toString(),
-              //                               style: const TextStyle(
-              //                                   color: Colors.white,
-              //                                   fontSize: 12),
-              //                             ),
-              //                           ),
-              //                       ],
-              //                     ),
-              //                   ),
-              //                 ),
-              //               );
-              //             }),
-              //           ],
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
+            
 
               const NoInternetBanner(),
             ],

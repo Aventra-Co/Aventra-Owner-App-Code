@@ -718,20 +718,6 @@ class _EditProfileScreenScreenState extends State<EditProfileScreen> {
                         height: MediaQuery.of(context).size.height * 2 / 100,
                       ),
 
-                      //boat staff
-                      // CustomTextFormFieldBlackWidth(
-                      //   width: MediaQuery.of(context).size.width * 90 / 100,
-                      //   controller: boatStaffTextEditingController,
-                      //   hintText: AppLanguage.boatStaffText[language],
-                      //   maxLength: AppConstant.fullnameLength,
-                      //   keyboardtype: TextInputType.text,
-                      //   fillColorStatus: 0,
-                      //   readOnly: false,
-                      // ),
-                      // SizedBox(
-                      //   height: MediaQuery.of(context).size.height * 2 / 100,
-                      // ),
-
                       //full name
                       CustomTextFormFieldBlackWidth(
                         width: MediaQuery.of(context).size.width * 90 / 100,

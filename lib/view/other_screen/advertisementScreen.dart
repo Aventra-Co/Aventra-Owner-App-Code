@@ -330,11 +330,7 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
                                 adDetails['advertisement_type'] == 0
                                     ? AppLanguage.privateText[language]
                                     : AppLanguage.publicText[language]),
-                            // textTile(AppLanguage.customerTypeText[language],
-                            //     "MahmoudAlbandar"),
-                            // textTile(AppLanguage.bookDateText[language], "2025-01-01"),
-                            // textTile(AppLanguage.tripDateText[language],
-                            //     adDetails['trip_date']),
+                 
                             textTile(AppLanguage.tripDateText[language],
                                 showFormattedDates),
                             textTile(AppLanguage.tripTimeText[language],
@@ -387,9 +383,7 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
                             textTile(
                                 AppLanguage.selectedItemPriceText[language],
                                 "KDW ${adDetails['totalAddonPrice']}"),
-                            // textTile(
-                            //     AppLanguage.extraHourPriceText[language], "KDW 50.00 0"),
-                            // textTile(AppLanguage.totalPriceText[language], "KDW 3.00"),
+                        
                             textTile(AppLanguage.cancellationTimeText[language],
                                 "${adDetails['cancle_day']} Days"),
                           ],

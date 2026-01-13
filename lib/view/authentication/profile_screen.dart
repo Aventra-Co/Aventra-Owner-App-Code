@@ -225,15 +225,6 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        // appBar: PreferredSize(
-        // preferredSize: const Size.fromHeight(0),
-        // child: AppBar(
-        //     backgroundColor: Colors.transparent,
-        //     systemOverlayStyle: const SystemUiOverlayStyle(
-        // systemNavigationBarColor: AppColor.themeColor,
-        // systemNavigationBarIconBrightness: Brightness.light,
-        //         statusBarColor: Colors.transparent,
-        //         statusBarIconBrightness: Brightness.dark))),
         body: Directionality(
           textDirection:
               language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
@@ -285,11 +276,7 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
                                   //edit
                                   GestureDetector(
                                     onTap: () {
-                                      // Navigator.push(
-                                      //     context,
-                                      //     MaterialPageRoute(
-                                      //         builder: (context) =>
-                                      //             const EditProfileScreen()));
+                             
                                     },
                                     child: Container(
                                       alignment: Alignment.centerRight,

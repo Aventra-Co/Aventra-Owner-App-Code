@@ -143,15 +143,6 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
     }
   }
 
-  // selectAllBoat() {
-  //   selectedBoats.clear();
-  //   for (var boat in boatList) {
-  //     selectedBoats.add(boat['boat_id']);
-  //   }
-  //   setState(() {});
-  //   log("selectedBoats$selectedBoats");
-  // }
-
   validation() {
     if (selectedBoatId == 0) {
       SnackBarToastMessage.showSnackBar(
@@ -363,20 +354,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                                     color: AppColor.primaryColor,
                                     fontSize: 16),
                               ),
-                              // if (boatList.isNotEmpty && isApiCalling == false)
-                              // GestureDetector(
-                              //   onTap: () {
-                              //     selectAllBoat();
-                              //   },
-                              //   child: Text(
-                              //     AppLanguage.selectAllText[language],
-                              //     style: const TextStyle(
-                              //         fontFamily: AppFont.fontFamily,
-                              //         fontWeight: FontWeight.w700,
-                              //         color: AppColor.themeColor,
-                              //         fontSize: 14),
-                              //   ),
-                              // ),
+                            
                             ],
                           ),
                         ),
@@ -587,150 +565,6 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                         SizedBox(
                             height: MediaQuery.of(context).size.height * 0.02),
 
-                        // Container(
-                        //   width: MediaQuery.of(context).size.width * 90 / 100,
-                        //   child: Row(
-                        //     children: [
-                        //       //!=== Test boat Button ===
-                        //       GestureDetector(
-                        //         onTap: () {
-                        //           setState(() {
-                        //             selectedBoat = 1;
-                        //           });
-                        //         },
-                        //         child: Container(
-                        //           decoration: BoxDecoration(
-                        //             color: selectedBoat == 1
-                        //                 ? AppColor.themeColor
-                        //                 : AppColor.secondaryColor,
-                        //             borderRadius: BorderRadius.circular(10),
-                        //             border:
-                        //                 Border.all(color: AppColor.boaderColor),
-                        //           ),
-                        //           child: Padding(
-                        //             padding: const EdgeInsets.only(
-                        //                 right: 20, left: 20, top: 5, bottom: 5),
-                        //             child: Text(
-                        //               AppLanguage.testBoatText[language],
-                        //               style: TextStyle(
-                        //                   fontFamily: AppFont.fontFamily,
-                        //                   fontWeight: FontWeight.w500,
-                        //                   color: selectedBoat == 1
-                        //                       ? AppColor.secondaryColor
-                        //                       : AppColor.primaryColor,
-                        //                   fontSize: 16),
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       ),
-                        //       SizedBox(
-                        //         width:
-                        //             MediaQuery.of(context).size.width * 2 / 100,
-                        //       ),
-
-                        //       //!==== Yachts Text Button =====
-                        //       GestureDetector(
-                        //         onTap: () {
-                        //           setState(() {
-                        //             selectedBoat = 2;
-                        //           });
-                        //         },
-                        //         child: Container(
-                        //           decoration: BoxDecoration(
-                        //             color: selectedBoat == 2
-                        //                 ? AppColor.themeColor
-                        //                 : AppColor.secondaryColor,
-                        //             borderRadius: BorderRadius.circular(10),
-                        //             border:
-                        //                 Border.all(color: AppColor.boaderColor),
-                        //           ),
-                        //           child: Padding(
-                        //             padding: const EdgeInsets.only(
-                        //                 right: 20, left: 20, top: 5, bottom: 5),
-                        //             child: Text(
-                        //               AppLanguage.yachtsText[language],
-                        //               style: TextStyle(
-                        //                   fontFamily: AppFont.fontFamily,
-                        //                   fontWeight: FontWeight.w500,
-                        //                   color: selectedBoat == 2
-                        //                       ? AppColor.secondaryColor
-                        //                       : AppColor.primaryColor,
-                        //                   fontSize: 16),
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
-
-                        //! ==== From and To Time ============
-                        // SizedBox(
-                        //   height: MediaQuery.of(context).size.height * 2 / 100,
-                        // ),
-                        // Container(
-                        //   width: MediaQuery.of(context).size.width * 90 / 100,
-                        //   child: Row(
-                        //     children: [
-                        //       //!====== Image markedCircleIcon ============
-                        //       Container(
-                        //         width: MediaQuery.of(context).size.width *
-                        //             15 /
-                        //             100,
-                        //         child: Text(
-                        //           AppLanguage.fromText[language],
-                        //           style: TextStyle(
-                        //               fontFamily: AppFont.fontFamily,
-                        //               fontWeight: FontWeight.w800,
-                        //               color: AppColor.primaryColor,
-                        //               fontSize: 16),
-                        //         ),
-                        //       ),
-                        //       //!====== Select Date Text ============
-                        //       Text(
-                        //         "01:58 AM",
-                        //         style: TextStyle(
-                        //             fontFamily: AppFont.fontFamily,
-                        //             fontWeight: FontWeight.w500,
-                        //             color: AppColor.primaryColor,
-                        //             fontSize: 16),
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
-                        // SizedBox(
-                        //   height: MediaQuery.of(context).size.height * 1 / 100,
-                        // ),
-                        // Container(
-                        //   width: MediaQuery.of(context).size.width * 90 / 100,
-                        //   child: Row(
-                        //     children: [
-                        //       //!====== Image circleIcon ============
-                        //       Container(
-                        //         width: MediaQuery.of(context).size.width *
-                        //             15 /
-                        //             100,
-                        //         child: Text(
-                        //           AppLanguage.toText[language],
-                        //           style: TextStyle(
-                        //               fontFamily: AppFont.fontFamily,
-                        //               fontWeight: FontWeight.w800,
-                        //               color: AppColor.primaryColor,
-                        //               fontSize: 16),
-                        //         ),
-                        //       ),
-                        //       //!====== Select Date Text ============
-                        //       Text(
-                        //         "01:58 AM",
-                        //         style: TextStyle(
-                        //             fontFamily: AppFont.fontFamily,
-                        //             fontWeight: FontWeight.w500,
-                        //             color: AppColor.primaryColor,
-                        //             fontSize: 16),
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
 
                         Padding(
                           padding: const EdgeInsets.only(top: 2.0, bottom: 30),
@@ -1130,75 +964,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                                             MediaQuery.of(context).size.height *
                                                 0.02),
 
-                                    //========== Selected Date Display ==========
-                                    // if (_selectedDay != null)
-                                    //   Container(
-                                    //     padding: const EdgeInsets.all(12),
-                                    //     decoration: BoxDecoration(
-                                    //       border:
-                                    //           Border.all(color: Colors.grey),
-                                    //       borderRadius:
-                                    //           BorderRadius.circular(20),
-                                    //     ),
-                                    //     child: Row(
-                                    //       children: [
-                                    //         // Calendar Icon and Date
-                                    //         SizedBox(
-                                    //           width: screenWidth * 0.4,
-                                    //           child: Row(
-                                    //             children: [
-                                    //               Image.asset(
-                                    //                   AppImage.calanderIcon,
-                                    //                   scale: 3),
-                                    //               SizedBox(
-                                    //                   width:
-                                    //                       screenWidth * 0.015),
-                                    //               Text(
-                                    //                 DateFormat('yyyy-MM-dd')
-                                    //                     .format(_selectedDay!),
-                                    //                 style: const TextStyle(
-                                    //                   fontSize: 16,
-                                    //                   fontWeight:
-                                    //                       FontWeight.w700,
-                                    //                   fontFamily:
-                                    //                       AppFont.fontFamily,
-                                    //                   color:
-                                    //                       AppColor.primaryColor,
-                                    //                 ),
-                                    //               ),
-                                    //             ],
-                                    //           ),
-                                    //         ),
-                                    //         // All Boats + Delete
-                                    //         // SizedBox(
-                                    //         //   width: screenWidth * 0.35,
-                                    //         //   child: Row(
-                                    //         //     mainAxisAlignment:
-                                    //         //         MainAxisAlignment
-                                    //         //             .spaceBetween,
-                                    //         //     children: [
-                                    //         //       Text(
-                                    //         //         AppLanguage
-                                    //         //             .allBoatsText[language],
-                                    //         //         style: const TextStyle(
-                                    //         //           fontSize: 16,
-                                    //         //           fontWeight:
-                                    //         //               FontWeight.w700,
-                                    //         //           fontFamily:
-                                    //         //               AppFont.fontFamily,
-                                    //         //           color:
-                                    //         //               AppColor.primaryColor,
-                                    //         //         ),
-                                    //         //       ),
-                                    //         //       Image.asset(
-                                    //         //           AppImage.deleteIcon,
-                                    //         //           scale: 3),
-                                    //         //     ],
-                                    //         //   ),
-                                    //         // ),
-                                    //       ],
-                                    //     ),
-                                    //   ),
+                                   
                                   ],
                                 ),
                               ),
@@ -1206,29 +972,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                           ),
                         ),
 
-                        // //! ==== Add Unavailability Button ============
-                        // GestureDetector(
-                        //   onTap: () {
-                        //     showCalanderBhottomSheet();
-                        //   },
-                        //   child: Container(
-                        //     alignment: Alignment.center,
-                        //     height: MediaQuery.of(context).size.height * 5 / 100,
-                        //     width: MediaQuery.of(context).size.width * 45 / 100,
-                        //     decoration: BoxDecoration(
-                        //       color: AppColor.themeColor,
-                        //       borderRadius: BorderRadius.circular(15),
-                        //     ),
-                        //     child: Text(
-                        //       AppLanguage.addUnavailabilityText[language],
-                        //       style: const TextStyle(
-                        //           fontSize: 16,
-                        //           color: AppColor.secondaryColor,
-                        //           fontFamily: AppFont.fontFamily,
-                        //           fontWeight: FontWeight.w700),
-                        //     ),
-                        //   ),
-                        // )
+                       
                       ],
                     ),
                   ),

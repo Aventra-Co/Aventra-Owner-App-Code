@@ -127,8 +127,6 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
           SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
           if (res['active_status'] == 0) {
             localstorageclearbutton();
-            // Navigator.push(context,
-            //     MaterialPageRoute(builder: (context) => const Login()));
           }
         }
       } else {
@@ -544,9 +542,6 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                                 .width *
                                                             90 /
                                                             100,
-                                                    // height: MediaQuery.of(context).size.height *
-                                                    //     20 /
-                                                    //     100,
                                                     padding: const EdgeInsets
                                                         .symmetric(
                                                       vertical: 5,
@@ -1310,18 +1305,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                               height:
                                   MediaQuery.of(context).size.width * 10 / 100,
                             ),
-                            // Container(
-                            //   margin: EdgeInsets.only(top: 10),
-                            //   alignment: Alignment.center,
-                            //   width:
-                            //       MediaQuery.of(context).size.width * 15 / 100,
-                            //   height:
-                            //       MediaQuery.of(context).size.width * 15 / 100,
-                            //   child: Image.asset(
-                            //     AppImage.deleteIcon,
-                            //     fit: BoxFit.cover,
-                            //   ),
-                            // ),
+                          
                             Container(
                               //color: Colors.amber,
                               alignment: Alignment.center,

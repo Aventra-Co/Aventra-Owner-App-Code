@@ -179,17 +179,7 @@ class _AddBoatScreenState extends State<AddBoatScreen> {
       formData.fields['cabins'] = cabinsTextEditingController.text;
       formData.fields['toilet'] = toiletTextEditingController.text;
 
-      // if (_imageSelect != null) {
-      //   XFile image1 = _imageSelect!;
-      //   List<int> imageBytes = await image1.readAsBytes();
-      //   http.MultipartFile imageFile = http.MultipartFile.fromBytes(
-      //       'image', imageBytes,
-      //       filename: 'image.jpg', contentType: MediaType('image', 'jpg'));
-
-      //   formData.files.add(imageFile);
-      // } else {
-      //   formData.fields['image'] = "";
-      // }
+     
 
       log("response--==> ${formData.fields}");
       // print("response--==> ${formData.files}");
@@ -476,52 +466,7 @@ class _AddBoatScreenState extends State<AddBoatScreen> {
                           height: MediaQuery.of(context).size.height * 6 / 100),
 
                       //!=== Add Boat Image Text ===
-                      // Container(
-                      //   width: MediaQuery.of(context).size.width * 90 / 100,
-                      //   child: Text(
-                      //     AppLanguage.addBoatImageText[language],
-                      //     style: const TextStyle(
-                      //         color: AppColor.textColor,
-                      //         fontFamily: AppFont.fontFamily,
-                      //         fontWeight: FontWeight.w400,
-                      //         fontSize: 20),
-                      //   ),
-                      // ),
-                      // SizedBox(
-                      //     height: MediaQuery.of(context).size.height * 1 / 100),
-                      // Container(
-                      //   width: MediaQuery.of(context).size.width * 90 / 100,
-                      //   height: MediaQuery.of(context).size.height * 15 / 100,
-                      //   decoration: BoxDecoration(
-                      //     borderRadius: BorderRadius.circular(10),
-                      //     border: Border.all(
-                      //       color: AppColor.boaderColor,
-                      //     ),
-                      //   ),
-                      //   child: Column(
-                      //     crossAxisAlignment: CrossAxisAlignment.center,
-                      //     mainAxisAlignment: MainAxisAlignment.center,
-                      //     children: [
-                      //       Image.asset(
-                      //         AppImage.uploadImageIcon,
-                      //         scale: 4,
-                      //       ),
-                      //       SizedBox(
-                      //           height:
-                      //               MediaQuery.of(context).size.height * 1 / 100),
-                      //       Text(
-                      //         AppLanguage.chooseFileToUploadText[language],
-                      //         style: const TextStyle(
-                      //             color: AppColor.textColor,
-                      //             fontFamily: AppFont.fontFamily,
-                      //             fontWeight: FontWeight.w600,
-                      //             fontSize: 14),
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
-                      // SizedBox(
-                      //     height: MediaQuery.of(context).size.height * 5 / 100),
+                     
 
                       //!=== Button Submit ===
                       AppButton(

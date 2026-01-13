@@ -302,8 +302,7 @@ class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
     print("run");
     dynamic image = await ImagePicker().pickImage(
         source: ImageSource.gallery,
-        // maxHeight: 450.0,
-        // maxWidth: 450.0,
+
         imageQuality: 50);
 
     if (image != null) {
@@ -754,45 +753,7 @@ class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
                             height:
                                 MediaQuery.of(context).size.height * 3 / 100),
 
-                        // Container(
-                        //   width: MediaQuery.of(context).size.width * 90 / 100,
-                        //   child: Row(
-                        //     children: [
-                        //       Container(
-                        //         height:
-                        //             MediaQuery.of(context).size.height * 2 / 100,
-                        //         width: MediaQuery.of(context).size.width * 4 / 100,
-                        //         child: Image.asset(
-                        //           AppImage.phoneIcon,
-                        //         ),
-                        //       ),
-                        //       SizedBox(
-                        //           width:
-                        //               MediaQuery.of(context).size.width * 2 / 100),
-                        //       Text(
-                        //         AppLanguage.mobileText[language],
-                        //         style: const TextStyle(
-                        //             color: AppColor.primaryColor,
-                        //             fontFamily: AppFont.fontFamily,
-                        //             fontWeight: FontWeight.w600,
-                        //             fontSize: 14),
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
-
-                        // //!=== mobile ====
-                        // TextField(
-                        //   controller: mobileTextEditingController,
-                        //   hintText: AppLanguage.mobileText[language],
-                        //   keyboardtype: TextInputType.name,
-                        //   maxLength: 50,
-                        //   fillColorStatus: 0,
-                        //   readOnly: false,
-                        //   width: MediaQuery.of(context).size.width * 90 / 100,
-                        // ),
-                        // SizedBox(
-                        //     height: MediaQuery.of(context).size.height * 2 / 100),
+                       
 
                         Container(
                           width: MediaQuery.of(context).size.width * 90 / 100,
@@ -832,14 +793,7 @@ class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
                         SizedBox(
                             height:
                                 MediaQuery.of(context).size.height * 2 / 100),
-                        // Container(
-                        //   height: MediaQuery.of(context).size.height * 30 / 100,
-                        //   width: MediaQuery.of(context).size.width * 80 / 100,
-                        //   child: Image.asset(
-                        //     AppImage.certificateImage,
-                        //     fit: BoxFit.fill,
-                        //   ),
-                        // ),
+                    
 
                         //!=== Permission Text ===
                         Container(
@@ -1626,18 +1580,7 @@ class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
                               height:
                                   MediaQuery.of(context).size.width * 10 / 100,
                             ),
-                            // Container(
-                            //   margin: EdgeInsets.only(top: 10),
-                            //   alignment: Alignment.center,
-                            //   width:
-                            //       MediaQuery.of(context).size.width * 15 / 100,
-                            //   height:
-                            //       MediaQuery.of(context).size.width * 15 / 100,
-                            //   child: Image.asset(
-                            //     AppImage.deleteIcon,
-                            //     fit: BoxFit.cover,
-                            //   ),
-                            // ),
+                          
                             Container(
                               //color: Colors.amber,
                               alignment: Alignment.center,

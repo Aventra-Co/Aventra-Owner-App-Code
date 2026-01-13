@@ -73,12 +73,7 @@ class _MessageCardState extends State<MessageCard> {
                     //show image
                     GestureDetector(
                         onTap: () {
-                          // Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //         builder: (context) => ImageShow(
-                          //               image: widget.message.msg,
-                          //             )));
+            
                         },
                         child: ClipRRect(
                           borderRadius:
@@ -166,12 +161,7 @@ class _MessageCardState extends State<MessageCard> {
                     //show image
                     GestureDetector(
                         onTap: () {
-                          // Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //         builder: (context) => ImageShow(
-                          //               image: widget.message.msg,
-                          //             )));
+                 
                         },
                         child: ClipRRect(
                           borderRadius:

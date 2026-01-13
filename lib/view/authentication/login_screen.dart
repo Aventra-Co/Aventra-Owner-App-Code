@@ -168,11 +168,7 @@ class _LoginState extends State<Login> {
           setState(() {
             isApiCalling = false;
           });
-          // if (res['active_status'] == 0) {
-          //   AppConstant.authNavigation = 0;
-          //   Navigator.push(context,
-          //       MaterialPageRoute(builder: (context) => const SignupScreen()));
-          // }
+
         }
       } else {
         setState(() {
@@ -610,21 +606,7 @@ class _LoginState extends State<Login> {
                                   MediaQuery.of(context).size.height * 6 / 100,
                             ),
 
-                            //signup button
-                            // AppButton(
-                            //     text: AppLanguage.signUpText[language],
-                            //     onPress: () {
-                            //       Navigator.push(
-                            //           context,
-                            //           MaterialPageRoute(
-                            //               builder: (context) =>
-                            //                   const Signup()));
-                            //     }),
-                            // SizedBox(
-                            //   height: MediaQuery.of(context).size.height *
-                            //       2 /
-                            //       100,
-                            // ),
+                         
 
                             //Contact Admin
                             GestureDetector(
@@ -816,16 +798,7 @@ class _LoginState extends State<Login> {
                                                                 .width *
                                                             5 /
                                                             100,
-                                                    // decoration: BoxDecoration(
-                                                    //   border: Border.all(
-                                                    //     width: .3,
-                                                    //     color: AppColor
-                                                    //         .textinputBorderColor,
-                                                    //   ),
-                                                    //   borderRadius:
-                                                    //       BorderRadius.circular(
-                                                    //           100),
-                                                    // ),
+                                                  
                                                     child: languageList[index]
                                                                 ["id"] ==
                                                             languageId

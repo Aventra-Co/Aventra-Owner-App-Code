@@ -50,11 +50,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     // print("userDetails $userDetails");
     if (data == null) {
-      // print("worked");
-      // SnackBarToastMessage.showSnackBar(
-      //     context, AppLanguage.notRegisteredMsg[language]);
-      // Navigator.push(
-      //     context, MaterialPageRoute(builder: (context) => const Login()));
     } else {
       userDataArr = jsonDecode(data);
       userId = userDataArr['user_id'] ?? 0;
@@ -542,35 +537,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                               MainAxisAlignment
                                                                   .spaceBetween,
                                                           children: [
-                                                            // Container(
-                                                            //   width:
-                                                            //       MediaQuery.of(context)
-                                                            //               .size
-                                                            //               .width *
-                                                            //           23 /
-                                                            //           100,
-                                                            //   child: Padding(
-                                                            //     padding:
-                                                            //         const EdgeInsets
-                                                            //             .only(
-                                                            //             bottom: 2.0),
-                                                            //     child: Text(
-                                                            //       ongoingTripsList[
-                                                            //           index]['day'],
-                                                            //       textAlign:
-                                                            //           TextAlign.end,
-                                                            //       style: const TextStyle(
-                                                            //           fontSize: 10,
-                                                            //           fontWeight:
-                                                            //               FontWeight
-                                                            //                   .w400,
-                                                            //           color: AppColor
-                                                            //               .green,
-                                                            //           fontFamily: AppFont
-                                                            //               .fontFamily),
-                                                            //     ),
-                                                            //   ),
-                                                            // ),
+                                                           
                                                             Container(
                                                               width: MediaQuery.of(
                                                                           context)

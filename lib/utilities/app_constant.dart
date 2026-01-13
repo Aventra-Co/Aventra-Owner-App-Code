@@ -202,9 +202,6 @@ class NoInternetBanner extends StatelessWidget {
 
     return Column(
       children: [
-        // SizedBox(
-        //   height: MediaQuery.of(context).size.height * 1 / 100,
-        // ),
         Container(
           height: MediaQuery.of(context).size.height * 6 / 100,
           width: double.infinity,

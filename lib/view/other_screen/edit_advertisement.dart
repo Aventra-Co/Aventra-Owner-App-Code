@@ -167,12 +167,10 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   Future<void> getTripDetailsApi() async {
     Uri url = Uri.parse(
         "${AppConfigProvider.apiUrl}view_trip_details?trip_id=${widget.tripId}");
-    print("url $url");
 
     String token = AppConstant.token;
 
     if (token.isEmpty) {
-      print("Token is missing!");
       return;
     }
 
@@ -184,20 +182,16 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       isApiCalling = true;
     });
 
-    print("headers $headers");
 
     try {
       final response = await http.get(url, headers: headers);
-      print("response $response");
       if (response.statusCode == 200) {
         dynamic res = jsonDecode(response.body);
-        print("res $res");
 
         if (res['success'] == true) {
           var item = res['trip_arr'];
           tripDetails = (item != "NA") ? item[0] : {};
 
-          print("adfasdfafd$tripDetails");
 
           fillData();
           setState(() {
@@ -216,13 +210,11 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
           });
         }
       } else {
-        print("Error: ${response.statusCode}");
         setState(() {
           isApiCalling = false;
         });
       }
     } catch (e) {
-      print("Exception: $e");
       setState(() {
         isApiCalling = false;
       });
@@ -252,7 +244,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
         ? tripDetails["activity_ids"].split(',')
         : [];
 
-    print("selectedActivityList$selectedActivityList");
     pickUpTextEditingController.text = tripDetails["pickup_point"];
     maxNumberTextController.text = tripDetails["max_people"].toString();
     messageTextEditingController.text = tripDetails["description_english"];
@@ -284,8 +275,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       userId,
     );
     boatCapacity = tripDetails['boat_capacity'].toString().trim();
-    print("boatCapacity$boatCapacity");
-    print('tripDetails["activity"]${tripDetails["activity"]}');
     activityTextEditingController.text = language == 0
         ? tripDetails["activity"][0]['english'][0]
         : tripDetails["activity"][0]['arabic'][0];
@@ -293,14 +282,11 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
         ? tripDetails["activity"][0]['english']
         : tripDetails["activity"][0]['arabic'];
     getCitiesApi(userId);
-    print("selectedActivityList$selectedActivityList");
-    print("selectedActivityList${selectedActivityList[0].runtimeType}");
     setState(() {});
   }
 
   //---------------------SEARCH FUNCTION COUNTRY--------------------///
   searchResultCountry(String query) {
-    print(query);
 
     var results1 = nationsSearchList
         .where((value) => value['country_name'][language]
@@ -309,7 +295,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
             .contains(query.toLowerCase()))
         .toList();
 
-    print("results1 $results1");
 
     nationsList = [];
 
@@ -320,7 +305,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
 
   //---------------------SEARCH FUNCTION COUNTRY--------------------///
   searchResultCity(String query) {
-    print(query);
 
     var results1 = citySearchList
         .where((value) => value['city_name'][language]
@@ -329,7 +313,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
             .contains(query.toLowerCase()))
         .toList();
 
-    print("results1 $results1");
 
     cityList = [];
 
@@ -340,7 +323,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
 
   //---------------------SEARCH FUNCTION COUNTRY--------------------///
   searchResultDestination(String query) {
-    print(query);
 
     var results1 = searchDestinationList
         .where((value) => value['destination'][language]
@@ -349,7 +331,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
             .contains(query.toLowerCase()))
         .toList();
 
-    print("results1 $results1");
 
     destinationList = [];
 
@@ -360,7 +341,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
 
   //---------------------SEARCH FUNCTION COUNTRY--------------------///
   searchResultActivity(String query) {
-    print(query);
 
     var results1 = activitySearchList
         .where((value) => value['name_english'][language]
@@ -369,7 +349,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
             .contains(query.toLowerCase()))
         .toList();
 
-    print("results1 $results1");
 
     activityList = [];
 
@@ -409,7 +388,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
           }
         }
         if (imageListdata.length > 7) {
-          print("Line 760");
           boatImageList = imageListdata.sublist(0, 7);
 
           setState(() {});
@@ -496,7 +474,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
 
 // ------------------------------FROM GALLERY------------------------//
   Future<void> _coverImgFromGallery() async {
-    print("run");
     dynamic image = await ImagePicker().pickImage(
         source: ImageSource.gallery,
         // maxHeight: 450.0,
@@ -504,7 +481,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
         imageQuality: 50);
 
     if (image != null) {
-      print("image 243 $image");
       Future.delayed(const Duration(seconds: 0), () {
         setState(() {
           coverImage = image;
@@ -583,12 +559,10 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   Future<void> getCountriesApi(userId) async {
     Uri url = Uri.parse(
         "${AppConfigProvider.apiUrl}fetch_country_list?user_id=$userId");
-    print("url $url");
 
     String token = AppConstant.token;
 
     if (token.isEmpty) {
-      print("Token is missing!");
       return;
     }
 
@@ -600,15 +574,12 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       isApiCalling = true;
     });
 
-    print("headers $headers");
 
     try {
       final response = await http.get(url, headers: headers);
-      print("response $response");
 
       if (response.statusCode == 200) {
         dynamic res = jsonDecode(response.body);
-        print("res $res");
 
         if (res['success'] == true) {
           var item = res['country_arr'];
@@ -631,13 +602,11 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
           });
         }
       } else {
-        print("Error: ${response.statusCode}");
         setState(() {
           isApiCalling = false;
         });
       }
     } catch (e) {
-      print("Exception: $e");
       setState(() {
         isApiCalling = false;
       });
@@ -648,12 +617,10 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   Future<void> getActivityApi(userId) async {
     Uri url = Uri.parse(
         "${AppConfigProvider.apiUrl}get_all_trip_types?user_id=$userId");
-    print("url $url");
 
     String token = AppConstant.token;
 
     if (token.isEmpty) {
-      print("Token is missing!");
       return;
     }
 
@@ -665,15 +632,12 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       isApiCalling = true;
     });
 
-    print("headers $headers");
 
     try {
       final response = await http.get(url, headers: headers);
-      print("response $response");
 
       if (response.statusCode == 200) {
         dynamic res = jsonDecode(response.body);
-        print("res $res");
 
         if (res['success'] == true) {
           var item = res['tripTypes'];
@@ -696,13 +660,11 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
           });
         }
       } else {
-        print("Error: ${response.statusCode}");
         setState(() {
           isApiCalling = false;
         });
       }
     } catch (e) {
-      print("Exception: $e");
       setState(() {
         isApiCalling = false;
       });
@@ -713,12 +675,10 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   Future<void> getBoatApi(userId) async {
     Uri url = Uri.parse(
         "${AppConfigProvider.apiUrl}fetch_all_boats?owner_id=$userId");
-    print("url $url");
 
     String token = AppConstant.token;
 
     if (token.isEmpty) {
-      print("Token is missing!");
       return;
     }
 
@@ -730,30 +690,16 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       isApiCalling = true;
     });
 
-    print("headers $headers");
 
     try {
       final response = await http.get(url, headers: headers);
-      print("response $response");
 
       if (response.statusCode == 200) {
         dynamic res = jsonDecode(response.body);
-        print("res $res");
 
         if (res['success'] == true) {
           var item = res['boat_arr'];
           boatList = (item != "NA") ? item : [];
-          print("boatList $boatList");
-          // activitySearchList = (item != "NA") ? item : [];
-          // if (boatList.isNotEmpty) {
-          //   for (var boat in boatList) {
-          //     if (boat['boat_id'].toString() ==
-          //         tripDetails["boat_id"].toString()) {
-
-          //     }
-          //   }
-          // }
-          print("boatCapacity$boatCapacity");
           setState(() {
             isApiCalling = false;
           });
@@ -770,13 +716,11 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
           });
         }
       } else {
-        print("Error: ${response.statusCode}");
         setState(() {
           isApiCalling = false;
         });
       }
     } catch (e) {
-      print("Exception: $e");
       setState(() {
         isApiCalling = false;
       });
@@ -787,12 +731,10 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   Future<void> getCitiesApi(userId) async {
     Uri url = Uri.parse(
         "${AppConfigProvider.apiUrl}fetch_city_by_country?$userId=5&country_id=$isSelectedNationality");
-    print("url $url");
 
     String token = AppConstant.token;
 
     if (token.isEmpty) {
-      print("Token is missing!");
       return;
     }
 
@@ -804,15 +746,12 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       isApiCalling = true;
     });
 
-    print("headers $headers");
 
     try {
       final response = await http.get(url, headers: headers);
-      print("response $response");
 
       if (response.statusCode == 200) {
         dynamic res = jsonDecode(response.body);
-        print("res $res");
 
         if (res['success'] == true) {
           var item = res['city_arr'];
@@ -835,13 +774,11 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
           });
         }
       } else {
-        print("Error: ${response.statusCode}");
         setState(() {
           isApiCalling = false;
         });
       }
     } catch (e) {
-      print("Exception: $e");
       setState(() {
         isApiCalling = false;
       });
@@ -852,12 +789,10 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   Future<void> getDestinationApi(userId) async {
     Uri url = Uri.parse(
         "${AppConfigProvider.apiUrl}get_desctination?user_id=$userId");
-    print("url $url");
 
     String token = AppConstant.token;
 
     if (token.isEmpty) {
-      print("Token is missing!");
       return;
     }
 
@@ -869,15 +804,12 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       isApiCalling = true;
     });
 
-    print("headers $headers");
 
     try {
       final response = await http.get(url, headers: headers);
-      print("response $response");
 
       if (response.statusCode == 200) {
         dynamic res = jsonDecode(response.body);
-        print("res $res");
 
         if (res['success'] == true) {
           var item = res['destination_arr'];
@@ -900,319 +832,16 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
           });
         }
       } else {
-        print("Error: ${response.statusCode}");
         setState(() {
           isApiCalling = false;
         });
       }
     } catch (e) {
-      print("Exception: $e");
       setState(() {
         isApiCalling = false;
       });
     }
   }
-
-  //!=============add ad validation===========
-  // editAdvertisementValidation(
-  //     XFile? coverImage,
-  //     List<XFile> serverImageList,
-  //     String capNameEnglish,
-  //     String capNameArabic,
-  //     String number,
-  //     String gender,
-  //     String nationality,
-  //     String destination,
-  //     String activity,
-  //     String boat,
-  //     String pickUpPoint,
-  //     String city,
-  //     String numOfPeople,
-  //     String descEnglish,
-  //     String descArabic,
-  //     String couponCode,
-  //     String startDate,
-  //     String endDate,
-  //     String couponDiscount,
-  //     String discount) {
-  //   if (coverImage == null && showCoverImage.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.coverImageMsg[language]);
-  //     return;
-  //   } else if (boatImageList.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.imagesMsg[language]);
-  //   } else if (capNameEnglish.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.capNameEngMsg[language]);
-  //     return;
-  //   }
-  //   // else if (capNameArabic.isEmpty) {
-  //   //   SnackBarToastMessage.showSnackBar(
-  //   //       context, AppLanguage.capNameArabMsg[language]);
-  //   //   return;
-  //   // }
-  //   else if (number.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.captainNumberMessage[language]);
-  //     return;
-  //   } else if (number.length < 7) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.captainNumbervalidMessage[language]);
-  //     return;
-  //   } else if (gender.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.genderMsg[language]);
-  //     return;
-  //   } else if (nationality.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.nationalityMsg[language]);
-  //     return;
-  //   } else if (destination.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.selectDestinationMsg[language]);
-  //     return;
-  //   } else if (activity.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.activityMsg[language]);
-  //     return;
-  //   } else if (boat.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(context, AppLanguage.boatMsg[language]);
-  //     return;
-  //   } else if (pickUpPoint.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.pickupMsg[language]);
-  //     return;
-  //   } else if (city.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(context, AppLanguage.cityMsg[language]);
-  //     return;
-  //   } else if (numOfPeople.isEmpty) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.maxPeopleMsg[language]);
-  //     return;
-  //   } else if (int.parse(numOfPeople.trim()) <= 0) {
-  //     SnackBarToastMessage.showSnackBar(
-  //         context, AppLanguage.minPeopleMsg[language]);
-  //     return;
-  //   } else if (int.parse(numOfPeople.trim()) > int.parse(boatCapacity)) {
-  //     SnackBarToastMessage.showSnackBar(context,
-  //         "${AppLanguage.maxPeopleExceededMsg[language]}$boatCapacity");
-  //     return;
-  //   }
-  //   //  else if (descEnglish.isEmpty) {
-  //   //   SnackBarToastMessage.showSnackBar(
-  //   //       context, AppLanguage.descEngMsg[language]);
-  //   //   return;
-  //   // } else if (descArabic.isEmpty) {
-  //   //   SnackBarToastMessage.showSnackBar(
-  //   //       context, AppLanguage.descArabMsg[language]);
-  //   //   return;
-  //   // }
-  //   else if (couponCode.isNotEmpty) {
-  //     if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(couponCode)) {
-  //       SnackBarToastMessage.showSnackBar(
-  //           context, AppLanguage.couponCodeValidMsg[language]);
-  //       return;
-  //     } else if (couponCode.length != 8) {
-  //       SnackBarToastMessage.showSnackBar(
-  //           context, AppLanguage.couponCodeLengthMsg[language]);
-  //       return;
-  //     } else if (!isCouponExist) {
-  //       SnackBarToastMessage.showSnackBar(
-  //           context, AppLanguage.couponAlreadyExistMsg[language]);
-  //       return;
-  //     } else if (startDate.isEmpty) {
-  //       SnackBarToastMessage.showSnackBar(
-  //           context, AppLanguage.selectStartDateMsg[language]);
-  //       return;
-  //     } else if (endDate.isEmpty) {
-  //       SnackBarToastMessage.showSnackBar(
-  //           context, AppLanguage.selectEndDateMsg[language]);
-  //       return;
-  //     } else if (couponDiscount.isEmpty) {
-  //       SnackBarToastMessage.showSnackBar(
-  //           context, AppLanguage.couponDiscountMsg[language]);
-  //       return;
-  //     } else if (couponDiscount == "0" || couponDiscount == "0.0") {
-  //       SnackBarToastMessage.showSnackBar(
-  //           context, AppLanguage.couponDiscountGreaterMsg[language]);
-  //       return;
-  //     } else if (int.parse(couponDiscount) >= 100) {
-  //       SnackBarToastMessage.showSnackBar(
-  //           context, AppLanguage.couponDiscountLessMsg[language]);
-  //       return;
-  //     } else if (discount.isNotEmpty) {
-  //       if (discount == "0" || discount == "0.0") {
-  //         SnackBarToastMessage.showSnackBar(
-  //             context, AppLanguage.discountGreaterMsg[language]);
-  //         return;
-  //       } else if (int.parse(discount) >= 100) {
-  //         SnackBarToastMessage.showSnackBar(
-  //             context, AppLanguage.discountLesserMsg[language]);
-  //         return;
-  //       } else {
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => EditAdvertisementSecondScreen(
-  //               boatImageList: boatImageList,
-  //               tripId: tripDetails['trip_id'].toString(),
-  //               deleteIds: deleteId.join(','),
-  //               coverImage: coverImage,
-  //               serverImageList: serverImageList,
-  //               capNameEng: capNameEnglish,
-  //               capNameArab: capNameArabic,
-  //               number: number,
-  //               genderId: selectedGender.toString(),
-  //               nationalityId: isSelectedNationality.toString(),
-  //               destinationId: isSelectedDestination.toString(),
-  //               activityId: selectedActivityList.join(", "),
-  //               boatId: isSelectedBoat.toString(),
-  //               pickup: pickUpPoint,
-  //               lat: latitudex.toString(),
-  //               long: longtitudex.toString(),
-  //               cityId: isSelectedCity.toString(),
-  //               members: numOfPeople,
-  //               descEng: descEnglish,
-  //               descArab: descArabic,
-  //               isPrivate: isToggle.toString(),
-  //               tripDetails: tripDetails,
-  //               couponDiscount: couponDiscount,
-  //               discount: discount,
-  //               couponCode: couponCode,
-  //               startDate: sendStartDate,
-  //               endDate: sendEndDate,
-  //             ),
-  //           ),
-  //         );
-  //       }
-  //       // SnackBarToastMessage.showSnackBar(
-  //       //     context, AppLanguage.discountMsg[language]);
-  //     } else {
-  //       Navigator.push(
-  //         context,
-  //         MaterialPageRoute(
-  //           builder: (context) => EditAdvertisementSecondScreen(
-  //             boatImageList: boatImageList,
-  //             tripId: tripDetails['trip_id'].toString(),
-  //             deleteIds: deleteId.join(','),
-  //             coverImage: coverImage,
-  //             serverImageList: serverImageList,
-  //             capNameEng: capNameEnglish,
-  //             capNameArab: capNameArabic,
-  //             number: number,
-  //             genderId: selectedGender.toString(),
-  //             nationalityId: isSelectedNationality.toString(),
-  //             destinationId: isSelectedDestination.toString(),
-  //             activityId: selectedActivityList.join(", "),
-  //             boatId: isSelectedBoat.toString(),
-  //             pickup: pickUpPoint,
-  //             lat: latitudex.toString(),
-  //             long: longtitudex.toString(),
-  //             cityId: isSelectedCity.toString(),
-  //             members: numOfPeople,
-  //             descEng: descEnglish,
-  //             descArab: descArabic,
-  //             isPrivate: isToggle.toString(),
-  //             tripDetails: tripDetails,
-  //             couponDiscount: couponDiscount,
-  //             discount: discount,
-  //             couponCode: couponCode,
-  //             startDate: sendStartDate,
-  //             endDate: sendEndDate,
-  //           ),
-  //         ),
-  //       );
-  //     }
-  //   } else if (discount.isNotEmpty) {
-  //     if (discount == "0" || discount == "0.0") {
-  //       SnackBarToastMessage.showSnackBar(
-  //           context, AppLanguage.discountGreaterMsg[language]);
-  //       return;
-  //     } else if (int.parse(discount) >= 100) {
-  //       SnackBarToastMessage.showSnackBar(
-  //           context, AppLanguage.discountLesserMsg[language]);
-  //       return;
-  //     } else {
-  //       Navigator.push(
-  //         context,
-  //         MaterialPageRoute(
-  //           builder: (context) => EditAdvertisementSecondScreen(
-  //             boatImageList: boatImageList,
-  //             tripId: tripDetails['trip_id'].toString(),
-  //             deleteIds: deleteId.join(','),
-  //             coverImage: coverImage,
-  //             serverImageList: serverImageList,
-  //             capNameEng: capNameEnglish,
-  //             capNameArab: capNameArabic,
-  //             number: number,
-  //             genderId: selectedGender.toString(),
-  //             nationalityId: isSelectedNationality.toString(),
-  //             destinationId: isSelectedDestination.toString(),
-  //             activityId: selectedActivityList.join(", "),
-  //             boatId: isSelectedBoat.toString(),
-  //             pickup: pickUpPoint,
-  //             lat: latitudex.toString(),
-  //             long: longtitudex.toString(),
-  //             cityId: isSelectedCity.toString(),
-  //             members: numOfPeople,
-  //             descEng: descEnglish,
-  //             descArab: descArabic,
-  //             isPrivate: isToggle.toString(),
-  //             tripDetails: tripDetails,
-  //             couponDiscount: couponDiscount,
-  //             discount: discount,
-  //             couponCode: couponCode,
-  //             startDate: sendStartDate,
-  //             endDate: sendEndDate,
-  //           ),
-  //         ),
-  //       );
-  //     }
-  //     // SnackBarToastMessage.showSnackBar(
-  //     //     context, AppLanguage.discountMsg[language]);
-  //   }
-  //   // else if (couponDiscount.isEmpty) {
-  //   //   SnackBarToastMessage.showSnackBar(
-  //   //       context, AppLanguage.couponDiscountMsg[language]);
-  //   // }
-  //   else {
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(
-  //         builder: (context) => EditAdvertisementSecondScreen(
-  //           boatImageList: boatImageList,
-  //           tripId: tripDetails['trip_id'].toString(),
-  //           deleteIds: deleteId.join(','),
-  //           coverImage: coverImage,
-  //           serverImageList: serverImageList,
-  //           capNameEng: capNameEnglish,
-  //           capNameArab: capNameArabic,
-  //           number: number,
-  //           genderId: selectedGender.toString(),
-  //           nationalityId: isSelectedNationality.toString(),
-  //           destinationId: isSelectedDestination.toString(),
-  //           activityId: selectedActivityList.join(", "),
-  //           boatId: isSelectedBoat.toString(),
-  //           pickup: pickUpPoint,
-  //           lat: latitudex.toString(),
-  //           long: longtitudex.toString(),
-  //           cityId: isSelectedCity.toString(),
-  //           members: numOfPeople,
-  //           descEng: descEnglish,
-  //           descArab: descArabic,
-  //           isPrivate: isToggle.toString(),
-  //           tripDetails: tripDetails,
-  //           couponDiscount: couponDiscount,
-  //           discount: discount,
-  //           couponCode: couponCode,
-  //           startDate: sendStartDate,
-  //           endDate: sendEndDate,
-  //         ),
-  //       ),
-  //     );
-  //   }
-  // }
 
 // Simplified validation method
   void editAdvertisementValidation(
@@ -1490,15 +1119,12 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
 
   // =====================remove==============//
   removeItemFromList(index) {
-    print("index $index");
     List itemListdemo = boatImageList;
     List deleteData = deleteId;
     if (boatImageList[index]['trip_image_id'] != 0) {
       deleteData.add(boatImageList[index]['trip_image_id']);
     }
 
-    print(deleteData);
-    print(itemListdemo);
 
     List itemList1 = [];
     if (itemListdemo.isNotEmpty) {
@@ -1604,14 +1230,12 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   Future<void> validateCouponApiCall(userId, couponCode) async {
     Uri url = Uri.parse(
         "${AppConfigProvider.apiUrl}check_coupon_exist?user_id=$userId?&coupon_code=$couponCode");
-    print("url $url");
     setState(() {
       isApiCalling = true;
     });
     String token = AppConstant.token;
 
     if (token.isEmpty) {
-      print("Token is missing!");
       // return;
     }
 
@@ -1619,11 +1243,9 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
 
     try {
       final response = await http.get(url, headers: headers);
-      print("response $response");
 
       if (response.statusCode == 200) {
         dynamic res = jsonDecode(response.body);
-        print("res $res");
 
         if (res['success'] == true) {
           isCouponExist = res['exist_status'];
@@ -2091,69 +1713,7 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                               height:
                                   MediaQuery.of(context).size.height * 2 / 100),
 
-                          //!==============language==========
-                          // Container(
-                          //   width: MediaQuery.of(context).size.width * 90 / 100,
-                          //   child: Text(
-                          //     AppLanguage.languageText[language],
-                          //     style: const TextStyle(
-                          //         fontFamily: AppFont.fontFamily,
-                          //         fontSize: 22,
-                          //         fontWeight: FontWeight.w600,
-                          //         color: AppColor.primaryColor),
-                          //   ),
-                          // ),
-                          // //select lang
-                          // SizedBox(
-                          //   width: MediaQuery.of(context).size.width * 90 / 100,
-                          //   height: MediaQuery.of(context).size.height * 5.5 / 100,
-                          //   child: TextFormField(
-                          //     readOnly: true,
-                          //     style: const TextStyle(
-                          //         height: 1.1,
-                          //         color: AppColor.textColor,
-                          //         fontSize: 16,
-                          //         fontWeight: FontWeight.w400),
-                          //     textAlignVertical: TextAlignVertical.center,
-                          //     controller: languageTextEditingController,
-                          //     onTap: () {
-                          //       dropDownModelForLanguage(context, screenWidth);
-                          //     },
-                          //     decoration: InputDecoration(
-                          //         border: const UnderlineInputBorder(
-                          //           // Use UnderlineInputBorder
-                          //           borderSide:
-                          //               BorderSide(color: AppColor.boaderColor),
-                          //         ),
-                          //         enabledBorder: const UnderlineInputBorder(
-                          //           borderSide:
-                          //               BorderSide(color: AppColor.boaderColor),
-                          //         ),
-                          //         focusedBorder: const UnderlineInputBorder(
-                          //           borderSide: BorderSide(
-                          //               color: AppColor.themeColor, width: 1),
-                          //         ),
-                          //         contentPadding:
-                          //             const EdgeInsets.symmetric(vertical: 10),
-                          //         fillColor: Colors.transparent,
-                          //         filled: true,
-                          //         counterText: '',
-                          //         hintText: AppLanguage.selectLanguageText[language],
-                          //         hintStyle: const TextStyle(
-                          //             color: AppColor.textColor,
-                          //             fontWeight: FontWeight.w400,
-                          //             fontSize: 16),
-                          //         suffix: Container(
-                          //           width:
-                          //               MediaQuery.of(context).size.width * 4 / 100,
-                          //           height:
-                          //               MediaQuery.of(context).size.height * 2 / 100,
-                          //           child: Image.asset(AppImage.dropDownIcon),
-                          //         )),
-                          //   ),
-                          // ),
-                          // SizedBox(
-                          //     height: MediaQuery.of(context).size.height * 2 / 100),
+                       
 
                           //!==============advertisement type==========
                           SizedBox(
@@ -2975,14 +2535,7 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                               textAlignVertical: TextAlignVertical.center,
                               controller: cityTextEditingController,
                               onTap: () {
-                                // String text =
-                                //     nationalityTextEditingController.text;
-                                // if (text.isEmpty) {
-                                //   SnackBarToastMessage.showSnackBar(context,
-                                //       AppLanguage.nationalityMsg[language]);
-                                // } else {
-                                //   dropDownModelForCity(context, screenWidth);
-                                // }
+                    
                                 dropDownModelForCity(context, screenWidth);
                               },
                               decoration: InputDecoration(
@@ -3710,9 +3263,7 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                     ),
                     child: Column(
                       children: [
-                        // SizedBox(
-                        //   height: MediaQuery.of(context).size.height * 4 / 100,
-                        // ),
+                  
 
                         AppHeaderOrange(
                             text: AppLanguage.nationalityText[language],
@@ -4133,8 +3684,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                                   }
                                                   activityTextEditingController
                                                       .clear();
-                                                  print(
-                                                      "selectedActivityList$selectedActivityList and selectedActivityNameList$selectedActivityNameList");
                                                   activityTextEditingController
                                                           .text =
                                                       selectedActivityNameList
@@ -4905,9 +4454,7 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                     ),
                     child: Column(
                       children: [
-                        // SizedBox(
-                        //   height: MediaQuery.of(context).size.height * 4 / 100,
-                        // ),
+                 
                         //image header
                         Container(
                           width: MediaQuery.of(context).size.width * 100 / 100,
@@ -5201,7 +4748,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   }
 
   void alertBoxsearch(BuildContext context) {
-    print("Opening bottom sheet...");
 
     showModalBottomSheet<void>(
       context: context,
@@ -5486,7 +5032,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                     AppButton(
                                       text: AppLanguage.continueText[language],
                                       onPress: () {
-                                        print(searchController.text);
                                         if (searchController.text.isEmpty) {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
@@ -5553,7 +5098,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
         });
       }
     } catch (e) {
-      print("Error: $e");
     }
   }
 
@@ -5575,7 +5119,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
         _getAddressFromLatLng(position);
       }
     }).catchError((e) {
-      print("Line 71");
       debugPrint(e);
     });
   }
@@ -5616,7 +5159,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
     await placemarkFromCoordinates(position.latitude, position.longitude)
         .then((List<Placemark> placemarks) {
       Placemark place = placemarks[0];
-      print("Line 95${position.latitude}");
 
       final addressText =
           '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
@@ -5649,9 +5191,7 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
             CameraPosition(target: initialPosition, zoom: 16.0)));
       }
 
-      print("Line 95${mapshow}");
     }).catchError((e) {
-      print("Line 95");
       debugPrint(e);
     });
   }
@@ -5673,7 +5213,6 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       pickUpTextEditingController.text = searchController.text;
       lat = latitudex;
       long = longtitudex;
-      print("latlong: $lat $long");
     });
     Navigator.pop(context);
   }
@@ -5685,395 +5224,3 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   }
 }
 
-
-  // void dropDownModelForGender(BuildContext context) {
-  //   showModalBottomSheet<void>(
-  //     isScrollControlled: true,
-  //     isDismissible: true,
-  //     context: context,
-  //     backgroundColor: Colors.transparent,
-  //     builder: (BuildContext context) {
-  //       return StatefulBuilder(
-  //         builder: (context, setState) {
-  //           return GestureDetector(
-  //             onTap: () => Navigator.pop(context),
-  //             child: Padding(
-  //               padding: MediaQuery.of(context).viewInsets,
-  //               child: GestureDetector(
-  //                 onTap: () {
-  //                   Navigator.pop(context);
-  //                 },
-  //                 child: Container(
-  //                   alignment: Alignment.center,
-  //                   width: MediaQuery.of(context).size.width,
-  //                   height: MediaQuery.of(context).size.height,
-  //                   child: Container(
-  //                     width: MediaQuery.of(context).size.width * 80 / 100,
-  //                     height: MediaQuery.of(context).size.height * 19 / 100,
-  //                     decoration: BoxDecoration(
-  //                       color: AppColor.secondaryColor,
-  //                       borderRadius: BorderRadius.circular(10),
-  //                     ),
-  //                     child: Column(
-  //                       children: [
-  //                         SizedBox(
-  //                           height:
-  //                               MediaQuery.of(context).size.height * 1 / 100,
-  //                         ),
-  //                         // List
-  //                         Flexible(
-  //                           child: ListView.builder(
-  //                             itemCount: genderList.length,
-  //                             itemBuilder: (context, index) {
-  //                               return Column(
-  //                                 children: [
-  //                                   SizedBox(
-  //                                     height:
-  //                                         MediaQuery.of(context).size.height *
-  //                                             2 /
-  //                                             100,
-  //                                   ),
-  //                                   GestureDetector(
-  //                                     onTap: () {
-  //                                       setState(() {
-  //                                         genderTextEditingController.text =
-  //                                             genderList[index];
-  //                                         isSelectedGender = genderList[index];
-  //                                         Navigator.pop(context);
-  //                                       });
-  //                                     },
-  //                                     child: Container(
-  //                                       width:
-  //                                           MediaQuery.of(context).size.width *
-  //                                               70 /
-  //                                               100,
-  //                                       color: AppColor.secondaryColor,
-  //                                       child: Row(
-  //                                         mainAxisAlignment:
-  //                                             MainAxisAlignment.spaceBetween,
-  //                                         children: [
-  //                                           Text(
-  //                                             genderList[index],
-  //                                             style: const TextStyle(
-  //                                               fontFamily: AppFont.fontFamily,
-  //                                               fontSize: 17,
-  //                                               color: AppColor.primaryColor,
-  //                                               fontWeight: FontWeight.w600,
-  //                                             ),
-  //                                           ),
-  //                                           Container(
-  //                                             width: MediaQuery.of(context)
-  //                                                     .size
-  //                                                     .width *
-  //                                                 5 /
-  //                                                 100,
-  //                                             height: MediaQuery.of(context)
-  //                                                     .size
-  //                                                     .width *
-  //                                                 5 /
-  //                                                 100,
-  //                                             child: isSelectedGender ==
-  //                                                     genderList[index]
-  //                                                 ? Image.asset(
-  //                                                     AppImage.tickOrangeIcon,
-  //                                                     fit: BoxFit.fill,
-  //                                                   )
-  //                                                 : null,
-  //                                           ),
-  //                                         ],
-  //                                       ),
-  //                                     ),
-  //                                   ),
-  //                                 ],
-  //                               );
-  //                             },
-  //                           ),
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
-
-  // void dropDownModelForLanguage(BuildContext context, screenWidth) {
-  //   showModalBottomSheet<void>(
-  //     constraints: BoxConstraints.expand(width: screenWidth),
-  //     isScrollControlled: true,
-  //     isDismissible: true,
-  //     context: context,
-  //     backgroundColor: AppColor.secondaryColor,
-  //     builder: (BuildContext context) {
-  //       return StatefulBuilder(
-  //         builder: (context, setState) {
-  //           return GestureDetector(
-  //             onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-  //             child: Padding(
-  //               padding: MediaQuery.of(context).viewInsets,
-  //               child: Container(
-  //                 width: MediaQuery.of(context).size.width,
-  //                 height: MediaQuery.of(context).size.height,
-  //                 decoration: BoxDecoration(
-  //                   color: AppColor.secondaryColor,
-  //                   borderRadius: BorderRadius.circular(10),
-  //                 ),
-  //                 child: Stack(
-  //                   children: [
-  //                     Column(
-  //                       children: [
-  //                         Expanded(
-  //                           flex: 1,
-  //                           child: SingleChildScrollView(
-  //                             physics: const NeverScrollableScrollPhysics(),
-  //                             child: Column(
-  //                               children: [
-  //                                 SizedBox(
-  //                                   height: MediaQuery.of(context).size.height *
-  //                                       4 /
-  //                                       100,
-  //                                 ),
-  //                                 //image header
-  //                                 Container(
-  //                                   width: MediaQuery.of(context).size.width *
-  //                                       100 /
-  //                                       100,
-  //                                   height: screenWidth > 600
-  //                                       ? null
-  //                                       : MediaQuery.of(context).size.height *
-  //                                           20 /
-  //                                           100,
-  //                                   decoration: const BoxDecoration(
-  //                                       image: DecorationImage(
-  //                                           image: AssetImage(
-  //                                               AppImage.headerBgImage),
-  //                                           fit: BoxFit.cover),
-  //                                       // color: AppColor.themeColor,
-  //                                       borderRadius: BorderRadius.only(
-  //                                           bottomLeft: Radius.circular(50),
-  //                                           bottomRight: Radius.circular(50))),
-  //                                   child: Column(
-  //                                     children: [
-  //                                       SizedBox(
-  //                                         height:
-  //                                             AppConstant.deviceType == "ios"
-  //                                                 ? MediaQuery.of(context)
-  //                                                         .size
-  //                                                         .height *
-  //                                                     6 /
-  //                                                     100
-  //                                                 : MediaQuery.of(context)
-  //                                                         .size
-  //                                                         .height *
-  //                                                     4 /
-  //                                                     100,
-  //                                       ),
-  //                                       //change lang
-  //                                       Container(
-  //                                         width: MediaQuery.of(context)
-  //                                                 .size
-  //                                                 .width *
-  //                                             100 /
-  //                                             100,
-  //                                         alignment: Alignment.center,
-  //                                         child: Row(
-  //                                           children: [
-  //                                             //edit
-  //                                             GestureDetector(
-  //                                               onTap: () {
-  //                                                 Navigator.pop(context);
-  //                                               },
-  //                                               child: Container(
-  //                                                 color: Colors.transparent,
-  //                                                 alignment: Alignment.center,
-  //                                                 width: MediaQuery.of(context)
-  //                                                         .size
-  //                                                         .width *
-  //                                                     15 /
-  //                                                     100,
-  //                                                 height: MediaQuery.of(context)
-  //                                                         .size
-  //                                                         .width *
-  //                                                     7 /
-  //                                                     100,
-  //                                                 child: Image.asset(
-  //                                                     AppImage.backIcon),
-  //                                               ),
-  //                                             ),
-  //                                             //profile
-  //                                             Container(
-  //                                               alignment: Alignment.center,
-  //                                               width: MediaQuery.of(context)
-  //                                                       .size
-  //                                                       .width *
-  //                                                   70 /
-  //                                                   100,
-  //                                               child: Text(
-  //                                                 AppLanguage
-  //                                                         .changeLanguageText[
-  //                                                     language],
-  //                                                 style: const TextStyle(
-  //                                                     color: AppColor
-  //                                                         .secondaryColor,
-  //                                                     fontSize: 20,
-  //                                                     fontWeight:
-  //                                                         FontWeight.w600,
-  //                                                     fontFamily:
-  //                                                         AppFont.fontFamily),
-  //                                               ),
-  //                                             ),
-  //                                             Container(
-  //                                               alignment:
-  //                                                   Alignment.centerRight,
-  //                                               width: MediaQuery.of(context)
-  //                                                       .size
-  //                                                       .width *
-  //                                                   15 /
-  //                                                   100,
-  //                                               height: MediaQuery.of(context)
-  //                                                       .size
-  //                                                       .width *
-  //                                                   7 /
-  //                                                   100,
-  //                                             ),
-  //                                           ],
-  //                                         ),
-  //                                       ),
-  //                                       SizedBox(
-  //                                         height: MediaQuery.of(context)
-  //                                                 .size
-  //                                                 .height *
-  //                                             10 /
-  //                                             100,
-  //                                       ),
-  //                                     ],
-  //                                   ),
-  //                                 ),
-  //                                 SizedBox(
-  //                                   height: MediaQuery.of(context).size.height *
-  //                                       2 /
-  //                                       100,
-  //                                 ),
-  //                                 //language list
-  //                                 Wrap(
-  //                                   children: [
-  //                                     ...List.generate(languageList.length,
-  //                                         (index) {
-  //                                       return Column(
-  //                                         crossAxisAlignment:
-  //                                             CrossAxisAlignment.center,
-  //                                         children: [
-  //                                           GestureDetector(
-  //                                             onTap: () {
-  //                                               setState(() {
-  //                                                 selectedLanguage =
-  //                                                     languageList[index]['id'];
-  //                                                 languageTextEditingController
-  //                                                         .text =
-  //                                                     languageList[index]
-  //                                                         ['title'];
-  //                                               });
-  //                                             },
-  //                                             child: Container(
-  //                                               width: MediaQuery.of(context)
-  //                                                       .size
-  //                                                       .width *
-  //                                                   90 /
-  //                                                   100,
-  //                                               decoration: BoxDecoration(
-  //                                                   color: selectedLanguage ==
-  //                                                           languageList[index]
-  //                                                               ['id']
-  //                                                       ? AppColor.themeColor
-  //                                                       : AppColor
-  //                                                           .secondaryColor,
-  //                                                   borderRadius:
-  //                                                       BorderRadius.circular(
-  //                                                           10),
-  //                                                   border: Border.all(
-  //                                                       width: 1,
-  //                                                       color: AppColor
-  //                                                           .boaderColor)),
-  //                                               child: Container(
-  //                                                 width: MediaQuery.of(context)
-  //                                                         .size
-  //                                                         .width *
-  //                                                     80 /
-  //                                                     100,
-  //                                                 child: Padding(
-  //                                                   padding: const EdgeInsets
-  //                                                       .symmetric(
-  //                                                       vertical: 10.0,
-  //                                                       horizontal: 18),
-  //                                                   child: Text(
-  //                                                     languageList[index]
-  //                                                         ['title'],
-  //                                                     style: TextStyle(
-  //                                                         color: selectedLanguage ==
-  //                                                                 languageList[
-  //                                                                         index]
-  //                                                                     ['id']
-  //                                                             ? AppColor
-  //                                                                 .secondaryColor
-  //                                                             : AppColor
-  //                                                                 .primaryColor,
-  //                                                         fontSize: 20,
-  //                                                         fontWeight:
-  //                                                             FontWeight.w400,
-  //                                                         fontFamily: AppFont
-  //                                                             .fontFamily),
-  //                                                   ),
-  //                                                 ),
-  //                                               ),
-  //                                             ),
-  //                                           ),
-  //                                           SizedBox(
-  //                                             height: MediaQuery.of(context)
-  //                                                     .size
-  //                                                     .height *
-  //                                                 2 /
-  //                                                 100,
-  //                                           ),
-  //                                         ],
-  //                                       );
-  //                                     }),
-  //                                   ],
-  //                                 ),
-  //                               ],
-  //                             ),
-  //                           ),
-  //                         )
-  //                       ],
-  //                     ),
-  //                     Positioned(
-  //                       bottom: MediaQuery.of(context).size.height * 6 / 100,
-  //                       child: Column(
-  //                         children: [
-  //                           Container(
-  //                             alignment: Alignment.center,
-  //                             width:
-  //                                 MediaQuery.of(context).size.width * 100 / 100,
-  //                             child: AppButton(
-  //                                 text: AppLanguage.doneText[language],
-  //                                 onPress: () {
-  //                                   Navigator.pop(context);
-  //                                 }),
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     )
-  //                   ],
-  //                 ),
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //       );
-  //     },
-  //   );
-  // }

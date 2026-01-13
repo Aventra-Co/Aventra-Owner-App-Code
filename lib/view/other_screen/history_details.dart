@@ -59,11 +59,7 @@ class _HistoryDetails extends State<HistoryDetails> {
 
     // print("userDetails $userDetails");
     if (data == null) {
-      // print("worked");
-      // SnackBarToastMessage.showSnackBar(
-      //     context, AppLanguage.notRegisteredMsg[language]);
-      // Navigator.push(
-      //     context, MaterialPageRoute(builder: (context) => const Login()));
+
     } else {
       userDataArr = jsonDecode(data);
       userId = userDataArr['user_id'] ?? 0;
@@ -179,16 +175,7 @@ class _HistoryDetails extends State<HistoryDetails> {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
-          // appBar: PreferredSize(
-          //     preferredSize: const Size.fromHeight(-30),
-          //     child: AppBar(
-          //         // backgroundColor: AppColor.themeColor,
-          //         systemOverlayStyle: const SystemUiOverlayStyle(
-          //       // systemNavigationBarColor: AppColor.secondaryColor,
-          //       // systemNavigationBarIconBrightness: Brightness.dark,
-          //       // statusBarColor: AppColor.secondaryColor,
-          //       statusBarIconBrightness: Brightness.dark,
-          //     ))),
+
           body: Directionality(
         textDirection:
             language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
@@ -236,31 +223,7 @@ class _HistoryDetails extends State<HistoryDetails> {
                                       color: AppColor.primaryColor),
                                 ),
                               ),
-                              // GestureDetector(
-                              //   onTap: () {},
-                              //   child: Container(
-                              //     alignment: Alignment.center,
-                              //     width: MediaQuery.of(context).size.width *
-                              //         25 /
-                              //         100,
-                              //     decoration: BoxDecoration(
-                              //         color: AppColor.themeColor,
-                              //         borderRadius: BorderRadius.circular(10)),
-                              //     child: Padding(
-                              //       padding: const EdgeInsets.symmetric(
-                              //           vertical: 8.0),
-                              //       child: Text(
-                              //         AppLanguage.addToCalenderText[language],
-                              //         textAlign: TextAlign.center,
-                              //         style: const TextStyle(
-                              //             fontSize: 15,
-                              //             fontWeight: FontWeight.w500,
-                              //             color: AppColor.secondaryColor,
-                              //             fontFamily: AppFont.fontFamily),
-                              //       ),
-                              //     ),
-                              //   ),
-                              // ),
+              
                             ],
                           ),
                         ),
@@ -446,22 +409,7 @@ class _HistoryDetails extends State<HistoryDetails> {
                                           2 /
                                           100),
 
-                                  //image
-                                  // Container(
-                                  //   width: MediaQuery.of(context).size.width *
-                                  //       20 /
-                                  //       100,
-                                  //   height: MediaQuery.of(context).size.height *
-                                  //       10 /
-                                  //       100,
-                                  //   child: ClipRRect(
-                                  //     borderRadius: BorderRadius.circular(10),
-                                  //     child: Image.asset(
-                                  //       AppImage.boatImage,
-                                  //       fit: BoxFit.cover,
-                                  //     ),
-                                  //   ),
-                                  // ),
+                    
                                 ],
                               ),
                             ),
@@ -1063,37 +1011,7 @@ class _HistoryDetails extends State<HistoryDetails> {
                                                             ),
                                                           ),
                                                         ),
-                                                        // GestureDetector(
-                                                        //   onTap: () {
-                                                        //     deleteSubAddOn(
-                                                        //         selectedAddons[
-                                                        //                 index][
-                                                        //             'addon_id'],
-                                                        //         selectedAddons[index]
-                                                        //                     [
-                                                        //                     'subAddons']
-                                                        //                 [subIndex]
-                                                        //             [
-                                                        //             'subAddOnId']);
-                                                        //   },
-                                                        //   child: Container(
-                                                        //     width: MediaQuery.of(
-                                                        //                 context)
-                                                        //             .size
-                                                        //             .width *
-                                                        //         5 /
-                                                        //         100,
-                                                        //     height: MediaQuery.of(
-                                                        //                 context)
-                                                        //             .size
-                                                        //             .width *
-                                                        //         5 /
-                                                        //         100,
-                                                        //     child: Image.asset(
-                                                        //         AppImage
-                                                        //             .deleteAccountIcon),
-                                                        //   ),
-                                                        // )
+                                                  
                                                       ],
                                                     )
                                                   ],
@@ -1346,66 +1264,7 @@ class _HistoryDetails extends State<HistoryDetails> {
                                       2 /
                                       100),
 
-                              // Container(
-                              //   width: MediaQuery.of(context).size.width *
-                              //       85 /
-                              //       100,
-                              //   child: const Text(
-                              //     "-------------------------------------------------------------------------------------------",
-                              //     maxLines: 1,
-                              //     style: TextStyle(
-                              //         fontFamily: AppFont.fontFamily,
-                              //         fontSize: 12,
-                              //         fontWeight: FontWeight.w400,
-                              //         color: AppColor.boaderColor),
-                              //   ),
-                              // ),
-                              // SizedBox(
-                              //     height: MediaQuery.of(context).size.height *
-                              //         1 /
-                              //         100),
-                              // Container(
-                              //   width: MediaQuery.of(context).size.width *
-                              //       85 /
-                              //       100,
-                              //   child: Row(
-                              //     children: [
-                              //       Container(
-                              //         width: MediaQuery.of(context).size.width *
-                              //             42 /
-                              //             100,
-                              //         child: Text(
-                              //           AppLanguage.captainFeesText[language],
-                              //           style: const TextStyle(
-                              //               fontFamily: AppFont.fontFamily,
-                              //               fontSize: 16,
-                              //               fontWeight: FontWeight.w500,
-                              //               color: AppColor.textColor),
-                              //         ),
-                              //       ),
-                              //       Container(
-                              //         width: MediaQuery.of(context).size.width *
-                              //             42 /
-                              //             100,
-                              //         alignment: language == 1
-                              //             ? Alignment.centerLeft
-                              //             : Alignment.centerRight,
-                              //         child: const Text(
-                              //           "10 KWD",
-                              //           style: TextStyle(
-                              //               fontFamily: AppFont.fontFamily,
-                              //               fontSize: 16,
-                              //               fontWeight: FontWeight.w600,
-                              //               color: AppColor.primaryColor),
-                              //         ),
-                              //       ),
-                              //     ],
-                              //   ),
-                              // ),
-                              // SizedBox(
-                              //     height: MediaQuery.of(context).size.height *
-                              //         2 /
-                              //         100),
+                           
 
                               Container(
                                 width: MediaQuery.of(context).size.width *
@@ -1510,119 +1369,7 @@ class _HistoryDetails extends State<HistoryDetails> {
                             height:
                                 MediaQuery.of(context).size.height * 3 / 100),
 
-                        //cancel booking
-                        // GestureDetector(
-                        //   onTap: () {
-                        //     Navigator.push(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //         builder: (context) => const CancelBooking(),
-                        //       ),
-                        //     );
-                        //   },
-                        //   child: Container(
-                        //     width: MediaQuery.of(context).size.width * 85 / 100,
-                        //     child: Row(
-                        //       children: [
-                        //         Text(
-                        //           AppLanguage.cancelBookingText[language],
-                        //           style: const TextStyle(
-                        //               fontFamily: AppFont.fontFamily,
-                        //               fontSize: 14,
-                        //               fontWeight: FontWeight.w500,
-                        //               color: AppColor.primaryColor),
-                        //         ),
-                        //         SizedBox(
-                        //           width: MediaQuery.of(context).size.width *
-                        //               1 /
-                        //               100,
-                        //         ),
-                        //         Container(
-                        //           width: MediaQuery.of(context).size.width *
-                        //               4 /
-                        //               100,
-                        //           height: MediaQuery.of(context).size.height *
-                        //               2 /
-                        //               100,
-                        //           child: ClipRRect(
-                        //             borderRadius: BorderRadius.circular(100),
-                        //             child: Image.asset(
-                        //               AppImage.infoIcon,
-                        //               fit: BoxFit.cover,
-                        //             ),
-                        //           ),
-                        //         ),
-                        //         const Spacer(),
-                        //         Container(
-                        //           width: MediaQuery.of(context).size.width *
-                        //               4 /
-                        //               100,
-                        //           height: MediaQuery.of(context).size.height *
-                        //               2 /
-                        //               100,
-                        //           child: ClipRRect(
-                        //             borderRadius: BorderRadius.circular(100),
-                        //             child: Image.asset(
-                        //               AppImage.nextArrowImage,
-                        //               fit: BoxFit.cover,
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ),
-                        // ),
-                        // SizedBox(
-                        //     height:
-                        //         MediaQuery.of(context).size.height * 3 / 100),
-
-                        //chat button
-                        // AppButton(
-                        //     text: AppLanguage.chatText[language],
-                        //     onPress: () {
-                        //       Navigator.push(
-                        //           context,
-                        //           MaterialPageRoute(
-                        //               builder: (context) =>
-                        //                   const ChatScreen()));
-                        //     }),
-                        // SizedBox(
-                        //     height:
-                        //         MediaQuery.of(context).size.height * 2 / 100),
-
-                        //change booking date button
-                        // AppButton(
-                        //     text: AppLanguage.changeBookingDateText[language],
-                        //     onPress: () {}),
-                        // SizedBox(
-                        //     height:
-                        //         MediaQuery.of(context).size.height * 2 / 100),
-
-                        // GestureDetector(
-                        //   onTap: () {},
-                        //   child: Container(
-                        //     alignment: Alignment.center,
-                        //     height:
-                        //         MediaQuery.of(context).size.height * 6.5 / 100,
-                        //     width: MediaQuery.of(context).size.width * 90 / 100,
-                        //     decoration: BoxDecoration(
-                        //         color: AppColor.secondaryColor,
-                        //         borderRadius: BorderRadius.circular(25),
-                        //         border: Border.all(
-                        //             width: 1, color: AppColor.boaderColor)),
-                        //     child: Text(
-                        //       AppLanguage.cancelText[language],
-                        //       style: const TextStyle(
-                        //           fontSize: 16,
-                        //           color: AppColor.primaryColor,
-                        //           fontFamily: AppFont.fontFamily,
-                        //           fontWeight: FontWeight.w700),
-                        //     ),
-                        //   ),
-                        // ),
-                        // SizedBox(
-                        //     height:
-                        //         MediaQuery.of(context).size.height * 2 / 100),
+                        
                       ],
                     ),
                   ),
