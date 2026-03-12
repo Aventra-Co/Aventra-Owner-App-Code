@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../utilities/app_config_provider.dart';
+import '../controller/app_config_provider.dart';
 
 class ProfileImage extends StatelessWidget {
   final double size;

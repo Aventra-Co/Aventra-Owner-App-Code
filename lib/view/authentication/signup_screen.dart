@@ -4,15 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '/view/authentication/otp_verify_screen.dart';
 import '../content_screen/content_screen.dart';
-import '/utilities/app_button.dart';
+import '../../controller/app_button.dart';
 // import '/utilities/app_header.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/textinput.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/textinput.dart';
 import 'login_screen.dart';
 
 class Signup extends StatefulWidget {

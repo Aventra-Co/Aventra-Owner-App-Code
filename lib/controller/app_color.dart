@@ -28,6 +28,7 @@ class AppColor {
     ],
   );
 
+  static const Color transparent = Colors.transparent;
   static const Color textColor = Color(0xff535353);
   static const Color textLightColor = Color(0xffBEC3C7);
   static const Color titleColor = Color(0xff6D6E71);
@@ -95,4 +96,23 @@ class AppColor {
   static const Color lightblue = Color(0xfff3fdfe);
   static const Color background = Color(0xfff6f4f1);
   static const Color chatBubbaleColor = Color(0xff918F8F);
+
+    //----------------------20/02/2026---------------------
+  static const Color completedColor = Color(0xFF1A908E);
+  static const Color ongoingColor = Color(0xFF096B9B);
+  static const Color pendingColor = Color(0xFFF8C63D);
+  static const Color black1313Color = Color(0xFF131313);
+  static const Color black2A2AColor = Color(0xFF2A2A2A);
+
+  static const Color grey5959Color = Color(0xFF595959);
+
+  // static const Color buttonColor = Color(0xFFF96909);
+  static const Color lightorangeColor = Color(0xFFFEE1CE);
+    static const Color lightColor = Color(0xFFE2DED354);
+static const Color divider1Color = Color(0xFFE3A3A3A);
+  static const Color creamColor = Color(0xffEFEFEF);
+  static const Color shadowColor = Color(0xffCCCCCC);  
+  static const Color blueColor = Color(0xff188A8B);
+
+
 }

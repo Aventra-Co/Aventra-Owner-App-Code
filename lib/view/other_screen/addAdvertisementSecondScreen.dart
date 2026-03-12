@@ -7,18 +7,18 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:the_boat_ownerside/utilities/app_snack_bar_toast_message.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_loader.dart';
+import 'package:the_boat_ownerside/controller/app_snack_bar_toast_message.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_loader.dart';
 import '../authentication/login_screen.dart';
-import '/utilities/app_button.dart';
-import '/utilities/app_footer.dart';
-import '/utilities/textinput.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_button.dart';
+import '../../controller/app_footer.dart';
+import '../../controller/textinput.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
 
@@ -503,6 +503,9 @@ class _AddAdvertisementSecondScreenState
                     ],
                   ),
                 ),
+              
+              
+              
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 2 / 100,
                 ),
@@ -1146,8 +1149,7 @@ class _AddAdvertisementSecondScreenState
                       ),
 
                       // //!=== Equipments Text ===
-                   
-
+                  
                       //add-ons list
                       Container(
                         alignment: Alignment.centerLeft,

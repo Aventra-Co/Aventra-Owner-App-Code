@@ -29,7 +29,7 @@ class AuthService {
           .user!;
 
       if (user != null) {
-        // call our database service to update the user data.
+        // call our database  service to update the user data.
         await DatabaseService(uid: user.uid).savingUserData(fullName, email);
         return true;
       }
@@ -38,7 +38,7 @@ class AuthService {
     }
   }
 
-  // signout
+  
   Future signOut() async {
     try {
       await HelperFunctions.saveUserLoggedInStatus(false);

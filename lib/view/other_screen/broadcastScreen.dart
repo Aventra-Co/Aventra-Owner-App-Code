@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_image.dart';
-import '/utilities/app_header.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_language.dart';
 import 'dart:ui' as ui;
 
 class BroadcastScreen extends StatefulWidget {

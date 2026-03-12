@@ -6,19 +6,19 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:the_boat_ownerside/utilities/app_snack_bar_toast_message.dart';
+import 'package:the_boat_ownerside/controller/app_snack_bar_toast_message.dart';
 import 'package:the_boat_ownerside/view/other_screen/manage_staff_screen.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_loader.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_loader.dart';
 import '../authentication/login_screen.dart';
-import '/utilities/app_button.dart';
-import '/utilities/app_header.dart';
-import '/utilities/textinput.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_button.dart';
+import '../../controller/app_header.dart';
+import '../../controller/textinput.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
 import 'dart:ui' as ui;
 import 'package:image_picker/image_picker.dart';
 
@@ -1460,7 +1460,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                         height: MediaQuery.of(context).size.height * 4 / 100,
                       ),
 
-                      AppHeader(
+                      CustomAppHeader(
                           text: "",
                           onPress: () {
                             Navigator.pop(context);

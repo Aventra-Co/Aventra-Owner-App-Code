@@ -1,22 +1,25 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:the_boat_ownerside/utilities/app_shimmers.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import 'package:the_boat_ownerside/controller/app_shimmers.dart';
+import 'package:the_boat_ownerside/view/propertymodule/property_ongoing_detail_screen.dart';
+import 'package:the_boat_ownerside/view/propertymodule/upcoming_detail_screen.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 import '../other_screen/weather_screen.dart';
 import '/view/other_screen/upcoming_details.dart';
 import '../other_screen/notification.dart';
-import '/utilities/app_constant.dart';
-import '/utilities/app_language.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_language.dart';
 import '/view/other_screen/details_screen.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_image.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_image.dart';
 import 'dart:ui' as ui;
 import 'package:http/http.dart' as http;
 import 'login_screen.dart';
@@ -32,6 +35,7 @@ class TripsScreen extends StatefulWidget {
 class _TripsScreenState extends State<TripsScreen> {
   static const String _baseUrl = 'https://!api.open-meteo.com/v1/forecast';
   int toggleStatus = 1;
+  int status = 1;
   List<dynamic> ongoingTripsList = <dynamic>[];
   List<dynamic> upcomingTripsList = <dynamic>[];
   bool isApiCalling = false;
@@ -50,6 +54,7 @@ class _TripsScreenState extends State<TripsScreen> {
   int notificationCount = 0;
   dynamic temperatureData = {};
 
+  int selectedTab = 0;
   @override
   void initState() {
     super.initState();
@@ -174,7 +179,7 @@ class _TripsScreenState extends State<TripsScreen> {
     Uri url =
         Uri.parse("${AppConfigProvider.apiUrl}home_page_api?user_id=$userId");
 
-        print("URL $url");
+    print("URL $url");
 
     String token = AppConstant.token;
 
@@ -568,8 +573,74 @@ class _TripsScreenState extends State<TripsScreen> {
     return null;
   }
 
+  final List<Map<String, dynamic>> ongoingBookings = [
+    {
+      'boat_name': 'Greenleaf Villa',
+      'boat_type': 'Riyadh – Al Narjis',
+      'booking_id': '4567687687',
+      'status': 'Ongoing',
+      'amount': '200 KWD',
+      'date': '2026-02-18',
+      'image': AppImage.house2Icon,
+      'status_color': AppColor.green,
+    },
+    {
+      'boat_name': 'Palm Resort Chalet',
+      'boat_type': 'Jeddah – Obhur',
+      'booking_id': '4567687687',
+      'status': 'Ongoing',
+      'amount': '220 KWD',
+      'date': '2024-11-05',
+      'image': AppImage.house1Icon,
+      'status_color': AppColor.green,
+    },
+    {
+      'boat_name': 'Sunset Farmhouse',
+      'boat_type': 'Diriyah – Riyadh',
+      'booking_id': '4567687687',
+      'status': 'Ongoing',
+      'amount': '240 KWD',
+      'date': '2024-11-05',
+      'image': AppImage.house2Icon,
+      'status_color': AppColor.green,
+    },
+  ];
+  final List<Map<String, dynamic>> upcomingBookings = [
+    {
+      'boat_name': 'Palm Resort Chalet',
+      'boat_type': 'Jeddah – Obhur',
+      'booking_id': '4567687687',
+      'status': 'Upcoming',
+      'amount': '200 KWD',
+      'date': '2024-11-05',
+      'image': AppImage.house1Icon,
+      'status_color': AppColor.themeColor, // Orange
+    },
+    {
+      'boat_name': 'Royal Majlis Villa',
+      'boat_type': 'Jeddah – Obhur',
+      'booking_id': '4567687687',
+      'status': 'Upcoming',
+      'amount': '220 KWD',
+      'date': '2024-11-05',
+      'image': AppImage.house2Icon,
+      'status_color': AppColor.themeColor,
+    },
+    {
+      'boat_name': 'Oasis Garden Chalet',
+      'boat_type': 'Jeddah – Obhur',
+      'booking_id': '4567687687',
+      'status': 'Upcoming',
+      'amount': '240 KWD',
+      'date': '2024-11-05',
+      'image': AppImage.house1Icon,
+      'status_color': AppColor.themeColor,
+    },
+  ];
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     double screenWidth = MediaQuery.of(context).size.width;
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -609,7 +680,6 @@ class _TripsScreenState extends State<TripsScreen> {
                           height: MediaQuery.of(context).size.height * 4 / 100,
                         ),
 
-                        //!weather notification
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
@@ -752,11 +822,10 @@ class _TripsScreenState extends State<TripsScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              //!ongoing
                               GestureDetector(
                                 onTap: () {
                                   setState(() {
-                                    toggleStatus = 1;
+                                    status = 1;
                                   });
                                 },
                                 child: Container(
@@ -765,7 +834,7 @@ class _TripsScreenState extends State<TripsScreen> {
                                       42 /
                                       100,
                                   decoration: BoxDecoration(
-                                      color: toggleStatus == 1
+                                      color: status == 1
                                           ? AppColor.themeColor
                                           : AppColor.secondaryColor,
                                       borderRadius: BorderRadius.circular(5)),
@@ -773,11 +842,11 @@ class _TripsScreenState extends State<TripsScreen> {
                                     padding: EdgeInsets.symmetric(
                                         vertical: screenWidth > 600 ? 15 : 8.0),
                                     child: Text(
-                                      AppLanguage.ongoingText[language],
+                                      AppLanguage.seaText[language],
                                       style: TextStyle(
                                           fontSize: screenWidth > 600 ? 20 : 14,
                                           fontWeight: FontWeight.w700,
-                                          color: toggleStatus == 1
+                                          color: status == 1
                                               ? AppColor.secondaryColor
                                               : AppColor.primaryColor,
                                           fontFamily: AppFont.fontFamily),
@@ -790,7 +859,7 @@ class _TripsScreenState extends State<TripsScreen> {
                               GestureDetector(
                                 onTap: () {
                                   setState(() {
-                                    toggleStatus = 2;
+                                    status = 2;
                                   });
                                 },
                                 child: Container(
@@ -799,7 +868,7 @@ class _TripsScreenState extends State<TripsScreen> {
                                       42 /
                                       100,
                                   decoration: BoxDecoration(
-                                      color: toggleStatus == 2
+                                      color: status == 2
                                           ? AppColor.themeColor
                                           : AppColor.secondaryColor,
                                       borderRadius: BorderRadius.circular(5)),
@@ -807,11 +876,11 @@ class _TripsScreenState extends State<TripsScreen> {
                                     padding: EdgeInsets.symmetric(
                                         vertical: screenWidth > 600 ? 15 : 8.0),
                                     child: Text(
-                                      AppLanguage.upcomingText[language],
+                                      AppLanguage.propertyText[language],
                                       style: TextStyle(
                                           fontSize: screenWidth > 600 ? 20 : 14,
                                           fontWeight: FontWeight.w700,
-                                          color: toggleStatus == 2
+                                          color: status == 2
                                               ? AppColor.secondaryColor
                                               : AppColor.primaryColor,
                                           fontFamily: AppFont.fontFamily),
@@ -822,700 +891,1069 @@ class _TripsScreenState extends State<TripsScreen> {
                             ],
                           ),
                         ),
+
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 5 / 100,
                         )
                       ],
                     ),
                   ),
-
-                  isLoading
-                      ? tripsShimmerEffect(context)
-                      : Expanded(
-                          child: SingleChildScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        3 /
-                                        100),
-
-                                //!ongoing list
-                                if (toggleStatus == 1)
-                                  (ongoingTripsList.isNotEmpty)
-                                      ? Wrap(
-                                          children: [
-                                            ...List.generate(
-                                                ongoingTripsList.length,
-                                                (index) {
-                                              return Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  //!coupon card
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            3 /
-                                                            100,
-                                                      ),
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          if (userType == 3 ||
-                                                              (userType == 2 &&
-                                                                  manageHome ==
-                                                                      1)) {
-                                                            Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder:
-                                                                    (context) =>
-                                                                        DetailsScreen(
-                                                                  tripId: ongoingTripsList[
-                                                                              index]
-                                                                          [
-                                                                          'trip_booking_id']
-                                                                      .toString(),
-                                                                ),
-                                                              ),
-                                                            );
-                                                          }
-                                                        },
-                                                        child: Container(
-                                                            width:
-                                                                MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    90 /
-                                                                    100,
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .symmetric(
-                                                              vertical: 5,
-                                                            ),
-                                                            alignment: Alignment
-                                                                .center,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              border: Border.all(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  width: 7.0,
-                                                                  style:
-                                                                      BorderStyle
-                                                                          .solid),
-                                                              boxShadow: const [
-                                                                BoxShadow(
-                                                                  color: Color(
-                                                                      0xffBEC3C7),
-                                                                  blurRadius:
-                                                                      9.0,
-                                                                  offset:
-                                                                      Offset(
-                                                                          1, 0),
-                                                                ),
-                                                              ], //!BoxShadow
-                                                              color: AppColor
-                                                                  .secondaryColor,
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          8),
-                                                            ),
-                                                            child: SizedBox(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  80 /
-                                                                  100,
-                                                              child: Row(
-                                                                children: [
-                                                                  //!image
-                                                                  Container(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        15 /
-                                                                        100,
-                                                                    height: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        15 /
-                                                                        100,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                            //! color: Colors.red,
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(10)),
-                                                                    child:
-                                                                        ClipRRect(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              10),
-                                                                      child:
-                                                                          ClipRRect(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(10),
-                                                                        child: ongoingTripsList[index]['trip_image'] !=
-                                                                                null
-                                                                            ? Image.network(
-                                                                                '${AppConfigProvider.imageURL}${ongoingTripsList[index]['trip_image']}',
-                                                                                fit: BoxFit.cover,
-                                                                                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                                                                                  if (loadingProgress == null) {
-                                                                                    return child;
-                                                                                  } else {
-                                                                                    return Shimmer.fromColors(
-                                                                                      baseColor: Colors.grey.shade300,
-                                                                                      highlightColor: Colors.grey.shade100,
-                                                                                      child: Container(
-                                                                                        color: Colors.grey.shade300,
-                                                                                      ),
-                                                                                    );
-                                                                                  }
-                                                                                },
-                                                                              )
-                                                                            : Image.asset(
-                                                                                AppImage.imageFrame,
-                                                                                fit: BoxFit.cover,
-                                                                              ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        2 /
-                                                                        100,
-                                                                  ),
-
-                                                                  //!left side
-                                                                  SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        40 /
-                                                                        100,
-                                                                    child:
-                                                                        Column(
-                                                                      children: [
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              40 /
-                                                                              100,
-                                                                          child:
-                                                                              Text(
-                                                                            ongoingTripsList[index]['boat_name_english'],
-                                                                            style: const TextStyle(
-                                                                                fontSize: 13,
-                                                                                fontWeight: FontWeight.w500,
-                                                                                color: AppColor.primaryColor,
-                                                                                fontFamily: AppFont.fontFamily),
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              40 /
-                                                                              100,
-                                                                          child:
-                                                                              Text(
-                                                                            "Boat",
-                                                                            style: const TextStyle(
-                                                                                fontSize: 10,
-                                                                                fontWeight: FontWeight.w500,
-                                                                                color: AppColor.textColor,
-                                                                                fontFamily: AppFont.fontFamily),
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          height: MediaQuery.of(context).size.height *
-                                                                              .5 /
-                                                                              100,
-                                                                        ),
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              40 /
-                                                                              100,
-                                                                          child:
-                                                                              Text(
-                                                                            ongoingTripsList[index]['random_booking_id'].toString(),
-                                                                            style: const TextStyle(
-                                                                                fontSize: 10,
-                                                                                fontWeight: FontWeight.w500,
-                                                                                color: AppColor.primaryColor,
-                                                                                fontFamily: AppFont.fontFamily),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-
-                                                                  //!right side
-                                                                  SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        23 /
-                                                                        100,
-                                                                    child:
-                                                                        Column(
-                                                                      crossAxisAlignment:
-                                                                          CrossAxisAlignment
-                                                                              .end,
-                                                                      children: [
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              23 /
-                                                                              100,
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.only(bottom: 2.0),
-                                                                            child:
-                                                                                Text(
-                                                                              "Today",
-                                                                              textAlign: TextAlign.end,
-                                                                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w400, color: AppColor.green, fontFamily: AppFont.fontFamily),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              23 /
-                                                                              100,
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.only(bottom: 2.0),
-                                                                            child:
-                                                                                Text(
-                                                                              "KD${ongoingTripsList[index]['total_amount']}",
-                                                                              textAlign: TextAlign.end,
-                                                                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColor.cyan, fontFamily: AppFont.fontFamily),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              23 /
-                                                                              100,
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.only(bottom: 2.0),
-                                                                            child:
-                                                                                Text(
-                                                                              ongoingTripsList[index]['booking_date'],
-                                                                              textAlign: TextAlign.end,
-                                                                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColor.textColor, fontFamily: AppFont.fontFamily),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            )),
-                                                      ),
-                                                      SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            3 /
-                                                            100,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  SizedBox(
-                                                    height:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .height *
-                                                            3 /
-                                                            100,
-                                                  )
-                                                ],
-                                              );
-                                            }),
-                                          ],
-                                        )
-                                      : Column(
-                                          children: [
-                                            SizedBox(
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    20 /
-                                                    100),
-                                            //!!text msg
-                                            SizedBox(
-                                              width: screenWidth * 70 / 100,
-                                              child: Text(
-                                                AppLanguage
-                                                    .homeNodataMsg[language],
-                                                textAlign: TextAlign.center,
-                                                style: const TextStyle(
-                                                    fontFamily:
-                                                        AppFont.fontFamily,
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w600,
-                                                    color:
-                                                        AppColor.primaryColor),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-
-                                //!upcoming list
-                                if (toggleStatus == 2)
-                                  (upcomingTripsList.isNotEmpty)
-                                      ? Wrap(
-                                          children: [
-                                            ...List.generate(
-                                                upcomingTripsList.length,
-                                                (index) {
-                                              return Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  //!coupon card
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            3 /
-                                                            100,
-                                                      ),
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          if (userType == 3 ||
-                                                              (userType == 2 &&
-                                                                  manageHome ==
-                                                                      1)) {
-                                                            Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder:
-                                                                        (context) =>
-                                                                            UpcomingDetailsScreen(
-                                                                              tripId: upcomingTripsList[index]['trip_booking_id'].toString(),
-                                                                            )));
-                                                          }
-                                                        },
-                                                        child: Container(
-                                                            width:
-                                                                MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    90 /
-                                                                    100,
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .symmetric(
-                                                              vertical: 5,
-                                                            ),
-                                                            alignment: Alignment
-                                                                .center,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              border: Border.all(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  width: 7.0,
-                                                                  style:
-                                                                      BorderStyle
-                                                                          .solid),
-                                                              boxShadow: const [
-                                                                BoxShadow(
-                                                                  color: Color(
-                                                                      0xffBEC3C7),
-                                                                  blurRadius:
-                                                                      9.0,
-                                                                  offset:
-                                                                      Offset(
-                                                                          1, 0),
-                                                                ),
-                                                              ], //!BoxShadow
-                                                              color: AppColor
-                                                                  .secondaryColor,
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          8),
-                                                            ),
-                                                            child: SizedBox(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  80 /
-                                                                  100,
-                                                              child: Row(
-                                                                children: [
-                                                                  //!image
-                                                                  Container(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        15 /
-                                                                        100,
-                                                                    height: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        15 /
-                                                                        100,
-                                                                    decoration: BoxDecoration(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(10)),
-                                                                    child:
-                                                                        ClipRRect(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              10),
-                                                                      child:
-                                                                          ClipRRect(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(10),
-                                                                        child: upcomingTripsList[index]['trip_image'] !=
-                                                                                null
-                                                                            ? Image.network(
-                                                                                '${AppConfigProvider.imageURL}${upcomingTripsList[index]['trip_image']}',
-                                                                                fit: BoxFit.cover,
-                                                                                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                                                                                  if (loadingProgress == null) {
-                                                                                    return child;
-                                                                                  } else {
-                                                                                    return Shimmer.fromColors(
-                                                                                      baseColor: Colors.grey.shade300,
-                                                                                      highlightColor: Colors.grey.shade100,
-                                                                                      child: Container(
-                                                                                        color: Colors.grey.shade300,
-                                                                                      ),
-                                                                                    );
-                                                                                  }
-                                                                                },
-                                                                              )
-                                                                            : Image.asset(
-                                                                                AppImage.imageFrame,
-                                                                                fit: BoxFit.cover,
-                                                                              ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        2 /
-                                                                        100,
-                                                                  ),
-
-                                                                  //!left side
-                                                                  SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        40 /
-                                                                        100,
-                                                                    child:
-                                                                        Column(
-                                                                      children: [
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              40 /
-                                                                              100,
-                                                                          child:
-                                                                              Text(
-                                                                            upcomingTripsList[index]['boat_name_english'],
-                                                                            style: const TextStyle(
-                                                                                fontSize: 13,
-                                                                                fontWeight: FontWeight.w500,
-                                                                                color: AppColor.primaryColor,
-                                                                                fontFamily: AppFont.fontFamily),
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              40 /
-                                                                              100,
-                                                                          child:
-                                                                              Text(
-                                                                            AppLanguage.boatText[language],
-                                                                            style: const TextStyle(
-                                                                                fontSize: 10,
-                                                                                fontWeight: FontWeight.w500,
-                                                                                color: AppColor.textColor,
-                                                                                fontFamily: AppFont.fontFamily),
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          height: MediaQuery.of(context).size.height *
-                                                                              .5 /
-                                                                              100,
-                                                                        ),
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              40 /
-                                                                              100,
-                                                                          child:
-                                                                              Text(
-                                                                            upcomingTripsList[index]['random_booking_id'].toString(),
-                                                                            style: const TextStyle(
-                                                                                fontSize: 10,
-                                                                                fontWeight: FontWeight.w500,
-                                                                                color: AppColor.primaryColor,
-                                                                                fontFamily: AppFont.fontFamily),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-
-                                                                  //!right side
-                                                                  SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        23 /
-                                                                        100,
-                                                                    child:
-                                                                        Column(
-                                                                      crossAxisAlignment:
-                                                                          CrossAxisAlignment
-                                                                              .end,
-                                                                      children: [
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              23 /
-                                                                              100,
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.only(bottom: 2.0),
-                                                                            child:
-                                                                                Text(
-                                                                              AppLanguage.upcomingText[language],
-                                                                              textAlign: TextAlign.end,
-                                                                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w400, color: AppColor.themeColor, fontFamily: AppFont.fontFamily),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              23 /
-                                                                              100,
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.only(bottom: 2.0),
-                                                                            child:
-                                                                                Text(
-                                                                              "KD${upcomingTripsList[index]['total_amount']}",
-                                                                              textAlign: TextAlign.end,
-                                                                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColor.cyan, fontFamily: AppFont.fontFamily),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              23 /
-                                                                              100,
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.only(bottom: 2.0),
-                                                                            child:
-                                                                                Text(
-                                                                              upcomingTripsList[index]['booking_date'],
-                                                                              textAlign: TextAlign.end,
-                                                                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColor.textColor, fontFamily: AppFont.fontFamily),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            )),
-                                                      ),
-                                                      SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            3 /
-                                                            100,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  SizedBox(
-                                                    height:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .height *
-                                                            3 /
-                                                            100,
-                                                  )
-                                                ],
-                                              );
-                                            }),
-                                          ],
-                                        )
-                                      : Column(
-                                          children: [
-                                            SizedBox(
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    20 /
-                                                    100),
-                                            //!!text msg
-                                            SizedBox(
-                                              width: screenWidth * 70 / 100,
-                                              child: Text(
-                                                AppLanguage
-                                                    .homeNodataMsg[language],
-                                                textAlign: TextAlign.center,
-                                                style: const TextStyle(
-                                                    fontFamily:
-                                                        AppFont.fontFamily,
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w600,
-                                                    color:
-                                                        AppColor.primaryColor),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                              ],
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 4 / 100,
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 90 / 100,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              toggleStatus = 1;
+                              selectedTab = 0;
+                            });
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            width: MediaQuery.of(context).size.width * 42 / 100,
+                            decoration: BoxDecoration(
+                                color: toggleStatus == 1
+                                    ? AppColor.themeColor
+                                    : AppColor.secondaryColor,
+                                border: Border.all(color: AppColor.themeColor),
+                                borderRadius: BorderRadius.circular(5)),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: screenWidth > 600 ? 15 : 8.0),
+                              child: Text(
+                                AppLanguage.ongoingText[language],
+                                style: TextStyle(
+                                    fontSize: screenWidth > 600 ? 20 : 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: toggleStatus == 1
+                                        ? AppColor.secondaryColor
+                                        : AppColor.primaryColor,
+                                    fontFamily: AppFont.fontFamily),
+                              ),
                             ),
                           ),
                         ),
+
+                        //!upcoming
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedTab = 1;
+                              toggleStatus = 2;
+                            });
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            width: MediaQuery.of(context).size.width * 42 / 100,
+                            decoration: BoxDecoration(
+                                color: toggleStatus == 2
+                                    ? AppColor.themeColor
+                                    : AppColor.secondaryColor,
+                                border: Border.all(color: AppColor.themeColor),
+                                borderRadius: BorderRadius.circular(5)),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: screenWidth > 600 ? 15 : 8.0),
+                              child: Text(
+                                AppLanguage.upcomingText[language],
+                                style: TextStyle(
+                                    fontSize: screenWidth > 600 ? 20 : 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: toggleStatus == 2
+                                        ? AppColor.secondaryColor
+                                        : AppColor.primaryColor,
+                                    fontFamily: AppFont.fontFamily),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+
+               
+               
+                  SizedBox(height: size.height * 0.02),
+
+                  // ...bookings.map((booking) => _buildBookingCard(
+                  //       context,
+                  //       size,
+                  //       booking,
+                  //     )),
+                  // upcoming Booking cards
+                  // ...upcomingBookings
+                  //     .map((booking) => _buildUpcomingBookingCard(
+                  //           size,
+                  //           booking,
+                  //         )),
+
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          // Show ongoing or upcoming based on selectedTab
+                          ...(selectedTab == 0
+                                  ? ongoingBookings
+                                  : upcomingBookings)
+                              .asMap()
+                              .entries
+                              .map((entry) => _buildBookingCard(
+                                    size,
+                                    entry.value,
+                                    entry.key,
+                                  )),
+
+                          SizedBox(height: size.height * 0.02),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // isLoading
+                  //     ? tripsShimmerEffect(context)
+                  //     : Expanded(
+                  //         child: SingleChildScrollView(
+                  //           physics: const AlwaysScrollableScrollPhysics(),
+                  //           child: Column(
+                  //             children: [
+                  //               SizedBox(
+                  //                   height: MediaQuery.of(context).size.height *
+                  //                       3 /
+                  //                       100),
+
+                  //               //!ongoing list
+                  //               if (toggleStatus == 1)
+                  //                 (ongoingTripsList.isNotEmpty)
+                  //                     ? Wrap(
+                  //                         children: [
+                  //                           ...List.generate(
+                  //                               ongoingTripsList.length,
+                  //                               (index) {
+                  //                             return Column(
+                  //                               crossAxisAlignment:
+                  //                                   CrossAxisAlignment.center,
+                  //                               children: [
+                  //                                 //!coupon card
+                  //                                 Row(
+                  //                                   mainAxisAlignment:
+                  //                                       MainAxisAlignment
+                  //                                           .center,
+                  //                                   children: [
+                  //                                     SizedBox(
+                  //                                       width: MediaQuery.of(
+                  //                                                   context)
+                  //                                               .size
+                  //                                               .width *
+                  //                                           3 /
+                  //                                           100,
+                  //                                     ),
+                  //                                     GestureDetector(
+                  //                                       onTap: () {
+                  //                                         if (userType == 3 ||
+                  //                                             (userType == 2 &&
+                  //                                                 manageHome ==
+                  //                                                     1)) {
+                  //                                           Navigator.push(
+                  //                                             context,
+                  //                                             MaterialPageRoute(
+                  //                                               builder:
+                  //                                                   (context) =>
+                  //                                                       DetailsScreen(
+                  //                                                 tripId: ongoingTripsList[
+                  //                                                             index]
+                  //                                                         [
+                  //                                                         'trip_booking_id']
+                  //                                                     .toString(),
+                  //                                               ),
+                  //                                             ),
+                  //                                           );
+                  //                                         }
+                  //                                       },
+                  //                                       child: Container(
+                  //                                           width:
+                  //                                               MediaQuery.of(
+                  //                                                           context)
+                  //                                                       .size
+                  //                                                       .width *
+                  //                                                   90 /
+                  //                                                   100,
+                  //                                           padding:
+                  //                                               const EdgeInsets
+                  //                                                   .symmetric(
+                  //                                             vertical: 5,
+                  //                                           ),
+                  //                                           alignment: Alignment
+                  //                                               .center,
+                  //                                           decoration:
+                  //                                               BoxDecoration(
+                  //                                             border: Border.all(
+                  //                                                 color: Colors
+                  //                                                     .white,
+                  //                                                 width: 7.0,
+                  //                                                 style:
+                  //                                                     BorderStyle
+                  //                                                         .solid),
+                  //                                             boxShadow: const [
+                  //                                               BoxShadow(
+                  //                                                 color: Color(
+                  //                                                     0xffBEC3C7),
+                  //                                                 blurRadius:
+                  //                                                     9.0,
+                  //                                                 offset:
+                  //                                                     Offset(
+                  //                                                         1, 0),
+                  //                                               ),
+                  //                                             ], //!BoxShadow
+                  //                                             color: AppColor
+                  //                                                 .secondaryColor,
+                  //                                             borderRadius:
+                  //                                                 BorderRadius
+                  //                                                     .circular(
+                  //                                                         8),
+                  //                                           ),
+                  //                                           child: SizedBox(
+                  //                                             width: MediaQuery.of(
+                  //                                                         context)
+                  //                                                     .size
+                  //                                                     .width *
+                  //                                                 80 /
+                  //                                                 100,
+                  //                                             child: Row(
+                  //                                               children: [
+                  //                                                 //!image
+                  //                                                 Container(
+                  //                                                   width: MediaQuery.of(context)
+                  //                                                           .size
+                  //                                                           .width *
+                  //                                                       15 /
+                  //                                                       100,
+                  //                                                   height: MediaQuery.of(context)
+                  //                                                           .size
+                  //                                                           .width *
+                  //                                                       15 /
+                  //                                                       100,
+                  //                                                   decoration:
+                  //                                                       BoxDecoration(
+                  //                                                           //! color: Colors.red,
+                  //                                                           borderRadius:
+                  //                                                               BorderRadius.circular(10)),
+                  //                                                   child:
+                  //                                                       ClipRRect(
+                  //                                                     borderRadius:
+                  //                                                         BorderRadius.circular(
+                  //                                                             10),
+                  //                                                     child:
+                  //                                                         ClipRRect(
+                  //                                                       borderRadius:
+                  //                                                           BorderRadius.circular(10),
+                  //                                                       child: ongoingTripsList[index]['trip_image'] !=
+                  //                                                               null
+                  //                                                           ? Image.network(
+                  //                                                               '${AppConfigProvider.imageURL}${ongoingTripsList[index]['trip_image']}',
+                  //                                                               fit: BoxFit.cover,
+                  //                                                               loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                  //                                                                 if (loadingProgress == null) {
+                  //                                                                   return child;
+                  //                                                                 } else {
+                  //                                                                   return Shimmer.fromColors(
+                  //                                                                     baseColor: Colors.grey.shade300,
+                  //                                                                     highlightColor: Colors.grey.shade100,
+                  //                                                                     child: Container(
+                  //                                                                       color: Colors.grey.shade300,
+                  //                                                                     ),
+                  //                                                                   );
+                  //                                                                 }
+                  //                                                               },
+                  //                                                             )
+                  //                                                           : Image.asset(
+                  //                                                               AppImage.imageFrame,
+                  //                                                               fit: BoxFit.cover,
+                  //                                                             ),
+                  //                                                     ),
+                  //                                                   ),
+                  //                                                 ),
+                  //                                                 SizedBox(
+                  //                                                   width: MediaQuery.of(context)
+                  //                                                           .size
+                  //                                                           .width *
+                  //                                                       2 /
+                  //                                                       100,
+                  //                                                 ),
+
+                  //                                                 //!left side
+                  //                                                 SizedBox(
+                  //                                                   width: MediaQuery.of(context)
+                  //                                                           .size
+                  //                                                           .width *
+                  //                                                       40 /
+                  //                                                       100,
+                  //                                                   child:
+                  //                                                       Column(
+                  //                                                     children: [
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             40 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Text(
+                  //                                                           ongoingTripsList[index]['boat_name_english'],
+                  //                                                           style: const TextStyle(
+                  //                                                               fontSize: 13,
+                  //                                                               fontWeight: FontWeight.w500,
+                  //                                                               color: AppColor.primaryColor,
+                  //                                                               fontFamily: AppFont.fontFamily),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             40 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Text(
+                  //                                                           "Boat",
+                  //                                                           style: const TextStyle(
+                  //                                                               fontSize: 10,
+                  //                                                               fontWeight: FontWeight.w500,
+                  //                                                               color: AppColor.textColor,
+                  //                                                               fontFamily: AppFont.fontFamily),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                       SizedBox(
+                  //                                                         height: MediaQuery.of(context).size.height *
+                  //                                                             .5 /
+                  //                                                             100,
+                  //                                                       ),
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             40 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Text(
+                  //                                                           ongoingTripsList[index]['random_booking_id'].toString(),
+                  //                                                           style: const TextStyle(
+                  //                                                               fontSize: 10,
+                  //                                                               fontWeight: FontWeight.w500,
+                  //                                                               color: AppColor.primaryColor,
+                  //                                                               fontFamily: AppFont.fontFamily),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                     ],
+                  //                                                   ),
+                  //                                                 ),
+
+                  //                                                 //!right side
+                  //                                                 SizedBox(
+                  //                                                   width: MediaQuery.of(context)
+                  //                                                           .size
+                  //                                                           .width *
+                  //                                                       23 /
+                  //                                                       100,
+                  //                                                   child:
+                  //                                                       Column(
+                  //                                                     crossAxisAlignment:
+                  //                                                         CrossAxisAlignment
+                  //                                                             .end,
+                  //                                                     children: [
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             23 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Padding(
+                  //                                                           padding:
+                  //                                                               const EdgeInsets.only(bottom: 2.0),
+                  //                                                           child:
+                  //                                                               Text(
+                  //                                                             "Today",
+                  //                                                             textAlign: TextAlign.end,
+                  //                                                             style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w400, color: AppColor.green, fontFamily: AppFont.fontFamily),
+                  //                                                           ),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             23 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Padding(
+                  //                                                           padding:
+                  //                                                               const EdgeInsets.only(bottom: 2.0),
+                  //                                                           child:
+                  //                                                               Text(
+                  //                                                             "KD${ongoingTripsList[index]['total_amount']}",
+                  //                                                             textAlign: TextAlign.end,
+                  //                                                             style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColor.cyan, fontFamily: AppFont.fontFamily),
+                  //                                                           ),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             23 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Padding(
+                  //                                                           padding:
+                  //                                                               const EdgeInsets.only(bottom: 2.0),
+                  //                                                           child:
+                  //                                                               Text(
+                  //                                                             ongoingTripsList[index]['booking_date'],
+                  //                                                             textAlign: TextAlign.end,
+                  //                                                             style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColor.textColor, fontFamily: AppFont.fontFamily),
+                  //                                                           ),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                     ],
+                  //                                                   ),
+                  //                                                 ),
+                  //                                               ],
+                  //                                             ),
+                  //                                           )),
+                  //                                     ),
+                  //                                     SizedBox(
+                  //                                       width: MediaQuery.of(
+                  //                                                   context)
+                  //                                               .size
+                  //                                               .width *
+                  //                                           3 /
+                  //                                           100,
+                  //                                     ),
+                  //                                   ],
+                  //                                 ),
+                  //                                 SizedBox(
+                  //                                   height:
+                  //                                       MediaQuery.of(context)
+                  //                                               .size
+                  //                                               .height *
+                  //                                           3 /
+                  //                                           100,
+                  //                                 )
+                  //                               ],
+                  //                             );
+                  //                           }),
+                  //                         ],
+                  //                       )
+                  //                     : Column(
+                  //                         children: [
+                  //                           SizedBox(
+                  //                               height: MediaQuery.of(context)
+                  //                                       .size
+                  //                                       .height *
+                  //                                   20 /
+                  //                                   100),
+                  //                           //!!text msg
+                  //                           SizedBox(
+                  //                             width: screenWidth * 70 / 100,
+                  //                             child: Text(
+                  //                               AppLanguage
+                  //                                   .homeNodataMsg[language],
+                  //                               textAlign: TextAlign.center,
+                  //                               style: const TextStyle(
+                  //                                   fontFamily:
+                  //                                       AppFont.fontFamily,
+                  //                                   fontSize: 13,
+                  //                                   fontWeight: FontWeight.w600,
+                  //                                   color:
+                  //                                       AppColor.primaryColor),
+                  //                             ),
+                  //                           ),
+                  //                         ],
+                  //                       ),
+
+                  //               //!upcoming list
+                  //               if (toggleStatus == 2)
+                  //                 (upcomingTripsList.isNotEmpty)
+                  //                     ? Wrap(
+                  //                         children: [
+                  //                           ...List.generate(
+                  //                               upcomingTripsList.length,
+                  //                               (index) {
+                  //                             return Column(
+                  //                               crossAxisAlignment:
+                  //                                   CrossAxisAlignment.center,
+                  //                               children: [
+                  //                                 //!coupon card
+                  //                                 Row(
+                  //                                   mainAxisAlignment:
+                  //                                       MainAxisAlignment
+                  //                                           .center,
+                  //                                   children: [
+                  //                                     SizedBox(
+                  //                                       width: MediaQuery.of(
+                  //                                                   context)
+                  //                                               .size
+                  //                                               .width *
+                  //                                           3 /
+                  //                                           100,
+                  //                                     ),
+                  //                                     GestureDetector(
+                  //                                       onTap: () {
+                  //                                         if (userType == 3 ||
+                  //                                             (userType == 2 &&
+                  //                                                 manageHome ==
+                  //                                                     1)) {
+                  //                                           Navigator.push(
+                  //                                               context,
+                  //                                               MaterialPageRoute(
+                  //                                                   builder:
+                  //                                                       (context) =>
+                  //                                                           UpcomingDetailsScreen(
+                  //                                                             tripId: upcomingTripsList[index]['trip_booking_id'].toString(),
+                  //                                                           )));
+                  //                                         }
+                  //                                       },
+                  //                                       child: Container(
+                  //                                           width:
+                  //                                               MediaQuery.of(
+                  //                                                           context)
+                  //                                                       .size
+                  //                                                       .width *
+                  //                                                   90 /
+                  //                                                   100,
+                  //                                           padding:
+                  //                                               const EdgeInsets
+                  //                                                   .symmetric(
+                  //                                             vertical: 5,
+                  //                                           ),
+                  //                                           alignment: Alignment
+                  //                                               .center,
+                  //                                           decoration:
+                  //                                               BoxDecoration(
+                  //                                             border: Border.all(
+                  //                                                 color: Colors
+                  //                                                     .white,
+                  //                                                 width: 7.0,
+                  //                                                 style:
+                  //                                                     BorderStyle
+                  //                                                         .solid),
+                  //                                             boxShadow: const [
+                  //                                               BoxShadow(
+                  //                                                 color: Color(
+                  //                                                     0xffBEC3C7),
+                  //                                                 blurRadius:
+                  //                                                     9.0,
+                  //                                                 offset:
+                  //                                                     Offset(
+                  //                                                         1, 0),
+                  //                                               ),
+                  //                                             ], //!BoxShadow
+                  //                                             color: AppColor
+                  //                                                 .secondaryColor,
+                  //                                             borderRadius:
+                  //                                                 BorderRadius
+                  //                                                     .circular(
+                  //                                                         8),
+                  //                                           ),
+                  //                                           child: SizedBox(
+                  //                                             width: MediaQuery.of(
+                  //                                                         context)
+                  //                                                     .size
+                  //                                                     .width *
+                  //                                                 80 /
+                  //                                                 100,
+                  //                                             child: Row(
+                  //                                               children: [
+                  //                                                 //!image
+                  //                                                 Container(
+                  //                                                   width: MediaQuery.of(context)
+                  //                                                           .size
+                  //                                                           .width *
+                  //                                                       15 /
+                  //                                                       100,
+                  //                                                   height: MediaQuery.of(context)
+                  //                                                           .size
+                  //                                                           .width *
+                  //                                                       15 /
+                  //                                                       100,
+                  //                                                   decoration: BoxDecoration(
+                  //                                                       borderRadius:
+                  //                                                           BorderRadius.circular(10)),
+                  //                                                   child:
+                  //                                                       ClipRRect(
+                  //                                                     borderRadius:
+                  //                                                         BorderRadius.circular(
+                  //                                                             10),
+                  //                                                     child:
+                  //                                                         ClipRRect(
+                  //                                                       borderRadius:
+                  //                                                           BorderRadius.circular(10),
+                  //                                                       child: upcomingTripsList[index]['trip_image'] !=
+                  //                                                               null
+                  //                                                           ? Image.network(
+                  //                                                               '${AppConfigProvider.imageURL}${upcomingTripsList[index]['trip_image']}',
+                  //                                                               fit: BoxFit.cover,
+                  //                                                               loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                  //                                                                 if (loadingProgress == null) {
+                  //                                                                   return child;
+                  //                                                                 } else {
+                  //                                                                   return Shimmer.fromColors(
+                  //                                                                     baseColor: Colors.grey.shade300,
+                  //                                                                     highlightColor: Colors.grey.shade100,
+                  //                                                                     child: Container(
+                  //                                                                       color: Colors.grey.shade300,
+                  //                                                                     ),
+                  //                                                                   );
+                  //                                                                 }
+                  //                                                               },
+                  //                                                             )
+                  //                                                           : Image.asset(
+                  //                                                               AppImage.imageFrame,
+                  //                                                               fit: BoxFit.cover,
+                  //                                                             ),
+                  //                                                     ),
+                  //                                                   ),
+                  //                                                 ),
+                  //                                                 SizedBox(
+                  //                                                   width: MediaQuery.of(context)
+                  //                                                           .size
+                  //                                                           .width *
+                  //                                                       2 /
+                  //                                                       100,
+                  //                                                 ),
+
+                  //                                                 //!left side
+                  //                                                 SizedBox(
+                  //                                                   width: MediaQuery.of(context)
+                  //                                                           .size
+                  //                                                           .width *
+                  //                                                       40 /
+                  //                                                       100,
+                  //                                                   child:
+                  //                                                       Column(
+                  //                                                     children: [
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             40 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Text(
+                  //                                                           upcomingTripsList[index]['boat_name_english'],
+                  //                                                           style: const TextStyle(
+                  //                                                               fontSize: 13,
+                  //                                                               fontWeight: FontWeight.w500,
+                  //                                                               color: AppColor.primaryColor,
+                  //                                                               fontFamily: AppFont.fontFamily),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             40 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Text(
+                  //                                                           AppLanguage.boatText[language],
+                  //                                                           style: const TextStyle(
+                  //                                                               fontSize: 10,
+                  //                                                               fontWeight: FontWeight.w500,
+                  //                                                               color: AppColor.textColor,
+                  //                                                               fontFamily: AppFont.fontFamily),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                       SizedBox(
+                  //                                                         height: MediaQuery.of(context).size.height *
+                  //                                                             .5 /
+                  //                                                             100,
+                  //                                                       ),
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             40 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Text(
+                  //                                                           upcomingTripsList[index]['random_booking_id'].toString(),
+                  //                                                           style: const TextStyle(
+                  //                                                               fontSize: 10,
+                  //                                                               fontWeight: FontWeight.w500,
+                  //                                                               color: AppColor.primaryColor,
+                  //                                                               fontFamily: AppFont.fontFamily),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                     ],
+                  //                                                   ),
+                  //                                                 ),
+
+                  //                                                 //!right side
+                  //                                                 SizedBox(
+                  //                                                   width: MediaQuery.of(context)
+                  //                                                           .size
+                  //                                                           .width *
+                  //                                                       23 /
+                  //                                                       100,
+                  //                                                   child:
+                  //                                                       Column(
+                  //                                                     crossAxisAlignment:
+                  //                                                         CrossAxisAlignment
+                  //                                                             .end,
+                  //                                                     children: [
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             23 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Padding(
+                  //                                                           padding:
+                  //                                                               const EdgeInsets.only(bottom: 2.0),
+                  //                                                           child:
+                  //                                                               Text(
+                  //                                                             AppLanguage.upcomingText[language],
+                  //                                                             textAlign: TextAlign.end,
+                  //                                                             style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w400, color: AppColor.themeColor, fontFamily: AppFont.fontFamily),
+                  //                                                           ),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             23 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Padding(
+                  //                                                           padding:
+                  //                                                               const EdgeInsets.only(bottom: 2.0),
+                  //                                                           child:
+                  //                                                               Text(
+                  //                                                             "KD${upcomingTripsList[index]['total_amount']}",
+                  //                                                             textAlign: TextAlign.end,
+                  //                                                             style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColor.cyan, fontFamily: AppFont.fontFamily),
+                  //                                                           ),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                       SizedBox(
+                  //                                                         width: MediaQuery.of(context).size.width *
+                  //                                                             23 /
+                  //                                                             100,
+                  //                                                         child:
+                  //                                                             Padding(
+                  //                                                           padding:
+                  //                                                               const EdgeInsets.only(bottom: 2.0),
+                  //                                                           child:
+                  //                                                               Text(
+                  //                                                             upcomingTripsList[index]['booking_date'],
+                  //                                                             textAlign: TextAlign.end,
+                  //                                                             style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColor.textColor, fontFamily: AppFont.fontFamily),
+                  //                                                           ),
+                  //                                                         ),
+                  //                                                       ),
+                  //                                                     ],
+                  //                                                   ),
+                  //                                                 ),
+                  //                                               ],
+                  //                                             ),
+                  //                                           )),
+                  //                                     ),
+                  //                                     SizedBox(
+                  //                                       width: MediaQuery.of(
+                  //                                                   context)
+                  //                                               .size
+                  //                                               .width *
+                  //                                           3 /
+                  //                                           100,
+                  //                                     ),
+                  //                                   ],
+                  //                                 ),
+                  //                                 SizedBox(
+                  //                                   height:
+                  //                                       MediaQuery.of(context)
+                  //                                               .size
+                  //                                               .height *
+                  //                                           3 /
+                  //                                           100,
+                  //                                 )
+                  //                               ],
+                  //                             );
+                  //                           }),
+                  //                         ],
+                  //                       )
+                  //                     : Column(
+                  //                         children: [
+                  //                           SizedBox(
+                  //                               height: MediaQuery.of(context)
+                  //                                       .size
+                  //                                       .height *
+                  //                                   20 /
+                  //                                   100),
+                  //                           //!!text msg
+                  //                           SizedBox(
+                  //                             width: screenWidth * 70 / 100,
+                  //                             child: Text(
+                  //                               AppLanguage
+                  //                                   .homeNodataMsg[language],
+                  //                               textAlign: TextAlign.center,
+                  //                               style: const TextStyle(
+                  //                                   fontFamily:
+                  //                                       AppFont.fontFamily,
+                  //                                   fontSize: 13,
+                  //                                   fontWeight: FontWeight.w600,
+                  //                                   color:
+                  //                                       AppColor.primaryColor),
+                  //                             ),
+                  //                           ),
+                  //                         ],
+                  //                       ),
+                  //             ],
+                  //           ),
+
+                  //         ),
+                  //       ),
+
                   const NoInternetBanner(),
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBookingCard(Size size, Map<String, dynamic> booking, index) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: size.width * 0.05,
+        vertical: size.height * 0.01,
+      ),
+      child: GestureDetector(
+        onTap: () {
+          if (selectedTab == 0 && index == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PropertyDetailsScreen(),
+              ),
+            );
+          } else if (selectedTab == 1 && index == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const TripStartDetailsScreen(),
+              ),
+            );
+          }
+        },
+        child: Container(
+          padding: EdgeInsets.all(size.width * 0.03),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Left - Image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  booking['image'],
+                  width: size.width * 0.15,
+                  height: size.width * 0.15,
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+              SizedBox(width: size.width * 0.03),
+
+              // Middle - Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      booking['boat_name'],
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontFamily: AppFont.fontFamily,
+                        fontWeight: FontWeight.w600,
+                        color: AppColor.primaryColor,
+                      ),
+                    ),
+                    SizedBox(height: size.height * 0.002),
+                    Text(
+                      booking['boat_type'],
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontFamily: AppFont.fontFamily,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    SizedBox(height: size.height * 0.005),
+                    Text(
+                      booking['booking_id'],
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontFamily: AppFont.fontFamily,
+                        fontWeight: FontWeight.w500,
+                        color: AppColor.primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Right - Status, Amount, Date
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    booking['status'],
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontFamily: AppFont.fontFamily,
+                      fontWeight: FontWeight.w500,
+                      color: booking['status_color'],
+                    ),
+                  ),
+                  SizedBox(height: size.height * 0.005),
+                  Text(
+                    booking['amount'],
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontFamily: AppFont.fontFamily,
+                      fontWeight: FontWeight.w600,
+                      color: AppColor.cyan,
+                    ),
+                  ),
+                  SizedBox(height: size.height * 0.002),
+                  Text(
+                    booking['date'],
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontFamily: AppFont.fontFamily,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUpcomingBookingCard(
+    Size size,
+    Map<String, dynamic> booking,
+  ) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: size.width * 0.05,
+        vertical: size.height * 0.01,
+      ),
+      child: GestureDetector(
+        onTap: () {},
+        child: Container(
+          padding: EdgeInsets.all(size.width * 0.03),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Left - Image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  booking['image'],
+                  width: size.width * 0.15,
+                  height: size.width * 0.15,
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+              SizedBox(width: size.width * 0.03),
+
+              // Middle - Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      booking['boat_name'],
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontFamily: AppFont.fontFamily,
+                        fontWeight: FontWeight.w600,
+                        color: AppColor.primaryColor,
+                      ),
+                    ),
+                    SizedBox(height: size.height * 0.002),
+                    Text(
+                      booking['boat_type'],
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontFamily: AppFont.fontFamily,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    SizedBox(height: size.height * 0.005),
+                    Text(
+                      booking['booking_id'],
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontFamily: AppFont.fontFamily,
+                        fontWeight: FontWeight.w500,
+                        color: AppColor.primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Right - Status, Amount, Date
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    booking['status'],
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontFamily: AppFont.fontFamily,
+                      fontWeight: FontWeight.w500,
+                      color: booking['status_color'], //  Orange for upcoming
+                    ),
+                  ),
+                  SizedBox(height: size.height * 0.005),
+                  Text(
+                    booking['amount'],
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontFamily: AppFont.fontFamily,
+                      fontWeight: FontWeight.w600,
+                      color: AppColor.cyan,
+                    ),
+                  ),
+                  SizedBox(height: size.height * 0.002),
+                  Text(
+                    booking['date'],
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontFamily: AppFont.fontFamily,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

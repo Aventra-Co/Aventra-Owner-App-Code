@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 import '../authentication/login_screen.dart';
-import '/utilities/app_footer.dart';
+import '../../controller/app_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../utilities/app_button.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_header.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_button.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_language.dart';
 import 'dart:ui' as ui;
 
 class CancelBooking extends StatefulWidget {
@@ -158,7 +158,7 @@ class CancelBookingState extends State<CancelBooking> {
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height * 3 / 100),
                 const NoInternetBanner(),
-                AppHeader(
+                CustomAppHeader(
                     text: AppLanguage.cancelBookingText[language],
                     onPress: () {
                       Navigator.pop(context);

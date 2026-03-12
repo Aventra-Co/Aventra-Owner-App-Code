@@ -1,22 +1,33 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
-import 'utilities/app_color.dart';
-import 'utilities/app_connectivity.dart';
-import 'utilities/app_constant.dart';
-import 'utilities/app_font.dart';
-import 'utilities/one_signal_service.dart';
-import 'utilities/route_observer.dart';
-import 'utilities/routes.dart';
+import 'controller/app_color.dart';
+import 'controller/app_connectivity.dart';
+import 'controller/app_constant.dart';
+import 'controller/app_font.dart';
+import 'controller/one_signal_service.dart';
+import 'controller/route_observer.dart';
+import 'controller/routes.dart';
 import 'view/authentication/splash_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: AppColor.secondaryColor,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ),
+  );
 
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
+  );
   // Initialize OneSignal
   await initOneSignal(AppConstant.oneSignalAppId);
   await OneSignalService.initOneSignal();
@@ -84,19 +95,18 @@ class MyApp extends StatelessWidget {
         navigatorObservers: [routeObserver],
         title: 'Aventra Owner',
         debugShowCheckedModeBanner: false,
-        navigatorKey: navigatorKey, // Make sure this is set
+        navigatorKey: navigatorKey,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: AppColor.themeColor),
           fontFamily: AppFont.fontFamily,
         ),
         routes: routes,
-        home: const AppInitializer(), // Use wrapper to handle initialization
+        home: const AppInitializer(),
       ),
     );
   }
 }
 
-// Wrapper widget to handle app initialization
 class AppInitializer extends StatefulWidget {
   const AppInitializer({super.key});
 
@@ -108,7 +118,6 @@ class _AppInitializerState extends State<AppInitializer> {
   @override
   void initState() {
     super.initState();
-    // Mark app as initialized after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       OneSignalService.setAppInitialized(true);
     });

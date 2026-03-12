@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../utilities/app_header.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_language.dart';
 import 'dart:ui' as ui;
 
 class BoatDetailsScreen extends StatefulWidget {
@@ -65,7 +65,7 @@ class BoatDetailsScreenState extends State<BoatDetailsScreen> {
           child: Column(
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 4 / 100),
-              AppHeader(
+              CustomAppHeader(
                   text: AppLanguage.boatDetailsText[language],
                   onPress: () {
                     Navigator.pop(context);

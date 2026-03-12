@@ -11,7 +11,7 @@ class AppHeader extends StatelessWidget {
   const AppHeader({
     super.key,
     required this.text,
-    required this.onPress,
+    required this.onPress, required String suffixText,
   });
 
   @override
@@ -110,4 +110,80 @@ class AppHeaderOrange extends StatelessWidget {
       ),
     );
   }
+}
+
+
+class CustomAppHeader extends StatelessWidget {
+  final String text;
+  final String? suffixText; // ✅ Added suffix
+  final Function onPress;
+
+  const CustomAppHeader({
+    super.key,
+    required this.text,
+    required this.onPress,
+    this.suffixText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Container(
+      width: size.width * 100 / 100,
+      height: size.height * 8 / 100,
+      padding: EdgeInsets.symmetric(horizontal: size.width * 0.01),
+      child: Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+
+    Row(
+      children: [
+
+        GestureDetector(
+          onTap: () {
+            onPress();
+          },
+          child: Transform.rotate(
+            angle: language == 1 ? 3.1416 : 0,
+            child: Image.asset(
+              AppImage.leftArrowIcon,
+              width: size.width * 6 / 100,
+              height: size.width * 6 / 100,
+              color: AppColor.primaryColor,
+            ),
+          ),
+        ),
+
+        SizedBox(width: size.width * 3 / 100), // 👈 spacing between arrow & text
+
+        Text(
+          text,
+          style: const TextStyle(
+            color: AppColor.primaryColor,
+            fontFamily: AppFont.fontFamily,
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
+        ),
+      ],
+    ),
+
+    /// 🔹 Right Side ID
+    Text(
+      suffixText ?? "",
+      textAlign: TextAlign.end,
+      style: const TextStyle(
+        color: AppColor.textColor,
+        fontFamily: AppFont.fontFamily,
+        fontWeight: FontWeight.w400,
+        fontSize: 12,
+      ),
+    ),
+  ],
+),
+    );
+  }
+
+
 }

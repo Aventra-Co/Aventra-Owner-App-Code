@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 
-import '../utilities/app_config_provider.dart';
-import '../utilities/app_constant.dart';
+import '../controller/app_config_provider.dart';
+import '../controller/app_constant.dart';
 
 class DatabaseService {
   final String? uid;

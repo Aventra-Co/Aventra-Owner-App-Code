@@ -7,18 +7,18 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:the_boat_ownerside/utilities/app_snack_bar_toast_message.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_loader.dart';
+import 'package:the_boat_ownerside/controller/app_snack_bar_toast_message.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_loader.dart';
 import '../authentication/login_screen.dart';
-import '/utilities/app_button.dart';
-import '/utilities/textinput.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_header.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_button.dart';
+import '../../controller/textinput.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -755,7 +755,6 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
     }
   }
 
-
 // Simplified add advertisement validation method
   void addAdvertisementValidation(
       XFile? coverImage,
@@ -1022,9 +1021,6 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
     );
   }
 
-// Reusable validation methods (can be shared between add and edit)
-
-  // Validate coupon code and related fields
 
   var refreshKey = GlobalKey<RefreshIndicatorState>();
 
@@ -1295,6 +1291,7 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
                             ],
                           ),
                         ),
+
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 10 / 100,
                         ),
@@ -1454,7 +1451,7 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
                                                 6 /
                                                 100,
                                             child: Image.asset(
-                                                AppImage.crossIcon)),
+                                                AppImage.cancelRedIcon)),
                                       ),
                                     ),
                                   ],
@@ -1745,8 +1742,6 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 2 / 100),
-
-                    
 
                           //!==============advertisement type==========
                           SizedBox(
@@ -2556,7 +2551,6 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
                               textAlignVertical: TextAlignVertical.center,
                               controller: cityTextEditingController,
                               onTap: () {
-                       
                                 dropDownModelForCity(context, screenWidth);
                               },
                               decoration: InputDecoration(
@@ -2798,7 +2792,6 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
                                 }
                               },
                               decoration: InputDecoration(
-                           
                                 border: const UnderlineInputBorder(
                                   borderSide:
                                       BorderSide(color: AppColor.boaderColor),
@@ -4003,7 +3996,6 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
                     ),
                     child: Column(
                       children: [
-            
                         //image header
                         Container(
                           width: MediaQuery.of(context).size.width * 100 / 100,
@@ -4645,7 +4637,7 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 3 / 100,
                       ),
-                      AppHeader(
+                      CustomAppHeader(
                         text: AppLanguage.locationText[language],
                         onPress: () {
                           Navigator.pop(context);
@@ -5101,5 +5093,4 @@ class _AddAdvertisementScreenState extends State<AddAdvertisementScreen> {
     print("LatLong: $lat and $long");
     Navigator.pop(context);
   }
-
 }

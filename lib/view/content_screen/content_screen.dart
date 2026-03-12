@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_header.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_header.dart';
 
 class Content extends StatelessWidget {
   static String routeName = './Content';
@@ -78,7 +78,7 @@ class _ContentScreenState extends State<ContentScreen>
         child: Column(
           children: [
             const NoInternetBanner(),
-            AppHeader(
+            CustomAppHeader(
               text: widget.header,
               onPress: () {
                 Navigator.pop(context);

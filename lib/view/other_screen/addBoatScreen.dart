@@ -5,18 +5,19 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:the_boat_ownerside/view/other_screen/chooseBoatScreen.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import 'package:the_boat_ownerside/view/other_screen/manageBoatScreen.dart';
+import '../../controller/app_config_provider.dart';
+
+import '../../controller/app_loader.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 import '../authentication/login_screen.dart';
-import '/utilities/app_button.dart';
-import '/utilities/textinput.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_button.dart';
+import '../../controller/textinput.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
 
 class AddBoatScreen extends StatefulWidget {
   static String routeName = './AddBoatScreen';
@@ -39,6 +40,7 @@ class _AddBoatScreenState extends State<AddBoatScreen> {
   TextEditingController boatBrandTextEditingController =
       TextEditingController();
   TextEditingController boatYearTextEditingController = TextEditingController();
+
   DateTime? selectedDate;
   var sendDate = "";
   bool isApiCalling = false;
@@ -179,8 +181,6 @@ class _AddBoatScreenState extends State<AddBoatScreen> {
       formData.fields['cabins'] = cabinsTextEditingController.text;
       formData.fields['toilet'] = toiletTextEditingController.text;
 
-     
-
       log("response--==> ${formData.fields}");
       // print("response--==> ${formData.files}");
       http.StreamedResponse response = await formData.send();
@@ -194,7 +194,7 @@ class _AddBoatScreenState extends State<AddBoatScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const ChooseBoatScreen(),
+              builder: (context) => const ManageBoatScreen(),
             ),
           );
           SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
@@ -242,7 +242,7 @@ class _AddBoatScreenState extends State<AddBoatScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColor.secondaryColor,
-        body: Container(
+        body: SizedBox(
           width: MediaQuery.of(context).size.width * 100 / 100,
           height: MediaQuery.of(context).size.height * 100 / 100,
           child: Column(
@@ -275,7 +275,7 @@ class _AddBoatScreenState extends State<AddBoatScreen> {
                             onTap: () {
                               Navigator.pop(context);
                             },
-                            child: Container(
+                            child: SizedBox(
                               width:
                                   MediaQuery.of(context).size.width * 15 / 100,
                               height:
@@ -466,7 +466,6 @@ class _AddBoatScreenState extends State<AddBoatScreen> {
                           height: MediaQuery.of(context).size.height * 6 / 100),
 
                       //!=== Add Boat Image Text ===
-                     
 
                       //!=== Button Submit ===
                       AppButton(

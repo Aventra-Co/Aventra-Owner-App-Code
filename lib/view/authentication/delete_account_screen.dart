@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 import '/view/authentication/login_screen.dart';
-import '../../utilities/app_button.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_header.dart';
-import '../../utilities/app_language.dart';
-import '../../utilities/app_loader.dart';
+import '../../controller/app_button.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_language.dart';
+import '../../controller/app_loader.dart';
 import 'dart:ui' as ui;
 
 class DeleteAccount extends StatefulWidget {
@@ -238,7 +238,8 @@ class _ContactAdminState extends State<DeleteAccount> {
                       AppButton(
                           text: AppLanguage.sendText[language],
                           onPress: () {
-                            reasonValidation(messageTextEditingController.text);
+                            Navigator.pop(context);
+                            // reasonValidation(messageTextEditingController.text);
                           }),
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 5 / 100),

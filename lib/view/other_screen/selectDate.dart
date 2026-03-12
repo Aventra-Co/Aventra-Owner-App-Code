@@ -5,17 +5,17 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:the_boat_ownerside/utilities/app_footer.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import 'package:the_boat_ownerside/controller/app_footer.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 import '../authentication/login_screen.dart';
-import '/utilities/app_font.dart';
-import '/utilities/app_header.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
 import 'dart:ui' as ui;
 import 'package:http/http.dart' as http;
 
@@ -294,6 +294,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
     }
   }
 
+  int status = 1;
   @override
   Widget build(BuildContext context) {
     return ProgressHUD(
@@ -341,25 +342,113 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                           height: MediaQuery.of(context).size.height * 2 / 100,
                         ),
 
+                        //!toggle buttons
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                AppLanguage.selectBoatText[language],
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    status = 1;
+                                  });
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  width: MediaQuery.of(context).size.width *
+                                      42 /
+                                      100,
+                                  decoration: BoxDecoration(
+                                      color: status == 1
+                                          ? AppColor.themeColor
+                                          : AppColor.secondaryColor,
+                                      borderRadius: BorderRadius.circular(5)),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: screenWidth > 600 ? 15 : 8.0),
+                                    child: Text(
+                                      AppLanguage.seaText[language],
+                                      style: TextStyle(
+                                          fontSize: screenWidth > 600 ? 20 : 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: status == 1
+                                              ? AppColor.secondaryColor
+                                              : AppColor.primaryColor,
+                                          fontFamily: AppFont.fontFamily),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              //!upcoming
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    status = 2;
+                                  });
+                                  // Navigator.push(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: ((context) => MyFooterPage(
+                                  //               indexOfPage: 1,
+                                  //             ))));
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  width: MediaQuery.of(context).size.width *
+                                      42 /
+                                      100,
+                                  decoration: BoxDecoration(
+                                      color: status == 2
+                                          ? AppColor.themeColor
+                                          : AppColor.secondaryColor,
+                                          border: Border.all(color: AppColor.themeColor),
+                                      borderRadius: BorderRadius.circular(5)),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: screenWidth > 600 ? 15 : 8.0),
+                                    child: Text(
+                                      AppLanguage.propertyText[language],
+                                      style: TextStyle(
+                                          fontSize: screenWidth > 600 ? 20 : 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: status == 2
+                                              ? AppColor.secondaryColor
+                                              : AppColor.primaryColor,
+                                          fontFamily: AppFont.fontFamily),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 2 / 100,
+                        ),
+
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                           
+                              Text(   status==1 ?
+                               AppLanguage.selectBoatText[language]
+                               :  AppLanguage.selectPropertyText[language],
                                 style: const TextStyle(
                                     fontFamily: AppFont.fontFamily,
                                     fontWeight: FontWeight.w700,
                                     color: AppColor.primaryColor,
                                     fontSize: 16),
                               ),
-                            
                             ],
                           ),
                         ),
                         SizedBox(
-                          height: MediaQuery.of(context).size.height * 2 / 100,
+                          height: MediaQuery.of(context).size.height * 1 / 100,
                         ),
 
                         //!pickup list
@@ -404,10 +493,11 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 8.0, horizontal: 12.0),
                                     child: Text(
+                                      status==1 ?
                                       boatList[index]['boat_name_english'] ??
-                                          "",
+                                          "" :AppLanguage.PalmResortText[language],
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
+                                      style: TextStyle( 
                                           color: selectedBoatId ==
                                                   boatList[index]["boat_id"]
                                               ? AppColor.secondaryColor
@@ -422,9 +512,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                             }),
                           ),
                         ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 2 / 100,
-                        ),
+
                         if (boatList.isEmpty && isApiCalling == false)
                           Column(
                             children: [
@@ -564,7 +652,6 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                         ),
                         SizedBox(
                             height: MediaQuery.of(context).size.height * 0.02),
-
 
                         Padding(
                           padding: const EdgeInsets.only(top: 2.0, bottom: 30),
@@ -946,7 +1033,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                                             scale: 4),
                                         label: Text(
                                           AppLanguage
-                                              .addUnavailabilityText[language],
+                                              .addAvailabilityText[language],
                                           style: const TextStyle(
                                             fontFamily: AppFont.fontFamily,
                                             fontSize: 16,
@@ -963,16 +1050,12 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                                         height:
                                             MediaQuery.of(context).size.height *
                                                 0.02),
-
-                                   
                                   ],
                                 ),
                               ),
                             ],
                           ),
                         ),
-
-                       
                       ],
                     ),
                   ),

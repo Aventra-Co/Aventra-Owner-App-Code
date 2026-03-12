@@ -5,16 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 import '../authentication/login_screen.dart';
-import '/utilities/app_header.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_language.dart';
 import 'dart:ui' as ui;
 
 class AdvertisementScreen extends StatefulWidget {
@@ -27,13 +26,6 @@ class AdvertisementScreen extends StatefulWidget {
 }
 
 class _AdvertisementScreenState extends State<AdvertisementScreen> {
-  List images = [
-    AppImage.boatImage,
-    AppImage.boatWaterIcon,
-    AppImage.yatchImage,
-    AppImage.yatch2Image,
-    AppImage.carBgImage,
-  ];
   bool isApiCalling = false;
   int selectedImageInd = 0;
   String allActivity = "";
@@ -202,7 +194,7 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 2 / 100),
 
-                      //==================IMAGE CODE=====================//
+                      //!==================IMAGE CODE=====================//
                       if (tripImages.isNotEmpty)
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
@@ -235,7 +227,7 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 2 / 100),
 
-                      //list
+                      //!list
                       Container(
                         alignment: Alignment.center,
                         width: MediaQuery.of(context).size.width * 100 / 100,
@@ -330,7 +322,7 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
                                 adDetails['advertisement_type'] == 0
                                     ? AppLanguage.privateText[language]
                                     : AppLanguage.publicText[language]),
-                 
+
                             textTile(AppLanguage.tripDateText[language],
                                 showFormattedDates),
                             textTile(AppLanguage.tripTimeText[language],
@@ -383,7 +375,7 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
                             textTile(
                                 AppLanguage.selectedItemPriceText[language],
                                 "KDW ${adDetails['totalAddonPrice']}"),
-                        
+
                             textTile(AppLanguage.cancellationTimeText[language],
                                 "${adDetails['cancle_day']} Days"),
                           ],

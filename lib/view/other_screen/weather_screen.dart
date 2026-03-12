@@ -7,13 +7,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
 
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_header.dart';
-import '../../utilities/app_language.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_language.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 
 class WeatherScreen extends StatefulWidget {
   static String routeName = './WeatherScreen';
@@ -337,7 +337,7 @@ class WeatherScreenState extends State<WeatherScreen> {
                 width: screenWidth * 100 / 100,
                 color: AppColor.secondaryColor,
                 child: Column(children: [
-                  AppHeader(
+                  CustomAppHeader(
                       text: AppLanguage.weatherReportText[language],
                       onPress: () {
                         Navigator.pop(context);

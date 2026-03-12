@@ -5,20 +5,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
-import '/view/other_screen/chooseBoatScreen.dart';
+import 'package:the_boat_ownerside/view/propertymodule/manage_property_screen.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
+import '../other_screen/manageBoatScreen.dart';
 import '/view/other_screen/historyScreen.dart';
 import '/view/other_screen/ratingScreen.dart';
 import '/view/other_screen/walletScreen.dart';
 import '/view/other_screen/manage_staff_screen.dart';
-import '/utilities/app_footer.dart';
+import '../../controller/app_footer.dart';
 import '/view/authentication/setting_screen.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
 import 'login_screen.dart';
 import 'dart:ui' as ui;
 import 'package:http/http.dart' as http;
@@ -275,9 +276,7 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
                                 children: [
                                   //edit
                                   GestureDetector(
-                                    onTap: () {
-                             
-                                    },
+                                    onTap: () {},
                                     child: Container(
                                       alignment: Alignment.centerRight,
                                       width: MediaQuery.of(context).size.width *
@@ -600,7 +599,7 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              const ChooseBoatScreen()));
+                                              const ManageBoatScreen()));
                                 },
                                 child: Container(
                                   width: MediaQuery.of(context).size.width *
@@ -698,6 +697,111 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
+
+                        Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ManagePropertyScreen()));
+                              },
+                              child: Container(
+                                width: MediaQuery.of(context).size.width *
+                                    90 /
+                                    100,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        width: 1, color: AppColor.boaderColor)),
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width *
+                                      80 /
+                                      100,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 13.0),
+                                    child: Row(
+                                      children: [
+                                        //setting icon
+                                        GestureDetector(
+                                          child: Container(
+                                            alignment: language == 1
+                                                ? Alignment.centerLeft
+                                                : Alignment.centerRight,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                10 /
+                                                100,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                5 /
+                                                100,
+                                            child:
+                                                Image.asset(AppImage.homeIcons),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              3 /
+                                              100,
+                                        ),
+
+                                        //text
+                                        Text(
+                                          AppLanguage
+                                              .managePropertyText[language],
+                                          style: const TextStyle(
+                                              color: AppColor.primaryColor,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700,
+                                              fontFamily: AppFont.fontFamily),
+                                        ),
+                                        const Spacer(),
+
+                                        //next
+                                        Container(
+                                          alignment: language == 1
+                                              ? Alignment.centerLeft
+                                              : Alignment.centerRight,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              10 /
+                                              100,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              5 /
+                                              100,
+                                          child: Image.asset(
+                                              AppImage.semiCircleArrowIcon),
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              3 /
+                                              100,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100,
+                            ),
+                          ],
+                        ),
 
                         //manage staff
                         if (userType == 3)

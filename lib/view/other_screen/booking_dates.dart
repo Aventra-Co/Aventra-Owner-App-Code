@@ -6,16 +6,16 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:the_boat_ownerside/utilities/app_constant.dart';
-import 'package:the_boat_ownerside/utilities/app_language.dart';
+import 'package:the_boat_ownerside/controller/app_constant.dart';
+import 'package:the_boat_ownerside/controller/app_language.dart';
 import 'package:the_boat_ownerside/view/other_screen/upcoming_details.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_header.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 import '../authentication/login_screen.dart';
 
 class BookingDatesScreen extends StatefulWidget {

@@ -59,6 +59,7 @@ class AppImage {
   static const toggleActiveIcon = "./assets/icons/ic_toggleActive.png";
   static const addImageIcon = "./assets/icons/ic_addImage.png";
   static const cancelIcon = "./assets/icons/ic_cancel.png";
+  static const cancelRedIcon = "./assets/icons/ic_cancelRed.png";
   static const markedCircleIcon = "./assets/icons/ic_markedCircle.png";
   static const circleIcon = "./assets/icons/ic_circle.png";
   static const mapIcon = "./assets/icons/ic_map.png";
@@ -102,4 +103,34 @@ class AppImage {
   static const discountStrip = './assets/icons/ic_discountStrip.png';
   static const discountStripInverted =
       './assets/icons/ic_discountStripInverted.png';
+//23/02/2026
+
+  static const house1Icon = './assets/icons/house1.png';
+
+  static const house2Icon = './assets/icons/house2.png';
+
+  static const cancellationPolicyIcon =
+      './assets/icons/cancellationPolicyIcon.png';
+
+  static const tv = './assets/icons/tv.png';
+  static const acIcon = './assets/icons/acIcon.png';
+  static const wifi = './assets/icons/wifi.png';
+  static const coffeeMachine = './assets/icons/coffeeMachine.png';
+  static const bedding = './assets/icons/bedding.png';
+  static const microwave = './assets/icons/microwave.png';
+  static const kettle = './assets/icons/kettle.png';
+  static const fridge = './assets/icons/fridge.png';
+  static const identifyIcon = './assets/icons/identifyIcon.png';
+  static const rightArrow = './assets/icons/rightArrow.png';
+  static const house3Icon = './assets/icons/house3.png';
+  static const houseBanner = './assets/icons/houseBanner.png';
+  static const location = './assets/icons/location.png';
+
+  static const propertyAdImage = './assets/icons/homeAdverstisement.png';
+  static const seaAdImage = './assets/icons/seaAdvertisement.png';
+  static const homeIcons = './assets/icons/homeIcon.png';
+
+  static const calenderIcon = './assets/icons/calenderIcon.png';
+  static const timeIcon = './assets/icons/timeIcon.png';
+  static const memberIcon = './assets/icons/memberIcon.png';
 }

@@ -8,12 +8,12 @@ import '../../chat/chat_user_card.dart';
 import '../../helper/apis.dart';
 import '../../model/chat_user.dart';
 import '../../model/message.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_footer.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_footer.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
 
 class InboxScreen extends StatefulWidget {
   static String routeName = './InboxScreen';

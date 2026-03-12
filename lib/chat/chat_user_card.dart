@@ -6,7 +6,7 @@ import '../helper/profile_dialog.dart';
 import '../model/chat_user.dart';
 import '../model/message.dart';
 
-import '../utilities/app_color.dart';
+import '../controller/app_color.dart';
 import 'chat_screen.dart';
 import 'profile_image.dart';
 
@@ -21,7 +21,6 @@ class ChatUserCard extends StatefulWidget {
 }
 
 class _ChatUserCardState extends State<ChatUserCard> {
-  //last message info (if null --> no message)
   Message? _message;
 
   @override
@@ -35,7 +34,6 @@ class _ChatUserCardState extends State<ChatUserCard> {
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(15)),
           onTap: () {
-            //for navigating to chat screen
 
             print(widget.user);
             Navigator.push(

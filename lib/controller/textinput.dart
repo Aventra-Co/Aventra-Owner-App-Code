@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'app_color.dart';
 import 'app_constant.dart'; // Update with your actual path
 
@@ -62,7 +63,6 @@ class CustomTextFormField extends StatelessWidget {
   }
 }
 
-// ignore: must_be_immutable
 class CustomTextFormFieldLightText extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
@@ -100,7 +100,6 @@ class CustomTextFormFieldLightText extends StatelessWidget {
           maxLength: maxLength,
           decoration: InputDecoration(
             border: const UnderlineInputBorder(
-              // Use UnderlineInputBorder
               borderSide: BorderSide(color: AppColor.secondaryColor),
             ),
             enabledBorder: const UnderlineInputBorder(
@@ -200,6 +199,7 @@ class CustomTextFormFieldBlackWidth extends StatelessWidget {
   final int fillColorStatus;
   final bool readOnly;
   final double width;
+  final List<TextInputFormatter>? inputFormatter;
   // ignore: prefer_typing_uninitialized_variables
   var keyboardtype;
 
@@ -211,6 +211,7 @@ class CustomTextFormFieldBlackWidth extends StatelessWidget {
       required this.maxLength,
       required this.fillColorStatus,
       required this.width,
+      this.inputFormatter,
       required this.readOnly});
 
   @override
@@ -230,6 +231,7 @@ class CustomTextFormFieldBlackWidth extends StatelessWidget {
           keyboardType: keyboardtype,
           controller: controller,
           maxLength: maxLength,
+          inputFormatters: inputFormatter,
           decoration: InputDecoration(
             border: const UnderlineInputBorder(
               // Use UnderlineInputBorder

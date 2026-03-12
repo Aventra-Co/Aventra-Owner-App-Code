@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../utilities/app_color.dart';
+import 'app_color.dart';
 import 'app_font.dart';
 
 class AppButton extends StatelessWidget {
@@ -29,7 +29,7 @@ class AppButton extends StatelessWidget {
         child: Text(
           text,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             color: AppColor.secondaryColor,
             fontFamily: AppFont.fontFamily,
             fontWeight: FontWeight.w700

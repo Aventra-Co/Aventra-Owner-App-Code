@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_shimmers.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/app_shimmers.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 import '../authentication/login_screen.dart';
 import 'ratingDetails.dart';
 import 'dart:ui' as ui;
@@ -127,6 +127,36 @@ class _RatingScreenState extends State<RatingScreen> {
     }
   }
 
+  // ================= PROPERTY STATIC RATING LIST =================
+
+  List<Map<String, dynamic>> propertyRatingList = [
+    {
+      "rating_review_id": "101",
+      "name": "Ahmed Ali",
+      "review": "Amazing property experience",
+      "total_rating_average": 4.5,
+      "createtime": "12 Feb 2026",
+      "image": AppImage.profilePlaceholderImage,
+    },
+    {
+      "rating_review_id": "102",
+      "name": "Sara Khan",
+      "review": "Very clean",
+      "total_rating_average": 5.0,
+      "createtime": "15 Feb 2026",
+      "image": AppImage.profilePlaceholderImage,
+    },
+    {
+      "rating_review_id": "103",
+      "name": "John Smith",
+      "review": "Good Experience Hopefully will have again",
+      "total_rating_average": 3.5,
+      "createtime": "18 Feb 2026",
+      "image": AppImage.profilePlaceholderImage,
+    },
+  ];
+
+  int status = 1;
   @override
   Widget build(BuildContext context) {
     return ProgressHUD(
@@ -136,6 +166,8 @@ class _RatingScreenState extends State<RatingScreen> {
   }
 
   Widget _buildUIScreen(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    double screenWidth = MediaQuery.of(context).size.width;
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light));
@@ -259,7 +291,6 @@ class _RatingScreenState extends State<RatingScreen> {
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 2 / 100,
                           ),
-                        
                         ],
                       ),
                     ),
@@ -269,6 +300,178 @@ class _RatingScreenState extends State<RatingScreen> {
                   ],
                 ),
               ),
+
+              SizedBox(height: MediaQuery.of(context).size.height * 2 / 100),
+
+              //!toggle buttons
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 90 / 100,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          status = 1;
+                        });
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        width: MediaQuery.of(context).size.width * 42 / 100,
+                        decoration: BoxDecoration(
+                            color: status == 1
+                                ? AppColor.themeColor
+                                : AppColor.secondaryColor,
+                            border: Border.all(color: AppColor.themeColor),
+                            borderRadius: BorderRadius.circular(5)),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: screenWidth > 600 ? 15 : 8.0),
+                          child: Text(
+                            AppLanguage.seaText[language],
+                            style: TextStyle(
+                                fontSize: screenWidth > 600 ? 20 : 14,
+                                fontWeight: FontWeight.w700,
+                                color: status == 1
+                                    ? AppColor.secondaryColor
+                                    : AppColor.primaryColor,
+                                fontFamily: AppFont.fontFamily),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    //!upcoming
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          status = 2;
+                        });
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        width: MediaQuery.of(context).size.width * 42 / 100,
+                        decoration: BoxDecoration(
+                            color: status == 2
+                                ? AppColor.themeColor
+                                : AppColor.secondaryColor,
+                            border: Border.all(color: AppColor.themeColor),
+                            borderRadius: BorderRadius.circular(5)),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: screenWidth > 600 ? 15 : 8.0),
+                          child: Text(
+                            AppLanguage.propertyText[language],
+                            style: TextStyle(
+                                fontSize: screenWidth > 600 ? 20 : 14,
+                                fontWeight: FontWeight.w700,
+                                color: status == 2
+                                    ? AppColor.secondaryColor
+                                    : AppColor.primaryColor,
+                                fontFamily: AppFont.fontFamily),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 2 / 100,
+              ),
+              if (status == 2 && propertyRatingList.isNotEmpty)
+                Wrap(
+                  children: [
+                    ...List.generate(propertyRatingList.length, (index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>      RatingDetailsScreen(
+                                              ratingId: ratingList[index]
+                                                      ['rating_review_id']
+                                                  .toString(),
+                                            ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          margin: EdgeInsets.symmetric(
+                              vertical: size.height * 0.01,
+                              horizontal: size.width * 2 / 100),
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white, width: 7.0),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: AppColor.textLightColor,
+                                blurRadius: 9.0,
+                                offset: Offset(1, 0),
+                              ),
+                            ],
+                            color: AppColor.secondaryColor,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: AssetImage(
+                                  propertyRatingList[index]['image']),
+                            ),
+                            title: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      propertyRatingList[index]['name'],
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: AppFont.fontFamily,
+                                          fontSize: 12,
+                                          color: AppColor.primaryColor),
+                                    ),
+                                    Text(
+                                      propertyRatingList[index]['createtime'],
+                                      style: const TextStyle(
+                                          color: AppColor.primaryColor,
+                                          fontSize: 12,
+                                          fontFamily: AppFont.fontFamily,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ],
+                                ),
+                                RatingBarIndicator(
+                                  rating: propertyRatingList[index]
+                                          ['total_rating_average']
+                                      .toDouble(),
+                                  itemCount: 5,
+                                  itemSize: 20,
+                                  unratedColor: AppColor.textLightColor,
+                                  itemBuilder: (context, _) => const Icon(
+                                    Icons.star,
+                                    color: Colors.yellow,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            subtitle: Text(
+                              propertyRatingList[index]['review'],
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: AppFont.fontFamily,
+                                  fontSize: 8,
+                                  color: AppColor.primaryColor),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+
               isLoading
                   ? ratingShimmerEffect(context)
                   : Expanded(
@@ -278,7 +481,7 @@ class _RatingScreenState extends State<RatingScreen> {
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 2 / 100),
-                          if (ratingList.isNotEmpty)
+                          if (ratingList.isNotEmpty && status != 2)
                             Wrap(
                               children: [
                                 ...List.generate(ratingList.length, (index) {

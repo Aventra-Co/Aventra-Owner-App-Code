@@ -7,15 +7,15 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../helper/apis.dart';
 import '../../model/chat_user.dart';
-import '../../utilities/app_firebase.dart';
+import '../../controller/app_firebase.dart';
 import '/view/authentication/login_screen.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_footer.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/one_signal_service.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_footer.dart';
+import '../../controller/app_image.dart';
+import '../../controller/one_signal_service.dart';
 import '../../view/other_screen/notification.dart';
 
 class Splash extends StatefulWidget {

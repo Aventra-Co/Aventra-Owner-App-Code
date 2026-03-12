@@ -6,16 +6,16 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:pinput/pinput.dart';
 import '/view/authentication/login_screen.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 import '/view/authentication/ResetPassword_screen.dart';
-import '../../utilities/app_button.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_header.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_button.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_language.dart';
 
 class ForgetOTPVerificationHeader extends StatelessWidget {
   static const routeName = './ForgetOTPVerificationHeader';
@@ -245,7 +245,7 @@ class _OTPState extends State<ForgetOTPVerification> {
                 children: [
                   SizedBox(
                       height: MediaQuery.of(context).size.height * 1 / 100),
-                  AppHeader(
+                  CustomAppHeader(
                       text: "",
                       onPress: () {
                         Navigator.pop(context);

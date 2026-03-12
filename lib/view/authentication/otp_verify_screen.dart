@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pinput/pinput.dart';
-import '../../utilities/app_button.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_footer.dart';
-import '../../utilities/app_header.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_button.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_footer.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_language.dart';
 
 class OTP extends StatefulWidget {
   static String routeName = "./OTP";
@@ -56,7 +56,7 @@ class _OTPState extends State<OTP> {
               children: [
                 SizedBox(
                     height: MediaQuery.of(context).size.height * 1 / 100),
-                AppHeader(
+                CustomAppHeader(
                     text: "",
                     onPress: () {
                       Navigator.pop(context);

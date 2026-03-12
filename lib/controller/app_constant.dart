@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'app_color.dart';
 import 'app_connectivity.dart';
@@ -40,6 +41,25 @@ class AppConstant {
   // static String apiKey = "AIzaSyAlmy6hvQysu1m7UhhevgFpuhzXkHHdhJ0";
   static String messagingSenderId = "83903925512";
   static String projectId = "my-boat-a9c54";
+
+
+//!===================INPUT FORMATTERS==========================
+    static List<TextInputFormatter> onlyDigitFormatter = [
+    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')) // only digits allowed
+  ];
+  static List<TextInputFormatter> alphaNumericFormatter = [
+    FilteringTextInputFormatter.allow(
+        RegExp(r'[a-zA-Z0-9]')) // alphanumeric allowed
+  ];
+  static List<TextInputFormatter> alphabetFormatter = [
+    FilteringTextInputFormatter.allow(
+        RegExp(r'[a-zA-Z ]') // alphabet and space allowed
+        )
+  ];
+  static List<TextInputFormatter> allAllowFormatter = [
+    FilteringTextInputFormatter.allow(RegExp(r'.*')) // alphabet allowed
+  ];
+  //!===================INPUT FORMATTERS==========================
 
   static const TextStyle textFilledStyle = TextStyle(
       color: AppColor.textColor, fontWeight: FontWeight.w400, fontSize: 16);

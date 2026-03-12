@@ -4,30 +4,30 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:the_boat_ownerside/utilities/app_footer.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_shimmers.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import 'package:the_boat_ownerside/controller/app_footer.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/app_shimmers.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 import '../authentication/login_screen.dart';
-import '/utilities/app_header.dart';
+import '../../controller/app_header.dart';
 import 'edit_boat_details_screen.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
 import 'addBoatScreen.dart';
 
-class ChooseBoatScreen extends StatefulWidget {
-  static String routeName = './WalletScreen';
-  const ChooseBoatScreen({super.key});
+class ManageBoatScreen extends StatefulWidget {
+  static String routeName = './ManageBoatScreen';
+  const ManageBoatScreen({super.key});
 
   @override
-  State<ChooseBoatScreen> createState() => _ChooseBoatScreenState();
+  State<ManageBoatScreen> createState() => _ManageBoatScreenState();
 }
 
-class _ChooseBoatScreenState extends State<ChooseBoatScreen> {
+class _ManageBoatScreenState extends State<ManageBoatScreen> {
   bool isApiCalling = false;
   bool isLoading = true;
   List<dynamic> boatList = [];
@@ -242,6 +242,17 @@ class _ChooseBoatScreenState extends State<ChooseBoatScreen> {
     }
   }
 
+  var refreshKey = GlobalKey<RefreshIndicatorState>();
+
+  //--------------------REFRESH FUNCION-----------------------//
+  Future<Null> _refreshPage() async {
+    refreshKey.currentState?.show(atTop: false);
+    await Future.delayed(const Duration(seconds: 1));
+    // getTopStories(0);
+    getUserDetails();
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ProgressHUD(
@@ -269,358 +280,371 @@ class _ChooseBoatScreenState extends State<ChooseBoatScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColor.secondaryColor,
-        body: Container(
-          width: MediaQuery.of(context).size.width * 100 / 100,
-          height: MediaQuery.of(context).size.height * 100 / 100,
-          child: Column(
-            children: [
-              AppHeaderOrange(
-                  text: AppLanguage.chooseBoatText[language],
-                  onPress: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MyFooterPage(
-                          indexOfPage: 4,
+        body: RefreshIndicator(
+          onRefresh: _refreshPage,
+          color: AppColor.themeColor,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 100 / 100,
+            height: MediaQuery.of(context).size.height * 100 / 100,
+            child: Column(
+              children: [
+                AppHeaderOrange(
+                    text: AppLanguage.manageBoatText[language],
+                    onPress: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MyFooterPage(
+                            indexOfPage: 4,
+                          ),
                         ),
-                      ),
-                    );
-                    return Future.value(false);
-                  }),
-              SizedBox(height: MediaQuery.of(context).size.height * 2 / 100),
+                      );
+                      return Future.value(false);
+                    }),
+                SizedBox(height: MediaQuery.of(context).size.height * 2 / 100),
 
-              //add bottom
-              if (userType == 3 || (userType == 2 && manageBoat == 1))
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AddBoatScreen(),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 90 / 100,
-                    alignment: Alignment.centerRight,
+                //add bottom
+                if (userType == 3 || (userType == 2 && manageBoat == 1))
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AddBoatScreen(),
+                        ),
+                      );
+                    },
                     child: Container(
-                      width: MediaQuery.of(context).size.width * 20 / 100,
-                      decoration: BoxDecoration(
-                          color: AppColor.themeColor,
-                          boxShadow: const [
-                            BoxShadow(
-                              color: AppColor.textLightColor, // Shadow color
-                              blurRadius: 3.0, // Blur intensity
-                              offset: Offset(0, 5), // Moves shadow 5px down
-                            ),
-                          ],
-                          borderRadius: BorderRadius.circular(5)),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: screenWidth > 600
-                                  ? MediaQuery.of(context).size.width * 4 / 100
-                                  : MediaQuery.of(context).size.width * 5 / 100,
-                              height: screenWidth > 600
-                                  ? MediaQuery.of(context).size.width * 4 / 100
-                                  : MediaQuery.of(context).size.width * 5 / 100,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: Image.asset(
-                                  AppImage.addIcon,
-                                  color: AppColor.secondaryColor,
-                                  fit: BoxFit.cover,
+                      width: MediaQuery.of(context).size.width * 90 / 100,
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 20 / 100,
+                        decoration: BoxDecoration(
+                            color: AppColor.themeColor,
+                            boxShadow: const [
+                              BoxShadow(
+                                color: AppColor.textLightColor, // Shadow color
+                                blurRadius: 3.0, // Blur intensity
+                                offset: Offset(0, 5), // Moves shadow 5px down
+                              ),
+                            ],
+                            borderRadius: BorderRadius.circular(5)),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: screenWidth > 600
+                                    ? MediaQuery.of(context).size.width *
+                                        4 /
+                                        100
+                                    : MediaQuery.of(context).size.width *
+                                        5 /
+                                        100,
+                                height: screenWidth > 600
+                                    ? MediaQuery.of(context).size.width *
+                                        4 /
+                                        100
+                                    : MediaQuery.of(context).size.width *
+                                        5 /
+                                        100,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Image.asset(
+                                    AppImage.addIcon,
+                                    color: AppColor.secondaryColor,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
-                            ),
-                            SizedBox(
-                              width:
-                                  MediaQuery.of(context).size.width * 1 / 100,
-                            ),
-                            Text(
-                              AppLanguage.addText[language],
-                              style: const TextStyle(
-                                  fontFamily: AppFont.fontFamily,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColor.secondaryColor),
-                            ),
-                          ],
+                              SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 1 / 100,
+                              ),
+                              Text(
+                                AppLanguage.addText[language],
+                                style: const TextStyle(
+                                    fontFamily: AppFont.fontFamily,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColor.secondaryColor),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 3 / 100,
                 ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 3 / 100,
-              ),
 
-              isLoading
-                  ? boatsShimmerEffect(context)
-                  : Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            if (boatList.isNotEmpty)
-                              Wrap(
-                                children: [
-                                  ...List.generate(boatList.length, (index) {
-                                    return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        //coupon card
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  3 /
-                                                  100,
-                                            ),
-                                            Container(
+                isLoading
+                    ? boatsShimmerEffect(context)
+                    : Expanded(
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Column(
+                            children: [
+                              if (boatList.isNotEmpty)
+                                Wrap(
+                                  children: [
+                                    ...List.generate(boatList.length, (index) {
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          //coupon card
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              SizedBox(
                                                 width: MediaQuery.of(context)
                                                         .size
                                                         .width *
-                                                    90 /
+                                                    3 /
                                                     100,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      width: 1,
-                                                      color:
-                                                          AppColor.boaderColor),
-                                                  boxShadow: const [
-                                                    BoxShadow(
-                                                      color: AppColor
-                                                          .textLightColor, // Shadow color
-                                                      blurRadius:
-                                                          2.0, // Blur intensity
-                                                      offset: Offset(0,
-                                                          5), // Moves shadow 5px down
-                                                    ),
-                                                  ], //BoxShadow
-                                                  color:
-                                                      AppColor.secondaryColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(15),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(vertical: 6.0),
-                                                  child: Container(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            80 /
-                                                            100,
-                                                    child: Row(
-                                                      children: [
-                                                        //left side
-                                                        Container(
-                                                          width: MediaQuery.of(
-                                                                      context)
+                                              ),
+                                              Container(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      90 /
+                                                      100,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        width: 1,
+                                                        color: AppColor
+                                                            .boaderColor),
+                                                    boxShadow: const [
+                                                      BoxShadow(
+                                                        color: AppColor
+                                                            .textLightColor, // Shadow color
+                                                        blurRadius:
+                                                            2.0, // Blur intensity
+                                                        offset: Offset(0,
+                                                            5), // Moves shadow 5px down
+                                                      ),
+                                                    ], //BoxShadow
+                                                    color:
+                                                        AppColor.secondaryColor,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15),
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        vertical: 6.0),
+                                                    child: SizedBox(
+                                                      width:
+                                                          MediaQuery.of(context)
                                                                   .size
                                                                   .width *
-                                                              45 /
+                                                              80 /
                                                               100,
-                                                          child: Column(
-                                                            children: [
-                                                              Container(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    45 /
-                                                                    100,
-                                                                child: Text(
-                                                                  "${AppLanguage.yearText[language]}-${boatList[index]['boat_year'].toString()}",
-                                                                  style: const TextStyle(
-                                                                      fontSize:
-                                                                          20,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w500,
-                                                                      color: AppColor
-                                                                          .primaryColor,
-                                                                      fontFamily:
-                                                                          AppFont
-                                                                              .fontFamily),
-                                                                ),
-                                                              ),
-                                                              Container(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    45 /
-                                                                    100,
-                                                                child: Text(
-                                                                  "${AppLanguage.capacityText[language]}-${boatList[index]['boat_capacity']}",
-                                                                  style: const TextStyle(
-                                                                      fontSize:
-                                                                          16,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400,
-                                                                      color: AppColor
-                                                                          .primaryColor,
-                                                                      fontFamily:
-                                                                          AppFont
-                                                                              .fontFamily),
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-
-                                                        //right side
-                                                        Container(
-                                                          alignment: Alignment
-                                                              .centerRight,
-                                                          width: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              35 /
-                                                              100,
-                                                          child: Row(
-                                                            children: [
-                                                              Container(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    26 /
-                                                                    100,
-                                                                // color: Colors.black,
-                                                                child: Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                          .only(
-                                                                          bottom:
-                                                                              2.0),
+                                                      child: Row(
+                                                        children: [
+                                                          //left side
+                                                          SizedBox(
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                45 /
+                                                                100,
+                                                            child: Column(
+                                                              children: [
+                                                                SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      45 /
+                                                                      100,
                                                                   child: Text(
-                                                                    boatList[index]
-                                                                            [
-                                                                            'boat_name_english'] ??
-                                                                        "",
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .start,
+                                                                    "${AppLanguage.yearText[language]}-${boatList[index]['boat_year'].toString()}",
                                                                     style: const TextStyle(
                                                                         fontSize:
-                                                                            16,
+                                                                            20,
                                                                         fontWeight:
                                                                             FontWeight
-                                                                                .w600,
+                                                                                .w500,
                                                                         color: AppColor
                                                                             .primaryColor,
                                                                         fontFamily:
                                                                             AppFont.fontFamily),
                                                                   ),
                                                                 ),
-                                                              ),
-                                                              SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    4 /
-                                                                    100,
-                                                              ),
-                                                              if (userType ==
-                                                                      3 ||
-                                                                  (userType ==
-                                                                          2 &&
-                                                                      manageBoat ==
-                                                                          1))
-                                                                GestureDetector(
-                                                                  onTap: () {
-                                                                    optionsBottomSheet(
-                                                                        context,
-                                                                        screenWidth,
-                                                                        index);
-                                                                  },
+                                                                SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      45 /
+                                                                      100,
+                                                                  child: Text(
+                                                                    "${AppLanguage.capacityText[language]}-${boatList[index]['boat_capacity']}",
+                                                                    style: const TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w400,
+                                                                        color: AppColor
+                                                                            .primaryColor,
+                                                                        fontFamily:
+                                                                            AppFont.fontFamily),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+
+                                                          //right side
+                                                          Container(
+                                                            alignment: Alignment
+                                                                .centerRight,
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                35 /
+                                                                100,
+                                                            child: Row(
+                                                              children: [
+                                                                SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      26 /
+                                                                      100,
+                                                                  // color: Colors.black,
                                                                   child:
-                                                                      Container(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        5 /
-                                                                        100,
-                                                                    child: Image
-                                                                        .asset(
-                                                                      AppImage
-                                                                          .threeDotIcon,
-                                                                      color: AppColor
-                                                                          .primaryColor,
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                        .only(
+                                                                        bottom:
+                                                                            2.0),
+                                                                    child: Text(
+                                                                      boatList[index]
+                                                                              [
+                                                                              'boat_name_english'] ??
+                                                                          "",
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .start,
+                                                                      style: const TextStyle(
+                                                                          fontSize:
+                                                                              16,
+                                                                          fontWeight: FontWeight
+                                                                              .w600,
+                                                                          color: AppColor
+                                                                              .primaryColor,
+                                                                          fontFamily:
+                                                                              AppFont.fontFamily),
                                                                     ),
                                                                   ),
                                                                 ),
-                                                            ],
+                                                                SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      4 /
+                                                                      100,
+                                                                ),
+                                                                if (userType ==
+                                                                        3 ||
+                                                                    (userType ==
+                                                                            2 &&
+                                                                        manageBoat ==
+                                                                            1))
+                                                                  GestureDetector(
+                                                                    onTap: () {
+                                                                      optionsBottomSheet(
+                                                                          context,
+                                                                          screenWidth,
+                                                                          index);
+                                                                    },
+                                                                    child:
+                                                                        SizedBox(
+                                                                      width: MediaQuery.of(context)
+                                                                              .size
+                                                                              .width *
+                                                                          5 /
+                                                                          100,
+                                                                      child: Image
+                                                                          .asset(
+                                                                        AppImage
+                                                                            .threeDotIcon,
+                                                                        color: AppColor
+                                                                            .primaryColor,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                              ],
+                                                            ),
                                                           ),
-                                                        ),
-                                                      ],
+                                                        ],
+                                                      ),
                                                     ),
-                                                  ),
-                                                )),
-                                            SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  3 /
-                                                  100,
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              3 /
-                                              100,
-                                        )
-                                      ],
-                                    );
-                                  }),
-                                ],
-                              ),
-                            if (boatList.isEmpty)
-                              Column(
-                                children: [
-                                  SizedBox(
+                                                  )),
+                                              SizedBox(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    3 /
+                                                    100,
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                3 /
+                                                100,
+                                          )
+                                        ],
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              if (boatList.isEmpty)
+                                Column(
+                                  children: [
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                20 /
+                                                100),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          20 /
+                                          100,
                                       height:
-                                          MediaQuery.of(context).size.height *
+                                          MediaQuery.of(context).size.width *
                                               20 /
-                                              100),
-                                  Container(
-                                    width: MediaQuery.of(context).size.width *
-                                        20 /
-                                        100,
-                                    height: MediaQuery.of(context).size.width *
-                                        20 /
-                                        100,
-                                    child: Image.asset(
-                                      AppImage.noDataIcon,
-                                      fit: BoxFit.cover,
+                                              100,
+                                      child: Image.asset(
+                                        AppImage.noDataIcon,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                          ],
+                                  ],
+                                ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-              const NoInternetBanner(),
-            ],
+                const NoInternetBanner(),
+              ],
+            ),
           ),
         ),
       ),
@@ -796,7 +820,6 @@ class _ChooseBoatScreenState extends State<ChooseBoatScreen> {
                               height:
                                   MediaQuery.of(context).size.width * 10 / 100,
                             ),
-                          
                             Container(
                               //color: Colors.amber,
                               alignment: Alignment.center,
@@ -827,7 +850,6 @@ class _ChooseBoatScreenState extends State<ChooseBoatScreen> {
                                     fontFamily: AppFont.fontFamily),
                               ),
                             ),
-
                             SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 4 / 100,

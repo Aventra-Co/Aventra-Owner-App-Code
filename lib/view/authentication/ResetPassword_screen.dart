@@ -2,16 +2,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import '../../utilities/app_button.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_header.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import '../../controller/app_button.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_header.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
 import 'login_screen.dart';
 
 class ResetPasswordHeader extends StatelessWidget {
@@ -163,7 +163,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                         physics: NeverScrollableScrollPhysics(),
                         child: Column(
                           children: [
-                            AppHeader(
+                            CustomAppHeader(
                                 text: AppLanguage.resetPasswordText[language],
                                 onPress: () {
                                   sureGoBackBottomSheet(context);

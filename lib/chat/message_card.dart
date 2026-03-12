@@ -7,7 +7,7 @@ import '../helper/apis.dart';
 import '../helper/dialogs.dart';
 import '../helper/my_date_util.dart';
 import '../model/message.dart';
-import '../utilities/app_color.dart';
+import '../controller/app_color.dart';
 
 class MessageCard extends StatefulWidget {
   const MessageCard({super.key, required this.message});

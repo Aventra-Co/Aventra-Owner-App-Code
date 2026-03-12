@@ -154,7 +154,7 @@ class AppLanguage {
   static const addMoreText = ["Add More ( up to 7)", "أضف المزيد (حتى 7)"];
   static const addText = ["Add", "إضافة"];
   static const uploadImageMsg = [
-    "Please upload cover pics \nSide pics preferred",
+    "Please upload side pics",
     "يرجى تحميل صور الغلاف\nويفضل الصور الجانبية"
   ];
   static const uploadCoverImageMsg = [
@@ -466,7 +466,10 @@ class AppLanguage {
     "يرجى إدخال الوصف"
   ];
   static const reasonMsg = ["Please enter reason", "يرجى إدخال السبب"];
-  static const merchantIdMsg = ["Please enter merchant ID", "يرجى إدخال معرّف التاجر"];
+  static const merchantIdMsg = [
+    "Please enter merchant ID",
+    "يرجى إدخال معرّف التاجر"
+  ];
 
   static const photoGalleryText = ["Gallery", "المعرض"];
   static const cameraText = ["Camera", "الكاميرا"];
@@ -1011,13 +1014,520 @@ class AppLanguage {
     "Ticket(s)",
     "تذكرة (تذاكر)",
   ];
-static const noCitiesMsg = [
-  "No cities found!",
-  "لم يتم العثور على مدن!",
-];
+  static const noCitiesMsg = [
+    "No cities found!",
+    "لم يتم العثور على مدن!",
+  ];
   static const offText = [
     "OFF",
     "خصم",
   ];
 
+  //20/02/2026
+
+  static const guestsText = ["Guests", "ضيف"];
+
+  static const blueNaturedescriptionText = [
+    "Blue Nature is a 5 star complemented with 80 well bedroom and suit, modern residence in a very strategic location from the city center..."
+  ];
+  static const bookingTimeText = [
+    "Booking Time",
+  ];
+  static const managePropertyText = [
+    "Manage Property",
+  ];
+
+  static const palmResortText = [
+    "PalmResort",
+  ];
+
+  static const resortText = [
+    "Resort",
+  ];
+
+  static const sunsetFarmhouseText = [
+    "Sunset Farmhouse",
+  ];
+
+  static const farmhouseText = [
+    "Farmhouse",
+  ];
+
+  static const customerDetailsText = [
+    "Customer Details",
+  ];
+
+// Property Title & Location
+  static const greenleafInnText = [
+    "The Greenleaf Inn",
+  ];
+
+  static const propertyLocationText = [
+    "South Kuta",
+  ];
+
+// Sections
+
+  static const whatThisPlaceOffersText = [
+    "What this place offers",
+  ];
+
+// Customer Info
+  static const customerNameText = [
+    "Jane Cooper",
+  ];
+
+// Booking Info
+
+  static const guestCountText = [
+    "4 Adults + 2 Children",
+  ];
+
+// Description Paragraph
+  static const propertyDescriptionText = [
+    "Blue Nature is a 5 star complex...",
+  ];
+
+// Features
+  static const tvText = [
+    "TV",
+  ];
+
+  static const wifiText = [
+    "Wifi",
+  ];
+
+  static const acText = [
+    "AC",
+  ];
+
+  static const fridgeText = [
+    "Fridge",
+  ];
+
+  static const beddingText = [
+    "Bedding",
+  ];
+
+  static const microwaveText = [
+    "Microwave",
+  ];
+
+  static const kettleText = [
+    "Kettle",
+  ];
+
+  static const coffeeMachineText = [
+    "Coffee Machine",
+  ];
+
+  static const bookingDateText = [
+    "Booking Date & Start Time",
+    "تاريخ الحجز ووقت البدء"
+  ];
+
+//23/02/2026
+
+  static const propertyText = [
+    "Property",
+  ];
+
+  static const seaText = [
+    "Sea",
+  ];
+  static const cancellationPolicyText = [
+    "Cancellation policy ",
+  ];
+
+  static const oceanBreezevillaText = [
+    "Ocean Breeze Villa",
+  ];
+  static const palmSunsetresortText = [
+    "Palm Sunset Resort",
+  ];
+
+  static const propertyAdvertisementText = [
+    "property Advertisement",
+  ];
+// ── AddAdvertisementSectionScreen ─────────────────────────
+
+  static const seaAdvertisementText = [
+    "Sea Advertisement",
+    "إعلان بحري",
+  ];
+
+  static const seaAdvertisementSubtitleText = [
+    "Give Your Boat on Rent, Earn More",
+    "أجر قاربك واكسب المزيد",
+  ];
+
+  static const propertyAdvertisementSubtitleText = [
+    "List Your Space, Get Daily Rent",
+    "أدرج مساحتك واحصل على إيجار يومي",
+  ];
+
+  static const choosepropertyText = [
+    "Choose property",
+    "اختر العقار",
+  ];
+
+//24/02/2026
+  static const enterGuardNameinEnglishText = [
+    "Enter Guard Name in English",
+    "أدخل اسم الحارس باللغة الإنجليزية",
+  ];
+  static const enterGuardNameinArabicText = [
+    "Enter Guard name in Arabic",
+    "أدخل اسم الحارس باللغة العربية",
+  ];
+
+  static const enterGuardNumberText = [
+    "Enter Guard Number",
+    "أدخل رقم الحارس",
+  ];
+
+  static const propertylocationText = [
+    "Property Location",
+    "موقع العقار",
+  ];
+  static const guardNationalityText = [
+    "Guard Nationality",
+    "جنسية الحارس",
+  ];
+
+  static const chooseDestinationText = [
+    "Choose destination",
+    "اختر الوجهة",
+  ];
+
+  static const petFriendlyText = [
+    "Pet friendly",
+    "مسموح بالحيوانات الأليفة",
+  ];
+
+  static const selectPropertyText = [
+    "Select property",
+    "اختر العقار",
+  ];
+  static const PalmResortText = [
+    "Palm Resort",
+    "منتجع بالم",
+  ];
+
+  static const addPropertyText = [
+    "Add Property",
+    "إضافة عقار",
+  ];
+
+// Property Form Texts
+
+  static const enterPropertyNameText = [
+    "Enter Property Name",
+    "أدخل اسم العقار",
+  ];
+  static const enterPropertyNameMsg = [
+    "Please enter property name",
+    "الرجاء إدخال اسم العقار",
+  ];
+
+  static const selectPropertyTypeText = [
+    "Select Property Type",
+    "اختر نوع العقار",
+  ];
+
+  static const selectPropertyTypeMsg = [
+    "Please select property type",
+    "الرجاء اختيار نوع العقار",
+  ];
+
+  static const selectPropertyMsg = [
+    "Please select property",
+    "الرجاء اختيار العقار",
+  ];
+
+  static const enterPropertyAddressText = [
+    "Enter Property Address",
+    "أدخل عنوان العقار",
+  ];
+
+  static const enterPropertyAddressMSg = [
+    "Please enter property address",
+    "الرجاء إدخال عنوان العقار",
+  ];
+
+  static const enterRoomsText = [
+    "Enter Rooms",
+    "أدخل عدد الغرف",
+  ];
+
+  static const enterRoomsMsg = [
+    "Please enter rooms",
+    "الرجاء إدخال عدد الغرف",
+  ];
+
+  static const enterHallsText = [
+    "Enter Halls",
+    "أدخل عدد الصالات",
+  ];
+
+  static const enterHallsMsg = [
+    "Please enter halls",
+    "الرجاء إدخال عدد الصالات",
+  ];
+
+  static const enterOutdoorSeatingText = [
+    "Enter Outdoor Seating",
+    "أدخل عدد الجلسات الخارجية",
+  ];
+
+  static const enterOutdoorSeatingMsg = [
+    "Please enter outdoor seating",
+    "الرجاء إدخال عدد الجلسات الخارجية",
+  ];
+
+  static const enterWashroomsText = [
+    "Enter Washrooms",
+    "أدخل عدد دورات المياه",
+  ];
+
+  static const enterWashroomsMsg = [
+    "Please enter washrooms",
+    "الرجاء إدخال عدد دورات المياه",
+  ];
+
+  static const enterPoolText = [
+    "Enter Pool",
+    "أدخل عدد المسابح",
+  ];
+  static const enterPoolMsg = [
+    "Please enter pool",
+    "الرجاء إدخال عدد المسابح",
+  ];
+
+  static const blueWaterisText = [
+    "BlueWater is a truly comprehensive resort with 263 well-bedroom and our modern sophisticated and very strategic location from the city center.",
+    "بلو ووتر هو منتجع شامل حقاً يضم 263 غرفة فاخرة وموقعنا الحديث والمتطور والاستراتيجي جداً من وسط المدينة",
+  ];
+
+  static const pleaseUploadsidepicsText = [
+    "Please upload Side\npics",
+    "الرجاء تحميل الصور\nالجانبية",
+  ];
+// ================= PROPERTY DETAILS TEXT =================
+
+  static const shawnText = [
+    "Shawn",
+    "شون",
+  ];
+
+  static const enterGuardNameArabicText = [
+    "Enter Guard name in Arabic",
+    "أدخل اسم الحارس باللغة العربية",
+  ];
+
+  static const alAhmadiText = [
+    "Al Ahmadi",
+    "الأحمدي",
+  ];
+
+  static const kuwaitText = [
+    "Kuwait",
+    "الكويت",
+  ];
+
+  static const nyonText = [
+    "Nyon",
+    "نيون",
+  ];
+
+  static const beachSideSalmiyaKuwaitText = [
+    "Beach side, Salmiya, Kuwait",
+    "على الشاطئ، السالمية، الكويت",
+  ];
+
+  static const maxNumberOfPeopleText = [
+    "Max Number Of People",
+    "الحد الأقصى لعدد الأشخاص",
+  ];
+
+  static const adultText = [
+    "Adult",
+    "بالغ",
+  ];
+
+  static const childText = [
+    "Child",
+    "طفل",
+  ];
+
+  static const descriptionInEnglishText = [
+    "Description in English",
+    "الوصف باللغة الإنجليزية",
+  ];
+
+  static const descriptionInArabicText = [
+    "Description in Arabic",
+    "الوصف باللغة العربية",
+  ];
+
+  static const enterCouponDiscountText = [
+    "Enter Coupon Discount",
+    "أدخل خصم الكوبون",
+  ];
+
+  //25/02
+  static const roomsText = [
+    "Rooms",
+    "الغرف",
+  ];
+
+  static const washroomsText = [
+    "Washrooms",
+    "دورات المياه",
+  ];
+
+  static const hallsText = [
+    "Halls",
+    "الصالات",
+  ];
+
+  static const outdoorSeatingText = [
+    "Outdoor Seating:",
+    "الجلسات الخارجية:",
+  ];
+
+  static const poolText = [
+    "Pool:",
+    "المسبح:",
+  ];
+
+  static const guardText = [
+    "Guard:",
+    "الحارس:",
+  ];
+
+  static const weekdayText = [
+    "Weekday:",
+    "أيام الأسبوع:",
+  ];
+
+  static const weekendText = [
+    "Weekend:",
+    "عطلة نهاية الأسبوع:",
+  ];
+
+  static const fullWeekText = [
+    "Full Week:",
+    "طوال الأسبوع:",
+  ];
+
+  static const couponCodeCOLONText = [
+    "Coupon Code:",
+    "رمز الكوبون:",
+  ];
+
+  static const couponDiscountCOLONText = [
+    "Coupon Discount:",
+    "خصم الكوبون:",
+  ];
+
+  static const discountCOLONText = [
+    "Discount:",
+    "الخصم:",
+  ];
+
+  static const petFriendlyCOLONText = [
+    "Pet Friendly:",
+    "مسموح بالحيوانات الأليفة:",
+  ];
+
+  static const cancellationTimeCOLONText = [
+    "Cancellation Time:",
+    "وقت الإلغاء:",
+  ];
+
+  static const daysCOLONText = [
+    "Days",
+    "أيام",
+  ];
+//26-02
+
+  static const propertyDetailsText = [
+    "Property Details",
+    "تفاصيل العقار",
+  ];
+
+  static const propertyNameText = [
+    "Property Name:",
+    "اسم العقار:",
+  ];
+
+  static const propertyTypeText = [
+    "Property Type:",
+    "نوع العقار:",
+  ];
+
+  static const propertyType = [
+    "Property Type",
+    "نوع العقار",
+  ];
+  static const reviewByText = [
+    "Review by",
+    "تم التقييم بواسطة",
+  ];
+
+  static const propertyAddressText = [
+    "Property Address:",
+    "عنوان العقار:",
+  ];
+  static const editpropertyText = [
+    "Edit Property",
+    "تعديل العقار",
+  ];
+  static const noPropertyTypesMsg = [
+    "No Resort Available",
+    "لا توجد منتجعات متاحة",
+  ];
+
+  static const areYousureyouwantText = [
+    "Are you sure you want to delete this Property?",
+    "هل أنت متأكد أنك تريد حذف هذا العقار؟",
+  ];
+  static const deletePropertyText = [
+    "Delete Property",
+    "حذف العقار",
+  ];
+  static const selectPropertyLocation = [
+    "Please select property location",
+    "الرجاء اختيار موقع العقار",
+  ];
+  static const guardNameEngMsg = [
+    "Please enter the guard name in English",
+    "الرجاء إدخال اسم الحارس باللغة الإنجليزية",
+  ];
+  static const guardNumberMessage = [
+    "Please enter guard number",
+    "الرجاء إدخال رقم الحارس",
+  ];
+  static const guardNumbervalidMessage = [
+    "Enter a valid guard number",
+    "الرجاء إدخال رقم حارس صحيح",
+  ];
+  static const minAdultMsg = [
+    "Number of people should be greater than 0",
+    "يجب أن يكون عدد الأشخاص أكبر من 0"
+  ];
+
+  static const oneDayText = ["One day \n(2pm till next day 12 afternoon)"];
+  static const weekDaysText = ["Weekday (Sun-Wed)"];
+  static const weekendDaysText = ["Weekend (Thu-Sat)"];
+  static const fullWeekDaysText = ["Full week (Sun-Sat)"];
+  static const selectOnePriceBoxMsg = [
+    "Please select at least one price option",
+  ];
+  static const enterAllThePriceMsg = [
+    "Please enter all the prices of the selected price fields",
+  ];
+  static const priceValidMsg = ["Price can't be 0 or less"];
+  static const startingFromText = ["Starting From"];
 }

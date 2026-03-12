@@ -4,19 +4,22 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../utilities/app_config_provider.dart';
-import '../../utilities/app_loader.dart';
-import '../../utilities/app_shimmers.dart';
-import '../../utilities/app_snack_bar_toast_message.dart';
+import 'package:the_boat_ownerside/view/propertymodule/add_advertisement_section_screen.dart';
+import 'package:the_boat_ownerside/view/propertymodule/edit_advertisement_property_screen.dart';
+import 'package:the_boat_ownerside/view/propertymodule/property_advertisement_screen.dart';
+import '../../controller/app_config_provider.dart';
+import '../../controller/app_loader.dart';
+import '../../controller/app_shimmers.dart';
+import '../../controller/app_snack_bar_toast_message.dart';
+// import '../propertymodule/property_list_screen.dart';
 import '/view/other_screen/advertisementScreen.dart';
 import '/view/other_screen/edit_advertisement.dart';
-import '/view/other_screen/add_advertisement_screen.dart';
-import '../../utilities/app_color.dart';
-import '../../utilities/app_constant.dart';
-import '../../utilities/app_font.dart';
-import '../../utilities/app_footer.dart';
-import '../../utilities/app_image.dart';
-import '../../utilities/app_language.dart';
+import '../../controller/app_color.dart';
+import '../../controller/app_constant.dart';
+import '../../controller/app_font.dart';
+import '../../controller/app_footer.dart';
+import '../../controller/app_image.dart';
+import '../../controller/app_language.dart';
 import 'dart:ui' as ui;
 import 'login_screen.dart';
 
@@ -39,6 +42,8 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
   bool isLoading = true;
   List<dynamic> tripList = [];
   List<dynamic> searchTripList = [];
+  List<dynamic> propertyList = [];
+  List<dynamic> searchPropertyList = [];
   int viewMyAdd = 0;
   int manageMyAd = 0;
   int userType = 0;
@@ -51,6 +56,8 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
     super.initState();
     getUserDetails();
   }
+
+  int status = 1;
 
   int userId = 0;
   dynamic userDetails;
@@ -112,6 +119,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
               (userType == 2 && manageMyAd == 1) ||
               (userType == 2 && viewMyAdd == 1)) {
             getAllTripsApi(userId);
+            getAllAdvertisementApi(userId);
           } else {
             setState(() {
               isApiCalling = false;
@@ -230,6 +238,75 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
     }
   }
 
+  //=============================GET Boat DETAILS===================================//
+  Future<void> getAllAdvertisementApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}get_all_owner_advertisements?user_id=$userId&type=$userType");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isLoading = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['data'];
+          propertyList = (item != "NA") ? item : [];
+          searchPropertyList = (item != "NA") ? item : [];
+
+          setState(() {
+            isApiCalling = false;
+            isLoading = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+            isLoading = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+        isLoading = false;
+      });
+    }
+  }
+
   //=============================Delete Boat DETAILS===================================//
   deleteAdApiCall(tripId) async {
     setState(() {
@@ -255,6 +332,60 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
         print("res : $res");
         if (res['success'] == true) {
           getAllTripsApi(userId);
+          SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          setState(() {
+            isApiCalling = false;
+          });
+          // ignore: use_build_context_synchronously
+          SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+          if (res['active_status'] == 0) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const Login()));
+          }
+        }
+      } else {
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  //=============================Delete Boat DETAILS===================================//
+  deletePropAdApiCall(propId) async {
+    setState(() {
+      isApiCalling = true;
+    });
+
+    Uri url =
+        Uri.parse("${AppConfigProvider.apiUrl}delete_advertisement_property");
+
+    print("Url===> $url");
+
+    try {
+      http.MultipartRequest formData = http.MultipartRequest('POST', url);
+      formData.fields['property_ad_id'] = propId.toString();
+      formData.fields['user_id'] = userId.toString();
+
+      log("response--==> ${formData.fields}");
+      // print("response--==> ${formData.files}");
+      http.StreamedResponse response = await formData.send();
+      print("response--==> $response");
+      var responseString = await response.stream.toBytes();
+      var res = jsonDecode(utf8.decode(responseString));
+
+      if (response.statusCode == 200) {
+        print("res : $res");
+        if (res['success'] == true) {
+          getAllAdvertisementApi(userId);
           SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
           setState(() {
             isApiCalling = false;
@@ -322,6 +453,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
   }
 
   Widget _buildUIScreen(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     double screenWidth = MediaQuery.of(context).size.width;
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -458,7 +590,6 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100,
                           ),
 
-                          //add adv
                           if (userType == 3 ||
                               (userType == 2 && manageMyAd == 1))
                             GestureDetector(
@@ -467,7 +598,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            const AddAdvertisementScreen()));
+                                            const AddAdvertisementSectionScreen()));
                               },
                               child: Container(
                                 alignment: Alignment.center,
@@ -501,652 +632,1322 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                     SizedBox(
                         height: MediaQuery.of(context).size.height * 2 / 100),
 
-                    isLoading
-                        ? myAdsShimmerEffect(context)
-                        : Expanded(
-                            child: SingleChildScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            child: Column(
-                              children: [
-                                if (tripList.isNotEmpty)
-                                  Wrap(
-                                    children: [
-                                      ...List.generate(tripList.length,
-                                          (index) {
-                                        return Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            //coupon card
-                                            Stack(
+                    //!toggle buttons
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 90 / 100,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                status = 1;
+                              });
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              width:
+                                  MediaQuery.of(context).size.width * 42 / 100,
+                              decoration: BoxDecoration(
+                                  color: status == 1
+                                      ? AppColor.themeColor
+                                      : AppColor.secondaryColor,
+                                  border:
+                                      Border.all(color: AppColor.themeColor),
+                                  borderRadius: BorderRadius.circular(5)),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: screenWidth > 600 ? 15 : 8.0),
+                                child: Text(
+                                  AppLanguage.seaText[language],
+                                  style: TextStyle(
+                                      fontSize: screenWidth > 600 ? 20 : 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: status == 1
+                                          ? AppColor.secondaryColor
+                                          : AppColor.primaryColor,
+                                      fontFamily: AppFont.fontFamily),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          //!upcoming
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                status = 2;
+                              });
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              width:
+                                  MediaQuery.of(context).size.width * 42 / 100,
+                              decoration: BoxDecoration(
+                                  color: status == 2
+                                      ? AppColor.themeColor
+                                      : AppColor.secondaryColor,
+                                  border:
+                                      Border.all(color: AppColor.themeColor),
+                                  borderRadius: BorderRadius.circular(5)),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: screenWidth > 600 ? 15 : 8.0),
+                                child: Text(
+                                  AppLanguage.propertyText[language],
+                                  style: TextStyle(
+                                      fontSize: screenWidth > 600 ? 20 : 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: status == 2
+                                          ? AppColor.secondaryColor
+                                          : AppColor.primaryColor,
+                                      fontFamily: AppFont.fontFamily),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: size.height * 0.04),
+
+                    if (status == 1) ...[
+                      //! SEA TAB
+                      isLoading
+                          ? myAdsShimmerEffect(context)
+                          : Expanded(
+                              child: SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: Column(
+                                  children: [
+                                    if (tripList.isNotEmpty)
+                                      Wrap(
+                                        children: [
+                                          ...List.generate(tripList.length,
+                                              (index) {
+                                            return Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
                                               children: [
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            AdvertisementScreen(
-                                                          tripId: tripList[
-                                                                      index]
-                                                                  ['trip_id']
-                                                              .toString(),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
-                                                  child: Container(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            90 /
-                                                            100,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                      vertical: 5,
-                                                    ),
-                                                    alignment: Alignment.center,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              30),
-                                                      image: DecorationImage(
-                                                        image: tripList[index][
-                                                                    'trip_image'] !=
-                                                                null
-                                                            ? NetworkImage(
-                                                                "${AppConfigProvider.imageURL}${tripList[index]['trip_image']}")
-                                                            : const AssetImage(
-                                                                    AppImage
-                                                                        .imageFrame)
-                                                                as ImageProvider,
-                                                        fit: BoxFit.cover,
-                                                        colorFilter:
-                                                            ColorFilter.mode(
-                                                          Colors.black.withOpacity(
-                                                              0.3), // Adjust the opacity
-                                                          BlendMode
-                                                              .darken, // You can change the BlendMode if needed
-                                                        ),
-                                                      ),
-                                                    ),
-
-                                                    child: Column(
-                                                      children: [
-                                                        SizedBox(
-                                                          height: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .height *
-                                                              1 /
-                                                              100,
-                                                        ),
-
-                                                        //3 options
-                                                        (userType == 3 ||
-                                                                (userType ==
-                                                                        2 &&
-                                                                    manageMyAd ==
-                                                                        1))
-                                                            ? SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    80 /
-                                                                    100,
-                                                                child: Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .end,
-                                                                  children: [
-                                                                    GestureDetector(
-                                                                      onTap:
-                                                                          () {
-                                                                        optionsBottomSheet(
-                                                                            context,
-                                                                            screenWidth,
-                                                                            tripList[index]['trip_id']);
-                                                                      },
-                                                                      child:
-                                                                          Container(
-                                                                        width: screenWidth >
-                                                                                600
-                                                                            ? MediaQuery.of(context).size.width *
-                                                                                5 /
-                                                                                100
-                                                                            : MediaQuery.of(context).size.width *
-                                                                                6 /
-                                                                                100,
-                                                                        height: screenWidth >
-                                                                                600
-                                                                            ? MediaQuery.of(context).size.width *
-                                                                                5 /
-                                                                                100
-                                                                            : MediaQuery.of(context).size.width *
-                                                                                6 /
-                                                                                100,
-                                                                        decoration: const BoxDecoration(
-                                                                            color:
-                                                                                AppColor.secondaryColor,
-                                                                            shape: BoxShape.circle),
-                                                                        child: Image
-                                                                            .asset(
-                                                                          AppImage
-                                                                              .menuCircle,
-                                                                          color:
-                                                                              AppColor.themeColor,
-                                                                          fit: BoxFit
-                                                                              .contain,
-                                                                        ),
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                              )
-                                                            : SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    80 /
-                                                                    100,
-                                                                height: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .height *
-                                                                    3 /
-                                                                    100,
-                                                              ),
-                                                        SizedBox(
-                                                          height: screenWidth >
-                                                                  600
-                                                              ? MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .height *
-                                                                  9 /
-                                                                  100
-                                                              : MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .height *
-                                                                  2 /
-                                                                  100,
-                                                        ),
-
-                                                        //text
-                                                        SizedBox(
-                                                          width: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              80 /
-                                                              100,
-                                                          child: Text(
-                                                            tripList[index][
-                                                                'boat_name_english'],
-                                                            style: const TextStyle(
-                                                                fontSize: 18,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                color: AppColor
-                                                                    .secondaryColor,
-                                                                fontFamily: AppFont
-                                                                    .fontFamily),
+                                                Stack(
+                                                  children: [
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                AdvertisementScreen(
+                                                              tripId: tripList[
+                                                                          index]
+                                                                      [
+                                                                      'trip_id']
+                                                                  .toString(),
+                                                            ),
                                                           ),
-                                                        ),
-
-                                                        //text3
-                                                        SizedBox(
-                                                          width: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              80 /
-                                                              100,
-                                                          child: Row(
-                                                            children: [
-                                                              Text(
-                                                                AppLanguage
-                                                                        .pickUpText[
-                                                                    language],
-                                                                style: const TextStyle(
-                                                                    fontSize:
-                                                                        12,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    color: AppColor
-                                                                        .secondaryColor,
-                                                                    fontFamily:
-                                                                        AppFont
-                                                                            .fontFamily),
-                                                              ),
-                                                              const Text(
-                                                                " \u2022 ",
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        18,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    color: AppColor
-                                                                        .secondaryColor,
-                                                                    fontFamily:
-                                                                        AppFont
-                                                                            .fontFamily),
-                                                              ),
-                                                              SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    63 /
-                                                                    100,
-                                                                child: Text(
-                                                                  "${tripList[index]['city_name'][language] ?? ""}",
-                                                                  maxLines: 1,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                  style: const TextStyle(
-                                                                      fontSize:
-                                                                          12,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w500,
-                                                                      color: AppColor
-                                                                          .secondaryColor,
-                                                                      fontFamily:
-                                                                          AppFont
-                                                                              .fontFamily),
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-
-                                                        //text3
-                                                        SizedBox(
-                                                          width: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              80 /
-                                                              100,
-                                                          child: Row(
-                                                            children: [
-                                                              Text(
-                                                                AppLanguage
-                                                                        .advTypeText[
-                                                                    language],
-                                                                style: const TextStyle(
-                                                                    fontSize:
-                                                                        12,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    color: AppColor
-                                                                        .secondaryColor,
-                                                                    fontFamily:
-                                                                        AppFont
-                                                                            .fontFamily),
-                                                              ),
-                                                              const Text(
-                                                                " \u2022 ",
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        18,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    color: AppColor
-                                                                        .secondaryColor,
-                                                                    fontFamily:
-                                                                        AppFont
-                                                                            .fontFamily),
-                                                              ),
-                                                              SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    63 /
-                                                                    100,
-                                                                child: Text(
-                                                                  tripList[index]
-                                                                              [
-                                                                              'advertisement_type'] ==
-                                                                          0
-                                                                      ? AppLanguage
-                                                                              .privateText[
-                                                                          language]
-                                                                      : AppLanguage
-                                                                              .publicText[
-                                                                          language],
-                                                                  maxLines: 1,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                  style: const TextStyle(
-                                                                      fontSize:
-                                                                          12,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w500,
-                                                                      color: AppColor
-                                                                          .secondaryColor,
-                                                                      fontFamily:
-                                                                          AppFont
-                                                                              .fontFamily),
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-
-                                                        //rating member button
-                                                        SizedBox(
-                                                          width: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              80 /
-                                                              100,
-                                                          child: Row(
-                                                            children: [
-                                                              //ratings
-                                                              if (tripList[index]
-                                                                          [
-                                                                          'rating']
-                                                                      .toString() !=
-                                                                  "0.00")
-                                                                Container(
-                                                                  alignment:
-                                                                      Alignment
-                                                                          .center,
-                                                                  decoration: BoxDecoration(
-                                                                      color: AppColor
-                                                                          .secondaryColor
-                                                                          .withOpacity(
-                                                                              .4),
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              20)),
-                                                                  child:
-                                                                      Padding(
-                                                                    padding: const EdgeInsets
-                                                                        .symmetric(
-                                                                        horizontal:
-                                                                            8.0,
-                                                                        vertical:
-                                                                            2),
-                                                                    child: Row(
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .center,
-                                                                      children: [
-                                                                        SizedBox(
-                                                                          width: screenWidth > 600
-                                                                              ? MediaQuery.of(context).size.width * 2 / 100
-                                                                              : MediaQuery.of(context).size.width * 3 / 100,
-                                                                          height: screenWidth > 600
-                                                                              ? MediaQuery.of(context).size.width * 2 / 100
-                                                                              : MediaQuery.of(context).size.width * 3 / 100,
-                                                                          child:
-                                                                              Image.asset(AppImage.starIcon),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          width: MediaQuery.of(context).size.width *
-                                                                              1 /
-                                                                              100,
-                                                                        ),
-                                                                        Text(
-                                                                          tripList[index]['rating']
-                                                                              .toString(),
-                                                                          textAlign:
-                                                                              TextAlign.center,
-                                                                          style: const TextStyle(
-                                                                              fontSize: 12,
-                                                                              fontWeight: FontWeight.w600,
-                                                                              color: AppColor.secondaryColor,
-                                                                              fontFamily: AppFont.fontFamily),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    2 /
-                                                                    100,
-                                                              ),
-
-                                                              //members
-                                                              Container(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    23 /
-                                                                    100,
-                                                                alignment:
-                                                                    Alignment
-                                                                        .center,
-                                                                decoration: BoxDecoration(
-                                                                    color: AppColor
-                                                                        .secondaryColor
-                                                                        .withOpacity(
-                                                                            .4),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            20)),
-                                                                child: Padding(
-                                                                  padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                      horizontal:
-                                                                          8.0,
-                                                                      vertical:
-                                                                          2),
-                                                                  child: Text(
-                                                                    "${tripList[index]['max_people']}  ${AppLanguage.membersText[language]}",
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .center,
-                                                                    style: const TextStyle(
-                                                                        fontSize:
-                                                                            10,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600,
-                                                                        color: AppColor
-                                                                            .secondaryColor,
-                                                                        fontFamily:
-                                                                            AppFont.fontFamily),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    2 /
-                                                                    100,
-                                                              ),
-
-                                                              const Spacer(),
-
-                                                              //speed
-                                                              Container(
-                                                                decoration: BoxDecoration(
-                                                                    color: AppColor
-                                                                        .themeColor,
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            5)),
-                                                                child: Padding(
-                                                                  padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                      horizontal:
-                                                                          8.0,
-                                                                      vertical:
-                                                                          4),
-                                                                  child: Text(
-                                                                    "${tripList[index]['price_per_hour']} KWD",
-                                                                    style: const TextStyle(
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600,
-                                                                        color: AppColor
-                                                                            .secondaryColor,
-                                                                        fontFamily:
-                                                                            AppFont.fontFamily),
-                                                                  ),
-                                                                ),
-                                                              )
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .height *
-                                                              2 /
-                                                              100,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                if (tripList[index]
-                                                            ['discount'] !=
-                                                        null &&
-                                                    tripList[index]
-                                                            ['discount'] >
-                                                        0) ...[
-                                                  Positioned(
-                                                    top: language == 0
-                                                        ? -30
-                                                        : -30,
-                                                    left: language == 0
-                                                        ? -22
-                                                        : null,
-                                                    right: language == 1
-                                                        ? -22
-                                                        : null,
-                                                    child: SizedBox(
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              30 /
-                                                              100,
-                                                      height:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .height *
-                                                              15 /
-                                                              100,
-                                                      child: Image.asset(
-                                                          language == 0
-                                                              ? AppImage
-                                                                  .discountStrip
-                                                              : AppImage
-                                                                  .discountStripInverted),
-                                                    ),
-                                                  ),
-                                                  Positioned(
-                                                    top:
-                                                        language == 0 ? 15 : 14,
-                                                    left: language == 0
-                                                        ? -25
-                                                        : null,
-                                                    right: language == 1
-                                                        ? -25
-                                                        : null,
-                                                    child: Transform.rotate(
-                                                      angle: language == 0
-                                                          ? -.65
-                                                          : .65,
+                                                        );
+                                                      },
                                                       child: Container(
-                                                        alignment:
-                                                            Alignment.center,
-                                                        // color: Colors.red,
                                                         width: MediaQuery.of(
                                                                     context)
                                                                 .size
                                                                 .width *
-                                                            30 /
+                                                            90 /
                                                             100,
-                                                        child: Text(
-                                                          "${tripList[index]['discount']}% ${AppLanguage.offText[language]}",
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          style: const TextStyle(
-                                                              fontFamily: AppFont
-                                                                  .fontFamily,
-                                                              fontSize: 11,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w800,
-                                                              color: AppColor
-                                                                  .secondaryColor),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                          vertical: 5,
+                                                        ),
+                                                        alignment:
+                                                            Alignment.center,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(30),
+                                                          image:
+                                                              DecorationImage(
+                                                            image: tripList[index]
+                                                                        [
+                                                                        'trip_image'] !=
+                                                                    null
+                                                                ? NetworkImage(
+                                                                    "${AppConfigProvider.imageURL}${tripList[index]['trip_image']}")
+                                                                : const AssetImage(
+                                                                        AppImage
+                                                                            .imageFrame)
+                                                                    as ImageProvider,
+                                                            fit: BoxFit.cover,
+                                                            colorFilter:
+                                                                ColorFilter
+                                                                    .mode(
+                                                              Colors.black
+                                                                  .withOpacity(
+                                                                      0.3),
+                                                              BlendMode.darken,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        child: Column(
+                                                          children: [
+                                                            SizedBox(
+                                                              height: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height *
+                                                                  1 /
+                                                                  100,
+                                                            ),
+
+                                                            // 3 options (edit/delete)
+                                                            (userType == 3 ||
+                                                                    (userType ==
+                                                                            2 &&
+                                                                        manageMyAd ==
+                                                                            1))
+                                                                ? SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        80 /
+                                                                        100,
+                                                                    child: Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .end,
+                                                                      children: [
+                                                                        GestureDetector(
+                                                                          onTap:
+                                                                              () {
+                                                                            optionsBottomSheet(
+                                                                                context,
+                                                                                screenWidth,
+                                                                                tripList[index]['trip_id'],
+                                                                                1);
+                                                                          },
+                                                                          child:
+                                                                              Container(
+                                                                            width: screenWidth > 600
+                                                                                ? MediaQuery.of(context).size.width * 5 / 100
+                                                                                : MediaQuery.of(context).size.width * 6 / 100,
+                                                                            height: screenWidth > 600
+                                                                                ? MediaQuery.of(context).size.width * 5 / 100
+                                                                                : MediaQuery.of(context).size.width * 6 / 100,
+                                                                            decoration:
+                                                                                const BoxDecoration(color: AppColor.secondaryColor, shape: BoxShape.circle),
+                                                                            child:
+                                                                                Image.asset(
+                                                                              AppImage.menuCircle,
+                                                                              color: AppColor.themeColor,
+                                                                              fit: BoxFit.contain,
+                                                                            ),
+                                                                          ),
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                  )
+                                                                : SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        80 /
+                                                                        100,
+                                                                    height: MediaQuery.of(context)
+                                                                            .size
+                                                                            .height *
+                                                                        3 /
+                                                                        100,
+                                                                  ),
+                                                            SizedBox(
+                                                              height: screenWidth >
+                                                                      600
+                                                                  ? MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .height *
+                                                                      9 /
+                                                                      100
+                                                                  : MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .height *
+                                                                      2 /
+                                                                      100,
+                                                            ),
+
+                                                            // Boat name
+                                                            SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  80 /
+                                                                  100,
+                                                              child: Text(
+                                                                tripList[index][
+                                                                    'boat_name_english'],
+                                                                style: const TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600,
+                                                                    color: AppColor
+                                                                        .secondaryColor,
+                                                                    fontFamily:
+                                                                        AppFont
+                                                                            .fontFamily),
+                                                              ),
+                                                            ),
+
+                                                            // City name
+                                                            SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  80 /
+                                                                  100,
+                                                              child: Row(
+                                                                children: [
+                                                                  Text(
+                                                                    AppLanguage
+                                                                            .pickUpText[
+                                                                        language],
+                                                                    style: const TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w500,
+                                                                        color: AppColor
+                                                                            .secondaryColor,
+                                                                        fontFamily:
+                                                                            AppFont.fontFamily),
+                                                                  ),
+                                                                  const Text(
+                                                                    " \u2022 ",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            18,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w500,
+                                                                        color: AppColor
+                                                                            .secondaryColor,
+                                                                        fontFamily:
+                                                                            AppFont.fontFamily),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        63 /
+                                                                        100,
+                                                                    child: Text(
+                                                                      "${tripList[index]['city_name'][language] ?? ""}",
+                                                                      maxLines:
+                                                                          1,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      style: const TextStyle(
+                                                                          fontSize:
+                                                                              12,
+                                                                          fontWeight: FontWeight
+                                                                              .w500,
+                                                                          color: AppColor
+                                                                              .secondaryColor,
+                                                                          fontFamily:
+                                                                              AppFont.fontFamily),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+
+                                                            // Advertisement type
+                                                            SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  80 /
+                                                                  100,
+                                                              child: Row(
+                                                                children: [
+                                                                  Text(
+                                                                    AppLanguage
+                                                                            .advTypeText[
+                                                                        language],
+                                                                    style: const TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w500,
+                                                                        color: AppColor
+                                                                            .secondaryColor,
+                                                                        fontFamily:
+                                                                            AppFont.fontFamily),
+                                                                  ),
+                                                                  const Text(
+                                                                    " \u2022 ",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            18,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w500,
+                                                                        color: AppColor
+                                                                            .secondaryColor,
+                                                                        fontFamily:
+                                                                            AppFont.fontFamily),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    // width: MediaQuery.of(context)
+                                                                    //         .size
+                                                                    //         .width *
+                                                                    //     6 /
+                                                                    //     100,
+                                                                    child: Text(
+                                                                      tripList[index]['advertisement_type'] ==
+                                                                              0
+                                                                          ? AppLanguage.privateText[
+                                                                              language]
+                                                                          : AppLanguage
+                                                                              .publicText[language],
+                                                                      maxLines:
+                                                                          1,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      style: const TextStyle(
+                                                                          fontSize:
+                                                                              12,
+                                                                          fontWeight: FontWeight
+                                                                              .w500,
+                                                                          color: AppColor
+                                                                              .secondaryColor,
+                                                                          fontFamily:
+                                                                              AppFont.fontFamily),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+
+                                                            // Rating, members, price
+                                                            SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  80 /
+                                                                  100,
+                                                              child: Row(
+                                                                children: [
+                                                                  if (tripList[index]
+                                                                              [
+                                                                              'rating'] !=
+                                                                          null &&
+                                                                      tripList[index]['rating']
+                                                                              .toString() !=
+                                                                          "0.00")
+                                                                    Container(
+                                                                      alignment:
+                                                                          Alignment
+                                                                              .center,
+                                                                      decoration: BoxDecoration(
+                                                                          color: AppColor.secondaryColor.withOpacity(
+                                                                              .4),
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(20)),
+                                                                      child:
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                8.0,
+                                                                            vertical:
+                                                                                2),
+                                                                        child:
+                                                                            Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.center,
+                                                                          children: [
+                                                                            SizedBox(
+                                                                              width: screenWidth > 600 ? MediaQuery.of(context).size.width * 2 / 100 : MediaQuery.of(context).size.width * 3 / 100,
+                                                                              height: screenWidth > 600 ? MediaQuery.of(context).size.width * 2 / 100 : MediaQuery.of(context).size.width * 3 / 100,
+                                                                              child: Image.asset(AppImage.starIcon),
+                                                                            ),
+                                                                            SizedBox(
+                                                                              width: MediaQuery.of(context).size.width * 1 / 100,
+                                                                            ),
+                                                                            Text(
+                                                                              tripList[index]['rating']?.toString() ?? "",
+                                                                              textAlign: TextAlign.center,
+                                                                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColor.secondaryColor, fontFamily: AppFont.fontFamily),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        2 /
+                                                                        100,
+                                                                  ),
+                                                                  Container(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        23 /
+                                                                        100,
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .center,
+                                                                    decoration: BoxDecoration(
+                                                                        color: AppColor
+                                                                            .secondaryColor
+                                                                            .withOpacity(
+                                                                                .4),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(20)),
+                                                                    child:
+                                                                        Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .symmetric(
+                                                                          horizontal:
+                                                                              8.0,
+                                                                          vertical:
+                                                                              2),
+                                                                      child:
+                                                                          Text(
+                                                                        "${tripList[index]['max_people']}  ${AppLanguage.membersText[language]}",
+                                                                        textAlign:
+                                                                            TextAlign.center,
+                                                                        style: const TextStyle(
+                                                                            fontSize:
+                                                                                10,
+                                                                            fontWeight:
+                                                                                FontWeight.w600,
+                                                                            color: AppColor.secondaryColor,
+                                                                            fontFamily: AppFont.fontFamily),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        2 /
+                                                                        100,
+                                                                  ),
+                                                                  const Spacer(),
+                                                                  Container(
+                                                                    decoration: BoxDecoration(
+                                                                        color: AppColor
+                                                                            .themeColor,
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(5)),
+                                                                    child:
+                                                                        Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .symmetric(
+                                                                          horizontal:
+                                                                              8.0,
+                                                                          vertical:
+                                                                              4),
+                                                                      child:
+                                                                          Text(
+                                                                        "${tripList[index]['price_per_hour']} KWD",
+                                                                        style: const TextStyle(
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.w600,
+                                                                            color: AppColor.secondaryColor,
+                                                                            fontFamily: AppFont.fontFamily),
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              height: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height *
+                                                                  1 /
+                                                                  100,
+                                                            ),
+                                                          ],
                                                         ),
                                                       ),
                                                     ),
-                                                  )
-                                                ]
+                                                    // Discount badge
+                                                    if (tripList[index]
+                                                                ['discount'] !=
+                                                            null &&
+                                                        tripList[index]
+                                                                ['discount'] >
+                                                            0) ...[
+                                                      Positioned(
+                                                        top: language == 0
+                                                            ? -30
+                                                            : -30,
+                                                        left: language == 0
+                                                            ? -22
+                                                            : null,
+                                                        right: language == 1
+                                                            ? -22
+                                                            : null,
+                                                        child: SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              30 /
+                                                              100,
+                                                          height: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .height *
+                                                              15 /
+                                                              100,
+                                                          child: Image.asset(
+                                                              language == 0
+                                                                  ? AppImage
+                                                                      .discountStrip
+                                                                  : AppImage
+                                                                      .discountStripInverted),
+                                                        ),
+                                                      ),
+                                                      Positioned(
+                                                        top: language == 0
+                                                            ? 15
+                                                            : 14,
+                                                        left: language == 0
+                                                            ? -25
+                                                            : null,
+                                                        right: language == 1
+                                                            ? -25
+                                                            : null,
+                                                        child: Transform.rotate(
+                                                          angle: language == 0
+                                                              ? -.65
+                                                              : .65,
+                                                          child: Container(
+                                                            alignment: Alignment
+                                                                .center,
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                30 /
+                                                                100,
+                                                            child: Text(
+                                                              "${tripList[index]['discount']}% ${AppLanguage.offText[language]}",
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              style: const TextStyle(
+                                                                  fontFamily:
+                                                                      AppFont
+                                                                          .fontFamily,
+                                                                  fontSize: 11,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w800,
+                                                                  color: AppColor
+                                                                      .secondaryColor),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      )
+                                                    ]
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      3 /
+                                                      100,
+                                                )
                                               ],
-                                            ),
-                                            SizedBox(
+                                            );
+                                          }),
+                                        ],
+                                      ),
+                                    if (tripList.isEmpty)
+                                      Column(
+                                        children: [
+                                          SizedBox(
                                               height: MediaQuery.of(context)
                                                       .size
                                                       .height *
-                                                  3 /
-                                                  100,
-                                            )
-                                          ],
-                                        );
-                                      }),
-                                    ],
-                                  ),
-                                if (tripList.isEmpty)
-                                  Column(
-                                    children: [
-                                      SizedBox(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              20 /
-                                              100),
-                                      //!text msg
-                                      SizedBox(
-                                        width: screenWidth * 70 / 100,
-                                        child: Text(
-                                          AppLanguage.advNodataMsg[language],
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                              fontFamily: AppFont.fontFamily,
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColor.primaryColor),
-                                        ),
+                                                  20 /
+                                                  100),
+                                          SizedBox(
+                                            width: screenWidth * 70 / 100,
+                                            child: Text(
+                                              AppLanguage
+                                                  .advNodataMsg[language],
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                  fontFamily:
+                                                      AppFont.fontFamily,
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppColor.primaryColor),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                              ],
+                                  ],
+                                ),
+                              ),
                             ),
-                          )),
+                    ] else ...[
+                      //! PROPERTY TAB
+                      isLoading
+                          ? myAdsShimmerEffect(context)
+                          : Expanded(
+                              child: SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: Column(
+                                  children: [
+                                    if (propertyList.isNotEmpty)
+                                      Wrap(
+                                        children: [
+                                          ...List.generate(propertyList.length,
+                                              (index) {
+                                            return Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Stack(
+                                                  children: [
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                PropertyAdvertisementScreen(
+                                                              propertyAdId: propertyList[
+                                                                          index]
+                                                                      [
+                                                                      'property_ad_id']
+                                                                  .toString(),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: Container(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            90 /
+                                                            100,
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                          vertical: 5,
+                                                        ),
+                                                        alignment:
+                                                            Alignment.center,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(30),
+                                                          image:
+                                                              DecorationImage(
+                                                            image: propertyList[
+                                                                            index]
+                                                                        [
+                                                                        'cover_image'] !=
+                                                                    null
+                                                                ? NetworkImage(
+                                                                    "${AppConfigProvider.imageURL}${propertyList[index]['cover_image']}")
+                                                                : const AssetImage(
+                                                                        AppImage
+                                                                            .imageFrame)
+                                                                    as ImageProvider,
+                                                            fit: BoxFit.cover,
+                                                            colorFilter:
+                                                                ColorFilter
+                                                                    .mode(
+                                                              Colors.black
+                                                                  .withOpacity(
+                                                                      0.3),
+                                                              BlendMode.darken,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        child: Column(
+                                                          children: [
+                                                            SizedBox(
+                                                              height: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height *
+                                                                  1 /
+                                                                  100,
+                                                            ),
+
+                                                            // 3 options (edit/delete)
+                                                            (userType == 3 ||
+                                                                    (userType ==
+                                                                            2 &&
+                                                                        manageMyAd ==
+                                                                            1))
+                                                                ? SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        80 /
+                                                                        100,
+                                                                    child: Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .end,
+                                                                      children: [
+                                                                        GestureDetector(
+                                                                          onTap:
+                                                                              () {
+                                                                            optionsBottomSheet(
+                                                                                context,
+                                                                                screenWidth,
+                                                                                propertyList[index]['property_ad_id'],
+                                                                                2);
+                                                                          },
+                                                                          child:
+                                                                              Container(
+                                                                            width: screenWidth > 600
+                                                                                ? MediaQuery.of(context).size.width * 5 / 100
+                                                                                : MediaQuery.of(context).size.width * 6 / 100,
+                                                                            height: screenWidth > 600
+                                                                                ? MediaQuery.of(context).size.width * 5 / 100
+                                                                                : MediaQuery.of(context).size.width * 6 / 100,
+                                                                            decoration:
+                                                                                const BoxDecoration(color: AppColor.secondaryColor, shape: BoxShape.circle),
+                                                                            child:
+                                                                                Image.asset(
+                                                                              AppImage.menuCircle,
+                                                                              color: AppColor.themeColor,
+                                                                              fit: BoxFit.contain,
+                                                                            ),
+                                                                          ),
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                  )
+                                                                : SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        80 /
+                                                                        100,
+                                                                    height: MediaQuery.of(context)
+                                                                            .size
+                                                                            .height *
+                                                                        3 /
+                                                                        100,
+                                                                  ),
+                                                            SizedBox(
+                                                              height: screenWidth >
+                                                                      600
+                                                                  ? MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .height *
+                                                                      9 /
+                                                                      100
+                                                                  : MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .height *
+                                                                      2 /
+                                                                      100,
+                                                            ),
+
+                                                            //! Property name
+                                                            SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  80 /
+                                                                  100,
+                                                              child: Text(
+                                                                propertyList[
+                                                                            index]
+                                                                        [
+                                                                        'property_name_english'] ??
+                                                                    "",
+                                                                style: const TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600,
+                                                                    color: AppColor
+                                                                        .secondaryColor,
+                                                                    fontFamily:
+                                                                        AppFont
+                                                                            .fontFamily),
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              height: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height *
+                                                                  .5 /
+                                                                  100,
+                                                            ),
+
+                                                            //! City name
+                                                            SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  80 /
+                                                                  100,
+                                                              child: Row(
+                                                                children: [
+                                                                  Text(
+                                                                    AppLanguage
+                                                                            .cityText[
+                                                                        language],
+                                                                    style: const TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w500,
+                                                                        color: AppColor
+                                                                            .secondaryColor,
+                                                                        fontFamily:
+                                                                            AppFont.fontFamily),
+                                                                  ),
+                                                                  const Text(
+                                                                    " \u2022 ",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            18,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w500,
+                                                                        color: AppColor
+                                                                            .secondaryColor,
+                                                                        fontFamily:
+                                                                            AppFont.fontFamily),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        63 /
+                                                                        100,
+                                                                    child: Text(
+                                                                      "${propertyList[index]['city_name'] ?? ""}",
+                                                                      maxLines:
+                                                                          1,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      style: const TextStyle(
+                                                                          fontSize:
+                                                                              12,
+                                                                          fontWeight: FontWeight
+                                                                              .w500,
+                                                                          color: AppColor
+                                                                              .secondaryColor,
+                                                                          fontFamily:
+                                                                              AppFont.fontFamily),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            //! Property Type name
+                                                            SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  80 /
+                                                                  100,
+                                                              child: Row(
+                                                                children: [
+                                                                  Text(
+                                                                    AppLanguage
+                                                                            .propertyType[
+                                                                        language],
+                                                                    style: const TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w500,
+                                                                        color: AppColor
+                                                                            .secondaryColor,
+                                                                        fontFamily:
+                                                                            AppFont.fontFamily),
+                                                                  ),
+                                                                  const Text(
+                                                                    " \u2022 ",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            18,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w500,
+                                                                        color: AppColor
+                                                                            .secondaryColor,
+                                                                        fontFamily:
+                                                                            AppFont.fontFamily),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        51.5 /
+                                                                        100,
+                                                                    child: Text(
+                                                                      "${propertyList[index]['property_type_name'][language] ?? ""}",
+                                                                      maxLines:
+                                                                          1,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      style: const TextStyle(
+                                                                          fontSize:
+                                                                              12,
+                                                                          fontWeight: FontWeight
+                                                                              .w500,
+                                                                          color: AppColor
+                                                                              .secondaryColor,
+                                                                          fontFamily:
+                                                                              AppFont.fontFamily),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+
+                                                            // Rating, members, price
+                                                            SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  80 /
+                                                                  100,
+                                                              child: Row(
+                                                                children: [
+                                                                  if (propertyList[index]
+                                                                              [
+                                                                              'rating'] !=
+                                                                          null &&
+                                                                      propertyList[index]['rating']
+                                                                              .toString() !=
+                                                                          "0.00")
+                                                                    Container(
+                                                                      alignment:
+                                                                          Alignment
+                                                                              .center,
+                                                                      decoration: BoxDecoration(
+                                                                          color: AppColor.secondaryColor.withOpacity(
+                                                                              .4),
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(20)),
+                                                                      child:
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                8.0,
+                                                                            vertical:
+                                                                                2),
+                                                                        child:
+                                                                            Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.center,
+                                                                          children: [
+                                                                            SizedBox(
+                                                                              width: screenWidth > 600 ? MediaQuery.of(context).size.width * 2 / 100 : MediaQuery.of(context).size.width * 3 / 100,
+                                                                              height: screenWidth > 600 ? MediaQuery.of(context).size.width * 2 / 100 : MediaQuery.of(context).size.width * 3 / 100,
+                                                                              child: Image.asset(AppImage.starIcon),
+                                                                            ),
+                                                                            SizedBox(
+                                                                              width: MediaQuery.of(context).size.width * 1 / 100,
+                                                                            ),
+                                                                            Text(
+                                                                              propertyList[index]['rating']?.toString() ?? "",
+                                                                              textAlign: TextAlign.center,
+                                                                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColor.secondaryColor, fontFamily: AppFont.fontFamily),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        2 /
+                                                                        100,
+                                                                  ),
+                                                                  Container(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        20 /
+                                                                        100,
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .center,
+                                                                    decoration: BoxDecoration(
+                                                                        color: AppColor
+                                                                            .secondaryColor
+                                                                            .withOpacity(
+                                                                                .4),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(20)),
+                                                                    child:
+                                                                        Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .symmetric(
+                                                                          horizontal:
+                                                                              8.0,
+                                                                          vertical:
+                                                                              4),
+                                                                      child:
+                                                                          Text(
+                                                                        "${(propertyList[index]['max_adult'] ?? 0) + (propertyList[index]['max_child'] ?? 0)}  ${AppLanguage.guestsText[language]}",
+                                                                        textAlign:
+                                                                            TextAlign.center,
+                                                                        style: const TextStyle(
+                                                                            fontSize:
+                                                                                10,
+                                                                            fontWeight:
+                                                                                FontWeight.w600,
+                                                                            color: AppColor.secondaryColor,
+                                                                            fontFamily: AppFont.fontFamily),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        2 /
+                                                                        100,
+                                                                  ),
+                                                                  const Spacer(),
+                                                                  Container(
+                                                                    decoration: BoxDecoration(
+                                                                        color: AppColor
+                                                                            .themeColor,
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(5)),
+                                                                    child:
+                                                                        Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .symmetric(
+                                                                          horizontal:
+                                                                              8.0,
+                                                                          vertical:
+                                                                              4),
+                                                                      child:
+                                                                          Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.end,
+                                                                        children: [
+                                                                          Text(
+                                                                            AppLanguage.startingFromText[language],
+                                                                            style: const TextStyle(
+                                                                                fontSize: 11,
+                                                                                fontWeight: FontWeight.w600,
+                                                                                color: AppColor.secondaryColor,
+                                                                                fontFamily: AppFont.fontFamily),
+                                                                          ),
+                                                                          Text(
+                                                                            " ${propertyList[index]['starting_price']?.toString() ?? ""} KWD",
+                                                                            style: const TextStyle(
+                                                                                fontSize: 15,
+                                                                                fontWeight: FontWeight.w600,
+                                                                                color: AppColor.secondaryColor,
+                                                                                fontFamily: AppFont.fontFamily),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              height: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height *
+                                                                  1 /
+                                                                  100,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    // Discount badge
+                                                    if (propertyList[index]
+                                                                ['discount'] !=
+                                                            null &&
+                                                        propertyList[index]
+                                                                ['discount'] >
+                                                            0) ...[
+                                                      Positioned(
+                                                        top: language == 0
+                                                            ? -30
+                                                            : -30,
+                                                        left: language == 0
+                                                            ? -22
+                                                            : null,
+                                                        right: language == 1
+                                                            ? -22
+                                                            : null,
+                                                        child: SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              30 /
+                                                              100,
+                                                          height: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .height *
+                                                              15 /
+                                                              100,
+                                                          child: Image.asset(
+                                                              language == 0
+                                                                  ? AppImage
+                                                                      .discountStrip
+                                                                  : AppImage
+                                                                      .discountStripInverted),
+                                                        ),
+                                                      ),
+                                                      Positioned(
+                                                        top: language == 0
+                                                            ? 15
+                                                            : 14,
+                                                        left: language == 0
+                                                            ? -25
+                                                            : null,
+                                                        right: language == 1
+                                                            ? -25
+                                                            : null,
+                                                        child: Transform.rotate(
+                                                          angle: language == 0
+                                                              ? -.65
+                                                              : .65,
+                                                          child: Container(
+                                                            alignment: Alignment
+                                                                .center,
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                30 /
+                                                                100,
+                                                            child: Text(
+                                                              "${propertyList[index]['discount']}% ${AppLanguage.offText[language]}",
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              style: const TextStyle(
+                                                                  fontFamily:
+                                                                      AppFont
+                                                                          .fontFamily,
+                                                                  fontSize: 11,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w800,
+                                                                  color: AppColor
+                                                                      .secondaryColor),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      )
+                                                    ]
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      3 /
+                                                      100,
+                                                )
+                                              ],
+                                            );
+                                          }),
+                                        ],
+                                      ),
+                                    if (propertyList.isEmpty)
+                                      Column(
+                                        children: [
+                                          SizedBox(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  20 /
+                                                  100),
+                                          SizedBox(
+                                            width: screenWidth * 70 / 100,
+                                            child: Text(
+                                              AppLanguage
+                                                  .advNodataMsg[language],
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                  fontFamily:
+                                                      AppFont.fontFamily,
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppColor.primaryColor),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                      // Expanded(
+                      //   child: PropertyList(
+                      //     propertyList: propertyList,
+                      //     language: language,
+                      //     manageMyAd: manageMyAd,
+                      //     userType: userType,
+                      //     viewMyAdd: viewMyAdd,
+                      //   ),
+                      // ),
+                    ],
+
                     const NoInternetBanner(),
                   ],
                 ),
@@ -1160,7 +1961,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
 
 //=====================options bottomsheet===============
   void optionsBottomSheet(
-      BuildContext context, double screenWidth, int tripId) {
+      BuildContext context, double screenWidth, int id, int adType) {
     showModalBottomSheet<void>(
       isScrollControlled: true,
       context: context,
@@ -1215,18 +2016,30 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                 onTap: () {
                                   Navigator.pop(context);
                                   if (optionsList[index]['id'] == 1) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            EditAdvertisementScreen(
-                                          tripId: tripId.toString(),
+                                    if (adType == 1) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              EditAdvertisementScreen(
+                                            tripId: id.toString(),
+                                          ),
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    } else {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              EditPropertyAdvertisementScreen(
+                                            propertyAdId: id.toString(),
+                                          ),
+                                        ),
+                                      );
+                                    }
                                   } else if (optionsList[index]['id'] == 2) {
                                     deleteBottomSheet(context, screenWidth,
-                                        tripId.toString());
+                                        id.toString(), adType);
                                   }
                                 },
                                 child: Container(
@@ -1262,7 +2075,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
   }
 
 //=====================Delete bottomsheet===============
-  void deleteBottomSheet(BuildContext context, screenWidth, tripId) {
+  void deleteBottomSheet(BuildContext context, screenWidth, id, adType) {
     showModalBottomSheet<void>(
         isScrollControlled: true,
         context: context,
@@ -1305,7 +2118,6 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                               height:
                                   MediaQuery.of(context).size.width * 10 / 100,
                             ),
-                          
                             Container(
                               //color: Colors.amber,
                               alignment: Alignment.center,
@@ -1336,7 +2148,6 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                     fontFamily: AppFont.fontFamily),
                               ),
                             ),
-
                             SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 4 / 100,
@@ -1383,7 +2194,11 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                   ),
                                   GestureDetector(
                                     onTap: () {
-                                      deleteAdApiCall(tripId);
+                                      if (adType == 1) {
+                                        deleteAdApiCall(id);
+                                      } else {
+                                        deletePropAdApiCall(id);
+                                      }
                                       Navigator.pop(context);
                                     },
                                     child: Container(
