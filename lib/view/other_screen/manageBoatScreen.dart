@@ -303,7 +303,7 @@ class _ManageBoatScreenState extends State<ManageBoatScreen> {
                     }),
                 SizedBox(height: MediaQuery.of(context).size.height * 2 / 100),
 
-                //add bottom
+                //add button
                 if (userType == 3 || (userType == 2 && manageBoat == 1))
                   GestureDetector(
                     onTap: () {

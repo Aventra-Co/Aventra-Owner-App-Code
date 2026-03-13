@@ -51,6 +51,8 @@ class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
   int isManageUnavailability = 0;
   int isViewBoat = 0;
   int isManageBoat = 0;
+  int isViewProperty = 0;
+  int isManageProperty = 0;
   int isViewMyWallet = 0;
   int isViewHistory = 0;
 
@@ -369,6 +371,8 @@ class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
     isManageUnavailability = userDetails["manage_unavailability"];
     isViewBoat = userDetails["view_boat"];
     isManageBoat = userDetails["manage_boat"];
+    isViewProperty = userDetails['view_property'];
+    isManageProperty = userDetails['manage_property'];
     isViewMyWallet = userDetails["view_my_wallet"];
     isViewHistory = userDetails["view_history"];
     setState(() {});
@@ -429,6 +433,8 @@ class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
           isManageUnavailability.toString();
       formData.fields['view_boat'] = isViewBoat.toString();
       formData.fields['manage_boat'] = isManageBoat.toString();
+      formData.fields['view_property'] = isViewProperty.toString();
+      formData.fields['manage_property'] = isManageProperty.toString();
       formData.fields['view_my_wallet'] = isViewMyWallet.toString();
       formData.fields['view_history'] = isViewHistory.toString();
 
@@ -1269,6 +1275,112 @@ class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
                                     borderRadius: BorderRadius.circular(100),
                                     child: Image.asset(
                                       isManageBoat == 1
+                                          ? AppImage.toggleActiveIcon
+                                          : AppImage.toggleDeactiveIcon,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 1 / 100),
+
+                        //=============view property===============
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                AppLanguage.viewPropertyText[language],
+                                style: const TextStyle(
+                                    color: AppColor.primaryColor,
+                                    fontFamily: AppFont.fontFamily,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (isViewProperty == 1) {
+                                      setState(() {
+                                        isViewProperty = 0;
+                                      });
+                                    } else {
+                                      setState(() {
+                                        isViewProperty = 1;
+                                      });
+                                    }
+                                  });
+                                },
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width *
+                                      10 /
+                                      100,
+                                  height: MediaQuery.of(context).size.height *
+                                      5 /
+                                      100,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Image.asset(
+                                      isViewProperty == 1
+                                          ? AppImage.toggleActiveIcon
+                                          : AppImage.toggleDeactiveIcon,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 1 / 100),
+
+                        //=============manage property===============
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                AppLanguage.managePropertyText[language],
+                                style: const TextStyle(
+                                    color: AppColor.primaryColor,
+                                    fontFamily: AppFont.fontFamily,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (isManageProperty == 1) {
+                                      setState(() {
+                                        isManageProperty = 0;
+                                      });
+                                    } else {
+                                      setState(() {
+                                        isManageProperty = 1;
+                                      });
+                                    }
+                                  });
+                                },
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width *
+                                      10 /
+                                      100,
+                                  height: MediaQuery.of(context).size.height *
+                                      5 /
+                                      100,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Image.asset(
+                                      isManageProperty == 1
                                           ? AppImage.toggleActiveIcon
                                           : AppImage.toggleDeactiveIcon,
                                       fit: BoxFit.cover,

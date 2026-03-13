@@ -2141,7 +2141,9 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                               width:
                                   MediaQuery.of(context).size.width * 75 / 100,
                               child: Text(
-                                AppLanguage.deleteMsg[language],
+                                adType == 0
+                                    ? AppLanguage.deleteMsg[language]
+                                    : AppLanguage.deleteAdMsg[language],
                                 style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,

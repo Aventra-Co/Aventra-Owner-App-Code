@@ -3,7 +3,7 @@ import '/view/authentication/calender_screen.dart';
 import '/view/authentication/inbox_screen.dart';
 import '/view/authentication/my_ads_screen.dart';
 import '/view/authentication/profile_screen.dart';
-import '/view/authentication/trips_screen.dart';
+import '../view/authentication/home_screen.dart';
 import 'app_color.dart';
 import 'app_constant.dart';
 import 'app_font.dart';
@@ -56,7 +56,7 @@ class _MyFooterPageState extends State<MyFooterPage> {
         controller: _pageController,
         onPageChanged: _onPageChanged,
         children: const <Widget>[
-          TripsScreen(),
+          HomeScreen(),
           MyAdsScreen(),
           InboxScreen(),
           CalenderScreen(),
@@ -87,14 +87,14 @@ class _MyFooterPageState extends State<MyFooterPage> {
                     decoration: BoxDecoration(
                         image: DecorationImage(
                             image: AssetImage(_selectedIndex == 0
-                                ? AppImage.tripsActiveIcon
-                                : AppImage.tripsDeactiveIcon))),
+                                ? AppImage.bookingsActive
+                                : AppImage.bookingDeactive))),
                   ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.5 / 100,
                   ),
                   Text(
-                    AppLanguage.tripText[language],
+                    AppLanguage.bookingsText[language],
                     style: TextStyle(
                       fontFamily: AppFont.fontFamily,
                       fontSize: screenWidth > 600 ? 16 : 11,
@@ -130,8 +130,8 @@ class _MyFooterPageState extends State<MyFooterPage> {
                     decoration: BoxDecoration(
                         image: DecorationImage(
                             image: AssetImage(_selectedIndex == 1
-                                ? AppImage.myAdsActiveIcon
-                                : AppImage.myAdsDeactiveIcon))),
+                                ? AppImage.adsActive
+                                : AppImage.adsDeactive))),
                   ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.5 / 100,
@@ -259,8 +259,8 @@ class _MyFooterPageState extends State<MyFooterPage> {
                     decoration: BoxDecoration(
                         image: DecorationImage(
                             image: AssetImage(_selectedIndex == 4
-                                ? AppImage.profileActiveIcon
-                                : AppImage.profileDeactiveIcon))),
+                                ? AppImage.profileActive
+                                : AppImage.profileDeactive))),
                   ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.5 / 100,

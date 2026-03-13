@@ -12,7 +12,7 @@ Widget tripsShimmerEffect(BuildContext context) {
         ),
         Wrap(
           children: List.generate(
-            5,
+            4,
             (index) {
               return Column(
                 children: [

@@ -166,7 +166,7 @@ class _ManagePropertyScreenState extends State<ManagePropertyScreen>
         if (res['success'] == true) {
           var item = res['user_arr'];
           permissions = (item != "NA") ? item : {};
-          manageProperty = permissions['manage_boat'] ?? 0;
+          manageProperty = permissions['manage_property'] ?? 0;
         } else {
           setState(() {
             isApiCalling = false;
@@ -305,50 +305,51 @@ class _ManagePropertyScreenState extends State<ManagePropertyScreen>
             SizedBox(height: size.height * 0.03),
 
             /// ADD BUTTON
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: size.width * 0.05,
-              ),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const AddPropertyScreen())),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: size.width * 0.04,
-                      vertical: size.height * 0.008,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColor.themeColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.add,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        SizedBox(width: size.width * 0.01),
-                        Text(
-                          AppLanguage.addText[language],
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontFamily: AppFont.fontFamily,
-                            fontWeight: FontWeight.w500,
+            if (userType == 3 || (userType == 2 && manageProperty == 1))
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: size.width * 0.05,
+                ),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AddPropertyScreen())),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: size.width * 0.04,
+                        vertical: size.height * 0.008,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColor.themeColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.add,
+                            size: 16,
                             color: Colors.white,
                           ),
-                        ),
-                      ],
+                          SizedBox(width: size.width * 0.01),
+                          Text(
+                            AppLanguage.addText[language],
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontFamily: AppFont.fontFamily,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
 
             SizedBox(height: size.height * 0.02),
 
@@ -419,17 +420,19 @@ class _ManagePropertyScreenState extends State<ManagePropertyScreen>
                                         ],
                                       ),
                                     ),
-                                    GestureDetector(
-                                      onTap: () => optionsBottomSheet(
-                                          context,
-                                          screenWidth,
-                                          propertyList[index]['property_id'],
-                                          propertyList[index]),
-                                      child: const Icon(
-                                        Icons.more_vert,
-                                        color: Colors.grey,
+                                    if (userType == 3 ||
+                                        (userType == 2 && manageProperty == 1))
+                                      GestureDetector(
+                                        onTap: () => optionsBottomSheet(
+                                            context,
+                                            screenWidth,
+                                            propertyList[index]['property_id'],
+                                            propertyList[index]),
+                                        child: const Icon(
+                                          Icons.more_vert,
+                                          color: Colors.grey,
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 ),
                               );

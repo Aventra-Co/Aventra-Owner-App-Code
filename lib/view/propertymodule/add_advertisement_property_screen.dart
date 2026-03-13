@@ -517,9 +517,9 @@ class _AddAdvertisementPropertyScreenState
       return AppLanguage.nationalityMsg[language];
     }
 
-    if (destination.isEmpty) {
-      return AppLanguage.selectDestinationMsg[language];
-    }
+    // if (destination.isEmpty) {
+    //   return AppLanguage.selectDestinationMsg[language];
+    // }
 
     if (property.isEmpty) {
       return AppLanguage.selectPropertyMsg[language];
@@ -1942,75 +1942,75 @@ class _AddAdvertisementPropertyScreenState
                           ),
 
                           //!=== select destination===
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 90 / 100,
-                            height:
-                                MediaQuery.of(context).size.height * 5.5 / 100,
-                            child: TextFormField(
-                              readOnly: true,
-                              style: const TextStyle(
-                                  height: 1.1,
-                                  color: AppColor.textColor,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400),
-                              textAlignVertical: TextAlignVertical.center,
-                              controller: destinationTextEditingController,
-                              onTap: () {
-                                dropDownModelForDestination(
-                                    context, screenWidth);
-                              },
-                              decoration: InputDecoration(
-                                  border: const UnderlineInputBorder(
-                                    // Use UnderlineInputBorder
-                                    borderSide:
-                                        BorderSide(color: AppColor.boaderColor),
-                                  ),
-                                  enabledBorder: const UnderlineInputBorder(
-                                    borderSide:
-                                        BorderSide(color: AppColor.boaderColor),
-                                  ),
-                                  focusedBorder: const UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: AppColor.themeColor, width: 1),
-                                  ),
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(vertical: 10),
-                                  fillColor: Colors.transparent,
-                                  filled: true,
-                                  counterText: '',
-                                  hintText: AppLanguage
-                                      .chooseDestinationText[language],
-                                  hintStyle: const TextStyle(
-                                      color: AppColor.textColor,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 16),
-                                  suffixIcon: IconButton(
-                                    icon: Container(
-                                      alignment: language == 0
-                                          ? Alignment.centerRight
-                                          : Alignment.centerLeft,
-                                      width: MediaQuery.of(context).size.width *
-                                          20 /
-                                          100,
-                                      height:
-                                          MediaQuery.of(context).size.width *
-                                              5 /
-                                              100,
-                                      child: Image.asset(
-                                        AppImage.dropDownIcon,
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      dropDownModelForDestination(
-                                          context, screenWidth);
-                                    },
-                                  )),
-                            ),
-                          ),
-                          SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height * 2 / 100,
-                          ),
+                          // SizedBox(
+                          //   width: MediaQuery.of(context).size.width * 90 / 100,
+                          //   height:
+                          //       MediaQuery.of(context).size.height * 5.5 / 100,
+                          //   child: TextFormField(
+                          //     readOnly: true,
+                          //     style: const TextStyle(
+                          //         height: 1.1,
+                          //         color: AppColor.textColor,
+                          //         fontSize: 16,
+                          //         fontWeight: FontWeight.w400),
+                          //     textAlignVertical: TextAlignVertical.center,
+                          //     controller: destinationTextEditingController,
+                          //     onTap: () {
+                          //       dropDownModelForDestination(
+                          //           context, screenWidth);
+                          //     },
+                          //     decoration: InputDecoration(
+                          //         border: const UnderlineInputBorder(
+                          //           // Use UnderlineInputBorder
+                          //           borderSide:
+                          //               BorderSide(color: AppColor.boaderColor),
+                          //         ),
+                          //         enabledBorder: const UnderlineInputBorder(
+                          //           borderSide:
+                          //               BorderSide(color: AppColor.boaderColor),
+                          //         ),
+                          //         focusedBorder: const UnderlineInputBorder(
+                          //           borderSide: BorderSide(
+                          //               color: AppColor.themeColor, width: 1),
+                          //         ),
+                          //         contentPadding:
+                          //             const EdgeInsets.symmetric(vertical: 10),
+                          //         fillColor: Colors.transparent,
+                          //         filled: true,
+                          //         counterText: '',
+                          //         hintText: AppLanguage
+                          //             .chooseDestinationText[language],
+                          //         hintStyle: const TextStyle(
+                          //             color: AppColor.textColor,
+                          //             fontWeight: FontWeight.w400,
+                          //             fontSize: 16),
+                          //         suffixIcon: IconButton(
+                          //           icon: Container(
+                          //             alignment: language == 0
+                          //                 ? Alignment.centerRight
+                          //                 : Alignment.centerLeft,
+                          //             width: MediaQuery.of(context).size.width *
+                          //                 20 /
+                          //                 100,
+                          //             height:
+                          //                 MediaQuery.of(context).size.width *
+                          //                     5 /
+                          //                     100,
+                          //             child: Image.asset(
+                          //               AppImage.dropDownIcon,
+                          //             ),
+                          //           ),
+                          //           onPressed: () {
+                          //             dropDownModelForDestination(
+                          //                 context, screenWidth);
+                          //           },
+                          //         )),
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //   height:
+                          //       MediaQuery.of(context).size.height * 2 / 100,
+                          // ),
 
                           //!=== select boat===
                           SizedBox(
@@ -2283,7 +2283,7 @@ class _AddAdvertisementPropertyScreenState
                                             onTap: () {
                                               setState(() {
                                                 adultCount = (adultCount - 1)
-                                                    .clamp(0, 10);
+                                                    .clamp(0, 50);
                                               });
                                             },
                                             child: Container(
@@ -2316,7 +2316,7 @@ class _AddAdvertisementPropertyScreenState
                                             onTap: () {
                                               setState(() {
                                                 adultCount = (adultCount + 1)
-                                                    .clamp(0, 10);
+                                                    .clamp(0, 50);
                                               });
                                             },
                                             child: Container(
@@ -2378,7 +2378,7 @@ class _AddAdvertisementPropertyScreenState
                                             onTap: () {
                                               setState(() {
                                                 childCount = (childCount - 1)
-                                                    .clamp(0, 10);
+                                                    .clamp(0, 50);
                                               });
                                             },
                                             child: Container(
@@ -2411,7 +2411,7 @@ class _AddAdvertisementPropertyScreenState
                                             onTap: () {
                                               setState(() {
                                                 childCount = (childCount + 1)
-                                                    .clamp(0, 10);
+                                                    .clamp(0, 50);
                                               });
                                             },
                                             child: Container(

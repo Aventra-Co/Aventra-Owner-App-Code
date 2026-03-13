@@ -17,14 +17,14 @@ import '../view/authentication/edit_profile_screen.dart';
 import '../view/authentication/forgot_password_screen.dart';
 import '../view/authentication/login_screen.dart';
 import '../view/authentication/signup_screen.dart';
-import '../view/authentication/trips_screen.dart';
+import '../view/authentication/home_screen.dart';
 
 final Map<String, WidgetBuilder> routes = {
   Login.routeName: (context) => const Login(),
   Signup.routeName: (context) => const Signup(),
   ContactAdmin.routeName: (context) => const ContactAdmin(),
   ForgotPasswordScreen.routeName: (context) => const ForgotPasswordScreen(),
-  TripsScreen.routeName: (context) => const TripsScreen(),
+  HomeScreen.routeName: (context) => const HomeScreen(),
   MyAdsScreen.routeName: (context) => const MyAdsScreen(),
   InboxScreen.routeName: (context) => const InboxScreen(),
   CalenderScreen.routeName: (context) => const CalenderScreen(),

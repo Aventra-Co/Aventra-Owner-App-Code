@@ -1518,16 +1518,53 @@ class AppLanguage {
     "يجب أن يكون عدد الأشخاص أكبر من 0"
   ];
 
-  static const oneDayText = ["One day \n(2pm till next day 12 afternoon)"];
-  static const weekDaysText = ["Weekday (Sun-Wed)"];
-  static const weekendDaysText = ["Weekend (Thu-Sat)"];
-  static const fullWeekDaysText = ["Full week (Sun-Sat)"];
+  static const oneDayText = [
+    "One day \n(2pm till next day 12 afternoon)",
+    "يوم واحد \n(من 2 ظهراً حتى 12 ظهر اليوم التالي)"
+  ];
+
+  static const weekDaysText = [
+    "Weekday (Sun-Wed)",
+    "أيام الأسبوع (الأحد-الأربعاء)"
+  ];
+
+  static const weekendDaysText = [
+    "Weekend (Thu-Sat)",
+    "عطلة نهاية الأسبوع (الخميس-السبت)"
+  ];
+
+  static const fullWeekDaysText = [
+    "Full week (Sun-Sat)",
+    "طوال الأسبوع (الأحد-السبت)"
+  ];
+
   static const selectOnePriceBoxMsg = [
     "Please select at least one price option",
+    "الرجاء اختيار خيار سعر واحد على الأقل"
   ];
+
   static const enterAllThePriceMsg = [
     "Please enter all the prices of the selected price fields",
+    "الرجاء إدخال جميع أسعار الحقول المحددة"
   ];
-  static const priceValidMsg = ["Price can't be 0 or less"];
-  static const startingFromText = ["Starting From"];
+
+  static const priceValidMsg = [
+    "Price can't be 0 or less",
+    "لا يمكن أن يكون السعر 0 أو أقل"
+  ];
+
+  static const startingFromText = ["Starting From", "يبدأ من"];
+
+  static const deleteAdMsg = [
+    "Are you sure you want to delete this advertisement?",
+    "هل أنت متأكد أنك تريد حذف هذا الإعلان؟"
+  ];
+
+  static const viewPropertyText = ["View Property", "عرض العقار"];
+  static const bookingsText = [
+    "Bookings",
+  ];
+  static const todayText = [
+    "Today",
+  ];
 }

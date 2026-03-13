@@ -41,6 +41,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
   TextEditingController _timeController = TextEditingController();
   bool isApiCalling = true;
   List<dynamic> boatList = <dynamic>[];
+  List<dynamic> propertyList = <dynamic>[];
   // List<int> selectedBoats = [];
   int selectedBoatId = 0;
   String selectedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -75,6 +76,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
       userType = data['user_type'];
     }
     getCalendarDatesApi(userId);
+    getPropertiesApi(userId);
     getBoatsApi(userId, userType);
     setState(() {});
   }
@@ -176,11 +178,15 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
       http.MultipartRequest formData = http.MultipartRequest('POST', url);
       formData.fields['user_id'] = userId.toString();
       formData.fields['date'] = selectedDate;
-      formData.fields['boat_ids'] = selectedBoatId.toString();
+      formData.fields['boat_ids'] =
+          status == 1 ? selectedBoatId.toString() : "0";
+      formData.fields['property_id'] =
+          status == 2 ? selectedBoatId.toString() : "0";
       formData.fields['type'] = tripTime.toString();
       formData.fields['from_time'] = sendStartTime;
       formData.fields['to_time'] = sendEndTime;
       formData.fields['select_all'] = "0";
+      formData.fields['entity_type'] = status == 1 ? "0" : "1";
       // (boatList.length == selectedBoats.length) ? "0" : "0";
 
       log("response--==> ${formData.fields}");
@@ -294,6 +300,70 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
     }
   }
 
+  //=============================GET Boat DETAILS===================================//
+  Future<void> getPropertiesApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}get_all_owner_properties?user_id=$userId&type=$userType");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isApiCalling = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['data'];
+          propertyList = (item != "NA") ? item : [];
+
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
   int status = 1;
   @override
   Widget build(BuildContext context) {
@@ -352,6 +422,15 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                                 onTap: () {
                                   setState(() {
                                     status = 1;
+                                    selectedBoatId = 0;
+                                    selectedDate = DateFormat('yyyy-MM-dd')
+                                        .format(DateTime.now());
+                                    _selectedDay = DateTime.now();
+                                    today = DateTime.now();
+                                    sendEndTime = "";
+                                    sendStartTime = "";
+                                    tripTime = 0;
+                                    _timeController.clear();
                                   });
                                 },
                                 child: Container(
@@ -363,6 +442,8 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                                       color: status == 1
                                           ? AppColor.themeColor
                                           : AppColor.secondaryColor,
+                                      border: Border.all(
+                                          color: AppColor.themeColor),
                                       borderRadius: BorderRadius.circular(5)),
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(
@@ -386,13 +467,16 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                                 onTap: () {
                                   setState(() {
                                     status = 2;
+                                    selectedBoatId = 0;
+                                    selectedDate = DateFormat('yyyy-MM-dd')
+                                        .format(DateTime.now());
+                                    _selectedDay = DateTime.now();
+                                    today = DateTime.now();
+                                    sendEndTime = "";
+                                    sendStartTime = "";
+                                    tripTime = 0;
+                                    _timeController.clear();
                                   });
-                                  // Navigator.push(
-                                  //     context,
-                                  //     MaterialPageRoute(
-                                  //         builder: ((context) => MyFooterPage(
-                                  //               indexOfPage: 1,
-                                  //             ))));
                                 },
                                 child: Container(
                                   alignment: Alignment.center,
@@ -403,7 +487,8 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                                       color: status == 2
                                           ? AppColor.themeColor
                                           : AppColor.secondaryColor,
-                                          border: Border.all(color: AppColor.themeColor),
+                                      border: Border.all(
+                                          color: AppColor.themeColor),
                                       borderRadius: BorderRadius.circular(5)),
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(
@@ -434,10 +519,10 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                           
-                              Text(   status==1 ?
-                               AppLanguage.selectBoatText[language]
-                               :  AppLanguage.selectPropertyText[language],
+                              Text(
+                                status == 1
+                                    ? AppLanguage.selectBoatText[language]
+                                    : AppLanguage.selectPropertyText[language],
                                 style: const TextStyle(
                                     fontFamily: AppFont.fontFamily,
                                     fontWeight: FontWeight.w700,
@@ -451,67 +536,136 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                           height: MediaQuery.of(context).size.height * 1 / 100,
                         ),
 
-                        //!pickup list
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          width: MediaQuery.of(context).size.width * 90 / 100,
-                          child: Wrap(
-                            alignment: WrapAlignment.start,
-                            spacing: 15,
-                            runSpacing: 10,
-                            children: List.generate(boatList.length, (index) {
-                              return (GestureDetector(
-                                onTap: () {
-                                  if (selectedBoatId ==
-                                      boatList[index]["boat_id"]) {
-                                    setState(() {
-                                      selectedBoatId = 0;
-                                    });
-                                    log("$selectedBoatId");
-                                  } else {
-                                    setState(() {
-                                      selectedBoatId =
-                                          boatList[index]["boat_id"];
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(1),
-                                  decoration: BoxDecoration(
-                                      color: selectedBoatId ==
-                                              boatList[index]["boat_id"]
-                                          ? AppColor.themeColor
-                                          : AppColor.secondaryColor,
-                                      border: Border.all(
-                                          width: 1,
-                                          color: selectedBoatId ==
-                                                  boatList[index]["boat_id"]
-                                              ? AppColor.themeColor
-                                              : AppColor.boaderColor),
-                                      borderRadius: BorderRadius.circular(10)),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0, horizontal: 12.0),
-                                    child: Text(
-                                      status==1 ?
-                                      boatList[index]['boat_name_english'] ??
-                                          "" :AppLanguage.PalmResortText[language],
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle( 
-                                          color: selectedBoatId ==
-                                                  boatList[index]["boat_id"]
-                                              ? AppColor.secondaryColor
-                                              : AppColor.themeColor,
-                                          fontFamily: AppFont.fontFamily,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 14),
+                        //!boat list
+                        if (status == 1) ...[
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: Wrap(
+                              alignment: WrapAlignment.start,
+                              spacing: 15,
+                              runSpacing: 10,
+                              children: List.generate(boatList.length, (index) {
+                                return (GestureDetector(
+                                  onTap: () {
+                                    if (selectedBoatId ==
+                                        boatList[index]["boat_id"]) {
+                                      setState(() {
+                                        selectedBoatId = 0;
+                                      });
+                                      log("$selectedBoatId");
+                                    } else {
+                                      setState(() {
+                                        selectedBoatId =
+                                            boatList[index]["boat_id"];
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(1),
+                                    decoration: BoxDecoration(
+                                        color: selectedBoatId ==
+                                                boatList[index]["boat_id"]
+                                            ? AppColor.themeColor
+                                            : AppColor.secondaryColor,
+                                        border: Border.all(
+                                            width: 1,
+                                            color: selectedBoatId ==
+                                                    boatList[index]["boat_id"]
+                                                ? AppColor.themeColor
+                                                : AppColor.boaderColor),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8.0, horizontal: 12.0),
+                                      child: Text(
+                                        boatList[index]['boat_name_english'] ??
+                                            "",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: selectedBoatId ==
+                                                    boatList[index]["boat_id"]
+                                                ? AppColor.secondaryColor
+                                                : AppColor.themeColor,
+                                            fontFamily: AppFont.fontFamily,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ));
-                            }),
+                                ));
+                              }),
+                            ),
                           ),
-                        ),
+                        ] else ...[
+                          //!property list
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: Wrap(
+                              alignment: WrapAlignment.start,
+                              spacing: 15,
+                              runSpacing: 10,
+                              children:
+                                  List.generate(propertyList.length, (index) {
+                                return (GestureDetector(
+                                  onTap: () {
+                                    if (selectedBoatId ==
+                                        propertyList[index]["property_id"]) {
+                                      setState(() {
+                                        selectedBoatId = 0;
+                                      });
+                                      log("$selectedBoatId");
+                                    } else {
+                                      setState(() {
+                                        selectedBoatId =
+                                            propertyList[index]["property_id"];
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(1),
+                                    decoration: BoxDecoration(
+                                        color: selectedBoatId ==
+                                                propertyList[index]
+                                                    ["property_id"]
+                                            ? AppColor.themeColor
+                                            : AppColor.secondaryColor,
+                                        border: Border.all(
+                                            width: 1,
+                                            color: selectedBoatId ==
+                                                    propertyList[index]
+                                                        ["property_id"]
+                                                ? AppColor.themeColor
+                                                : AppColor.boaderColor),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8.0, horizontal: 12.0),
+                                      child: Text(
+                                        propertyList[index]
+                                                ['property_name_english'] ??
+                                            "",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: selectedBoatId ==
+                                                    propertyList[index]
+                                                        ["property_id"]
+                                                ? AppColor.secondaryColor
+                                                : AppColor.themeColor,
+                                            fontFamily: AppFont.fontFamily,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14),
+                                      ),
+                                    ),
+                                  ),
+                                ));
+                              }),
+                            ),
+                          ),
+                        ],
 
                         if (boatList.isEmpty && isApiCalling == false)
                           Column(

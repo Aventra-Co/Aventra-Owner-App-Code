@@ -54,6 +54,8 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
   int isManageUnavailability = 0;
   int isViewBoat = 0;
   int isManageBoat = 0;
+  int isViewProperty = 0;
+  int isManageProperty = 0;
   int isViewMyWallet = 0;
   int isViewHistory = 0;
   bool isApiCalling = false;
@@ -326,6 +328,8 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
           isManageUnavailability.toString();
       formData.fields['view_boat'] = isViewBoat.toString();
       formData.fields['manage_boat'] = isManageBoat.toString();
+      formData.fields['view_property'] = isViewProperty.toString();
+      formData.fields['manage_property'] = isManageProperty.toString();
       formData.fields['view_my_wallet'] = isViewHome.toString();
       formData.fields['view_history'] = isViewHistory.toString();
       formData.fields['user_type'] = "2";
@@ -403,7 +407,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
         body: Directionality(
           textDirection:
               language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.width * 100 / 100,
             height: MediaQuery.of(context).size.height * 100 / 100,
             child: Column(
@@ -421,7 +425,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                           height: MediaQuery.of(context).size.height * 1 / 100,
                         ),
 
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Text(
                             AppLanguage.detailsText[language],
@@ -437,7 +441,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                         ),
 
                         //!=== Add username Text ===
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Text(
                             AppLanguage.usernameText[language],
@@ -464,7 +468,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                         ),
 
                         //!=== Add Name Text ===
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Text(
                             AppLanguage.nameText[language],
@@ -491,7 +495,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                         ),
 
                         //!=== Role Text ===
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Text(
                             AppLanguage.roleText[language],
@@ -570,7 +574,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                         ),
 
                         //!=== Email Text ===
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Text(
                             AppLanguage.emailText[language],
@@ -597,7 +601,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 2 / 100),
 
                         //!=== Password Text ===
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Text(
                             AppLanguage.passwordText[language],
@@ -679,7 +683,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                         ),
 
                         //!=== Staff Text ===
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Text(
                             AppLanguage.staffIdText[language],
@@ -695,7 +699,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100),
 
                         //!=== Upload staff id  Text ===
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Text(
                             AppLanguage.uploadStaffIdText[language],
@@ -762,7 +766,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(20),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.of(context).size.width *
                                           90 /
                                           100,
@@ -789,7 +793,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                           _imageSelect = null;
                                         });
                                       },
-                                      child: Container(
+                                      child: SizedBox(
                                           width: MediaQuery.of(context)
                                                   .size
                                                   .width *
@@ -806,7 +810,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 2 / 100),
 
                         //!=== Permission Text ===
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Text(
                             "${AppLanguage.permissionText[language]}:",
@@ -822,7 +826,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100),
 
                         //=============view home===============
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -849,7 +853,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                     }
                                   });
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       10 /
                                       100,
@@ -875,7 +879,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100),
 
                         //=============manage home===============
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -902,7 +906,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                     }
                                   });
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       10 /
                                       100,
@@ -928,7 +932,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100),
 
                         //=============view my add===============
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -955,7 +959,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                     }
                                   });
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       10 /
                                       100,
@@ -981,7 +985,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100),
 
                         //=============manage my add===============
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1008,7 +1012,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                     }
                                   });
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       10 /
                                       100,
@@ -1034,7 +1038,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100),
 
                         //=============chat===============
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1061,7 +1065,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                     }
                                   });
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       10 /
                                       100,
@@ -1087,7 +1091,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100),
 
                         //=============view unavailability===============
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1114,7 +1118,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                     }
                                   });
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       10 /
                                       100,
@@ -1140,7 +1144,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100),
 
                         //=============manage unavailability===============
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1167,7 +1171,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                     }
                                   });
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       10 /
                                       100,
@@ -1193,7 +1197,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100),
 
                         //=============view boat===============
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1220,7 +1224,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                     }
                                   });
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       10 /
                                       100,
@@ -1246,7 +1250,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100),
 
                         //=============manage boat===============
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1273,7 +1277,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                     }
                                   });
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       10 /
                                       100,
@@ -1298,8 +1302,114 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                             height:
                                 MediaQuery.of(context).size.height * 1 / 100),
 
+                        //=============view property===============
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                AppLanguage.viewPropertyText[language],
+                                style: const TextStyle(
+                                    color: AppColor.primaryColor,
+                                    fontFamily: AppFont.fontFamily,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (isViewProperty == 1) {
+                                      setState(() {
+                                        isViewProperty = 0;
+                                      });
+                                    } else {
+                                      setState(() {
+                                        isViewProperty = 1;
+                                      });
+                                    }
+                                  });
+                                },
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width *
+                                      10 /
+                                      100,
+                                  height: MediaQuery.of(context).size.height *
+                                      5 /
+                                      100,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Image.asset(
+                                      isViewProperty == 1
+                                          ? AppImage.toggleActiveIcon
+                                          : AppImage.toggleDeactiveIcon,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 1 / 100),
+
+                        //=============manage property===============
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                AppLanguage.managePropertyText[language],
+                                style: const TextStyle(
+                                    color: AppColor.primaryColor,
+                                    fontFamily: AppFont.fontFamily,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (isManageProperty == 1) {
+                                      setState(() {
+                                        isManageProperty = 0;
+                                      });
+                                    } else {
+                                      setState(() {
+                                        isManageProperty = 1;
+                                      });
+                                    }
+                                  });
+                                },
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width *
+                                      10 /
+                                      100,
+                                  height: MediaQuery.of(context).size.height *
+                                      5 /
+                                      100,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Image.asset(
+                                      isManageProperty == 1
+                                          ? AppImage.toggleActiveIcon
+                                          : AppImage.toggleDeactiveIcon,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 1 / 100),
+
                         //=============view wallet===============
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1326,7 +1436,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                     }
                                   });
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       10 /
                                       100,
@@ -1352,7 +1462,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                 MediaQuery.of(context).size.height * 1 / 100),
 
                         //=============view history===============
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1379,7 +1489,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                     }
                                   });
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       10 /
                                       100,
@@ -1467,7 +1577,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                           }),
 
                       // Search field
-                      Container(
+                      SizedBox(
                         width: MediaQuery.of(context).size.width * 90 / 100,
                         height: MediaQuery.of(context).size.height * 6.5 / 100,
                         child: TextFormField(
@@ -1563,7 +1673,7 @@ class _AddBoatScreenState extends State<AddStaffScreen> {
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
-                                        Container(
+                                        SizedBox(
                                           width: MediaQuery.of(context)
                                                   .size
                                                   .width *

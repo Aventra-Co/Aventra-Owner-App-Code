@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:the_boat_ownerside/view/other_screen/booking_dates.dart';
-import 'package:the_boat_ownerside/view/propertymodule/booking_dates_screen.dart';
+// import 'package:the_boat_ownerside/view/propertymodule/booking_dates_screen.dart';
 import '../../controller/app_config_provider.dart';
 import '../../controller/app_footer.dart';
 import '../../controller/app_color.dart';
@@ -448,7 +448,7 @@ class _CalenderScreenScreenState extends State<CalenderScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        const BookingDates(),
+                                        const BookingDatesScreen(),
                                   ),
                                 );
                               },
@@ -604,9 +604,7 @@ class _CalenderScreenScreenState extends State<CalenderScreen> {
                               },
                             ),
                           ),
-                         
-                         
-                         
+
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 0.02),

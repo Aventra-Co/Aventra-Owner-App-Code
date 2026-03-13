@@ -133,4 +133,10 @@ class AppImage {
   static const calenderIcon = './assets/icons/calenderIcon.png';
   static const timeIcon = './assets/icons/timeIcon.png';
   static const memberIcon = './assets/icons/memberIcon.png';
+  static const profileActive = './assets/icons/ic_ac_profile.png';
+  static const profileDeactive = './assets/icons/ic_de_profile.png';
+  static const adsDeactive = './assets/icons/ic_de_ads.png';
+  static const adsActive = './assets/icons/ic_ac_ads.png';
+  static const bookingsActive = './assets/icons/ic_ac_bookings.png';
+  static const bookingDeactive = './assets/icons/ic_de_bookings.png';
 }

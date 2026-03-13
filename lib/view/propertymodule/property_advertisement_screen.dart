@@ -98,8 +98,8 @@ class _PropertyAdvertisementScreenState
         if (res['success'] == true) {
           var item = res['data'];
           adDetails = (item != "NA") ? item : [];
-          if (adDetails['images'] != "NA") {
-            tripImages.addAll(adDetails['images']);
+          if (adDetails['property_images'] != "NA") {
+            tripImages.addAll(adDetails['property_images']);
             offerings = adDetails['amenities'] ?? [];
           }
           setState(() {
@@ -349,7 +349,7 @@ class _PropertyAdvertisementScreenState
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      adDetails['city_name'] ?? "",
+                                      adDetails['city_name']?[language] ?? "",
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w400,
@@ -399,7 +399,9 @@ class _PropertyAdvertisementScreenState
                                     "${adDetails['full_week_active'] == 1 ? adDetails['full_week_price']?.toString() : "NA"} ${adDetails['full_week_active'] == 1 ? "KWD" : ""}"),
                                 _detailRow(
                                     AppLanguage.couponCodeCOLONText[language],
-                                    adDetails['coupon_code'] ?? "NA"),
+                                    adDetails['coupon_code'].isNotEmpty
+                                        ? adDetails['coupon_code'] ?? "NA"
+                                        : "NA"),
                                 _detailRow(
                                     AppLanguage
                                         .couponDiscountCOLONText[language],

@@ -1025,6 +1025,7 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
       ],
     );
   }
+
 }
 
 class CustomTextFormFieldSmallBox extends StatelessWidget {

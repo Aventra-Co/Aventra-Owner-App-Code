@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:the_boat_ownerside/controller/app_snack_bar_toast_message.dart';
 import 'package:the_boat_ownerside/view/propertymodule/edit_prpertyAd_second_screen.dart';
@@ -39,17 +40,13 @@ class EditPropertyAdvertisementScreen extends StatefulWidget {
 
 class _EditProfileScreenScreenState
     extends State<EditPropertyAdvertisementScreen> {
-  TextEditingController emailTextEditingController = TextEditingController();
-  TextEditingController genderTextEditingController = TextEditingController();
-  TextEditingController languageTextEditingController = TextEditingController();
-  TextEditingController captainEnglishNameTextController =
+  TextEditingController guardEnglishNameTextController =
       TextEditingController();
-  TextEditingController captainArabicNameTextController =
-      TextEditingController();
-  TextEditingController captainNumberTextController = TextEditingController();
+  TextEditingController guardArabicNameTextController = TextEditingController();
+  TextEditingController guardNumberTextController = TextEditingController();
   TextEditingController activityTextEditingController = TextEditingController();
-  TextEditingController boatTextEditingController = TextEditingController();
-  TextEditingController pickUpTextEditingController = TextEditingController();
+  TextEditingController propertyTextEditingController = TextEditingController();
+  TextEditingController locationTextEditingController = TextEditingController();
   TextEditingController cityTextEditingController = TextEditingController();
   TextEditingController maxNumberTextController = TextEditingController();
   TextEditingController messageTextEditingController = TextEditingController();
@@ -72,8 +69,6 @@ class _EditProfileScreenScreenState
       TextEditingController();
   TextEditingController couponCodeTextEditingController =
       TextEditingController();
-  TextEditingController searchDestinationController = TextEditingController();
-
   DateTime? selectedDate;
   var sendDate = "";
   List genderList = [
@@ -81,13 +76,12 @@ class _EditProfileScreenScreenState
     AppLanguage.femaleText[language],
     AppLanguage.otherText[language]
   ];
-
   String isSelectedGender = AppLanguage.maleText[language];
   int selectedLanguage = 0;
   int selectedActivity = 0;
   int selectedGender = 0;
   int isSelectedNationality = 0;
-  int isSelectedBoat = 0;
+  int isSelectedProperty = 0;
   int isSelectedCity = 0;
   int isSelectedDestination = 0;
   List<XFile> serverImageList = [];
@@ -95,40 +89,15 @@ class _EditProfileScreenScreenState
   // late File _image;
   bool isApiCalling = false;
   XFile? coverImage;
-  String showCoverImage = "";
-
-  List languageList = [
-    {
-      "id": 1,
-      "title": AppLanguage.englishText[language],
-    },
-    {
-      "id": 2,
-      "title": AppLanguage.arabicText[language],
-    },
-    {
-      "id": 3,
-      "title": AppLanguage.frenchText[language],
-    },
-    {
-      "id": 4,
-      "title": AppLanguage.italianText[language],
-    },
-    {
-      "id": 5,
-      "title": AppLanguage.koreanText[language],
-    },
-  ];
-
   List activityList = <dynamic>[];
-  // List nationsList = <dynamic>[];
-  // List nationsSearchList = <dynamic>[];
+  List nationsList = <dynamic>[];
+  List nationsSearchList = <dynamic>[];
   List citySearchList = <dynamic>[];
   List activitySearchList = <dynamic>[];
-  // List cityList = <dynamic>[];
-  // List destinationList = <dynamic>[];
+  List cityList = <dynamic>[];
+  List destinationList = <dynamic>[];
   List searchDestinationList = <dynamic>[];
-  List<dynamic> boatList = <dynamic>[];
+  List<dynamic> propertyList = <dynamic>[];
   int userId = 0;
   dynamic userDetails;
 //==map====
@@ -139,42 +108,45 @@ class _EditProfileScreenScreenState
   double long = 14.723027497529984;
   double latitudex = 32.44745630896057;
   double longtitudex = 14.723027497529984;
-  // String? _currentAddress;
-  // Position? _currentPosition;
   TextEditingController controller = TextEditingController();
-  var address;
   TextEditingController searchController = TextEditingController();
   List<dynamic> predictions = [];
-  List<dynamic> selectedActivityList = [];
-  List<dynamic> selectedActivityNameList = [];
   Timer? _debounce;
-  dynamic tripDetails;
-  List<dynamic> boatImageList = <dynamic>[];
-  List deleteId = [];
   String boatCapacity = '0';
+  int userType = 0;
+  String country = '';
+  String location = '';
   DateTime? startDate;
   DateTime? endDate;
   String sendStartDate = "";
   String sendEndDate = "";
   TextEditingController startDateController = TextEditingController();
   TextEditingController endDateController = TextEditingController();
+  TextEditingController searchDestinationController = TextEditingController();
+  dynamic adDetails = {};
   bool isCouponExist = false;
+  String selectedProperty = '';
+  String selectedDestination = '';
+  int adultCount = 0;
+  int childCount = 0;
+  List deleteId = [];
 
-  int adultCount = 10;
-  int childCount = 10;
   @override
   void initState() {
     super.initState();
+    getUserDetails();
   }
 
-  //=============================GET Trip DETAILS===================================//
-  Future<void> getTripDetailsApi() async {
+  //=============================GET Advertisement DETAILS===================================//
+  Future<void> getAdDetailsApi(userId) async {
     Uri url = Uri.parse(
-        "${AppConfigProvider.apiUrl}view_trip_details?trip_id=${widget.propertyAdId}");
+        "${AppConfigProvider.apiUrl}view_owner_advertisements?user_id=$userId&property_ad_id=${widget.propertyAdId}");
+    print("url $url");
 
     String token = AppConstant.token;
 
     if (token.isEmpty) {
+      print("Token is missing!");
       return;
     }
 
@@ -186,16 +158,22 @@ class _EditProfileScreenScreenState
       isApiCalling = true;
     });
 
+    print("headers $headers");
+
     try {
       final response = await http.get(url, headers: headers);
+      print("response $response");
+
       if (response.statusCode == 200) {
         dynamic res = jsonDecode(response.body);
+        print("res $res");
 
         if (res['success'] == true) {
-          var item = res['trip_arr'];
-          tripDetails = (item != "NA") ? item[0] : {};
-
-          // fillData();
+          var item = res['data'];
+          adDetails = (item != "NA") ? item : {};
+          if (adDetails.isNotEmpty) {
+            fillData();
+          }
           setState(() {
             isApiCalling = false;
           });
@@ -212,124 +190,74 @@ class _EditProfileScreenScreenState
           });
         }
       } else {
+        print("Error: ${response.statusCode}");
         setState(() {
           isApiCalling = false;
         });
       }
     } catch (e) {
+      print("Exception: $e");
       setState(() {
         isApiCalling = false;
       });
     }
   }
 
-  // fillData() {
-  //   showCoverImage = tripDetails["trip_image"];
-  //   boatImageList =
-  //       tripDetails["tripImages"] != "NA" ? tripDetails["tripImages"] : [];
-  //   isToggle = tripDetails["advertisement_type"];
-  //   captainEnglishNameTextController.text = tripDetails["captain_name_english"];
-  //   captainArabicNameTextController.text = tripDetails["captain_name_arabic"];
-  //   captainNumberTextController.text = tripDetails["contact_number"];
-  //   selectedGender = tripDetails["gender"];
-  //   isSelectedGender = genderList[selectedGender];
-  //   nationalityTextEditingController.text =
-  //       tripDetails["country_name"][language];
-  //   isSelectedNationality = tripDetails["country_id"];
-  //   isSelectedDestination = tripDetails["destination_id"];
-  //   destinationTextEditingController.text = tripDetails["destinaton"][language];
-  //   isSelectedCity = tripDetails["city_id"];
-  //   cityTextEditingController.text = tripDetails["city_name"][language];
-  //   isSelectedBoat = tripDetails["boat_id"];
-  //   boatTextEditingController.text = tripDetails["boat_name_english"];
-  //   selectedActivityList = tripDetails["activity_ids"] != null
-  //       ? tripDetails["activity_ids"].split(',')
-  //       : [];
+  String showCoverImage = "";
+  List<dynamic> propertyImageList = [];
 
-  //   pickUpTextEditingController.text = tripDetails["pickup_point"];
-  //   maxNumberTextController.text = tripDetails["max_people"].toString();
-  //   messageTextEditingController.text = tripDetails["description_english"];
-  //   messageArabicTextEditingController.text = tripDetails["description_arabic"];
-  //   discountTextEditingController.text =
-  //       tripDetails["discount"] == 0 ? "" : tripDetails["discount"].toString();
-  //   coupanDiscountTextEditingController.text =
-  //       tripDetails["coupon_discount"] == 0
-  //           ? ""
-  //           : tripDetails["coupon_discount"].toString();
-  //   lat = double.parse(tripDetails["latitude"].toString());
-  //   long = double.parse(tripDetails["longitude"].toString());
-  //   couponCodeTextEditingController.text = tripDetails["coupon_code"] ?? "";
-  //   if (couponCodeTextEditingController.text.isNotEmpty &&
-  //       couponCodeTextEditingController.text != "NA") {
-  //     isCouponExist = true;
-  //     startDate = DateTime.parse(tripDetails["coupon_start_date"]);
-  //     endDate = DateTime.parse(tripDetails["coupon_end_date"]);
-  //     startDateController.text = DateFormat('MMM dd, yyyy')
-  //         .format(DateTime.parse(tripDetails["coupon_start_date"] ?? ""));
-  //     endDateController.text = DateFormat('MMM dd, yyyy')
-  //         .format(DateTime.parse(tripDetails["coupon_end_date"] ?? ""));
-  //     sendStartDate = tripDetails["coupon_start_date"];
-  //     sendEndDate = tripDetails["coupon_end_date"];
-  //   } else {
-  //     couponCodeTextEditingController.text = "";
-  //   }
-  //   getActivityApi(
-  //     userId,
-  //   );
-  //   boatCapacity = tripDetails['boat_capacity'].toString().trim();
-  //   activityTextEditingController.text = language == 0
-  //       ? tripDetails["activity"][0]['english'][0]
-  //       : tripDetails["activity"][0]['arabic'][0];
-  //   selectedActivityNameList = language == 0
-  //       ? tripDetails["activity"][0]['english']
-  //       : tripDetails["activity"][0]['arabic'];
-  //   getCitiesApi(userId);
-  //   setState(() {});
-  // }
-
-  // searchResultCountry(String query) {
-  //   var results1 = nationsSearchList
-  //       .where((value) => value['country_name'][language]
-  //           .toString()
-  //           .toLowerCase()
-  //           .contains(query.toLowerCase()))
-  //       .toList();
-
-  //   nationsList = [];
-
-  //   nationsList = results1;
-
-  //   setState(() {});
-  // }
-
-  searchResultCity(String query) {
-    var results1 = citySearchList
-        .where((value) => value['city_name'][language]
-            .toString()
-            .toLowerCase()
-            .contains(query.toLowerCase()))
-        .toList();
-
-    cityList = [];
-
-    // cityList = results1;
-
-    setState(() {});
-  }
-
-  //---------------------SEARCH FUNCTION COUNTRY--------------------///
-  searchResultActivity(String query) {
-    var results1 = activitySearchList
-        .where((value) => value['name_english'][language]
-            .toString()
-            .toLowerCase()
-            .contains(query.toLowerCase()))
-        .toList();
-
-    activityList = [];
-
-    activityList = results1;
-
+  fillData() {
+    showCoverImage = adDetails["cover_image"] ?? "";
+    propertyImageList = adDetails["images"] != "NA" ? adDetails["images"] : [];
+    print("propertyImageList ${propertyImageList}");
+    isToggle = adDetails["pet_friendly"];
+    guardEnglishNameTextController.text = adDetails["guard_name_english"];
+    guardArabicNameTextController.text = adDetails["guard_name_arabic"];
+    guardNumberTextController.text = adDetails["guard_number"].toString();
+    selectedGender = adDetails["gender"];
+    isSelectedGender = genderList[selectedGender];
+    nationalityTextEditingController.text = adDetails["country_name"][language];
+    isSelectedNationality = adDetails["country_id"] ?? 0;
+    isSelectedDestination = adDetails["destination_id"] ?? 0;
+    // destinationTextEditingController.text =
+    //     adDetails["destinaton"]?[language] ?? "";
+    isSelectedCity = adDetails["city_id"];
+    cityTextEditingController.text = adDetails["city_name"][language];
+    isSelectedProperty = adDetails["property_id"] ?? 0;
+    propertyTextEditingController.text =
+        adDetails["property_name_english"] ?? "";
+    adultCount = adDetails["max_adult"] ?? 0;
+    childCount = adDetails['max_child'] ?? 0;
+    locationTextEditingController.text = adDetails["address"] ?? "";
+    maxNumberTextController.text = adDetails["max_people"].toString();
+    messageTextEditingController.text = adDetails["description_english"] ?? "";
+    messageArabicTextEditingController.text =
+        adDetails["description_arabic"] ?? "";
+    discountTextEditingController.text = adDetails["discount_percentage"] == 0
+        ? ""
+        : adDetails["discount_percentage"].toString();
+    coupanDiscountTextEditingController.text = adDetails["coupon_discount"] == 0
+        ? ""
+        : adDetails["coupon_discount"].toString();
+    lat = double.parse(adDetails["latitude"].toString());
+    long = double.parse(adDetails["longitude"].toString());
+    couponCodeTextEditingController.text = adDetails["coupon_code"] ?? "";
+    if (couponCodeTextEditingController.text.isNotEmpty &&
+        couponCodeTextEditingController.text != "NA") {
+      isCouponExist = true;
+      startDate = DateTime.parse(adDetails["start_date"]);
+      endDate = DateTime.parse(adDetails["end_date"]);
+      startDateController.text = DateFormat('MMM dd, yyyy')
+          .format(DateTime.parse(adDetails["start_date"] ?? ""));
+      endDateController.text = DateFormat('MMM dd, yyyy')
+          .format(DateTime.parse(adDetails["end_date"] ?? ""));
+      sendStartDate = adDetails["start_date"] ?? "";
+      sendEndDate = adDetails["end_date"] ?? "";
+    } else {
+      couponCodeTextEditingController.text = "";
+    }
+    boatCapacity = adDetails['boat_capacity'].toString().trim();
+    getCitiesApi(userId);
     setState(() {});
   }
 
@@ -351,20 +279,23 @@ class _EditProfileScreenScreenState
           data.add(file);
         }
 
-        List imageListdata = boatImageList;
+        List imageListdata = propertyImageList;
 
         if (imageListdata.length <= 7) {
           for (var i = 0; i < data.length; i++) {
-            imageListdata
-                .add({"image": data[i], "status": true, "trip_image_id": 0});
+            imageListdata.add({
+              "image_path": data[i],
+              "status": true,
+              "property_image_id": 0
+            });
 
             setState(() {
-              boatImageList = imageListdata;
+              propertyImageList = imageListdata;
             });
           }
         }
         if (imageListdata.length > 7) {
-          boatImageList = imageListdata.sublist(0, 7);
+          propertyImageList = imageListdata.sublist(0, 7);
 
           setState(() {});
         }
@@ -385,7 +316,8 @@ class _EditProfileScreenScreenState
 
     if (image != null) {
       setState(() {
-        boatImageList.add({"image": File(image.path), "trip_image_id": 0});
+        propertyImageList
+            .add({"image_path": File(image.path), "property_image_id": 0});
       });
     }
   }
@@ -423,7 +355,6 @@ class _EditProfileScreenScreenState
         });
   }
 
-//=============cover image picker===========
   //--------------------------------FROM CAMERA-----------------------//
   Future<void> _coverImgFromCamera() async {
     dynamic image = await ImagePicker().pickImage(
@@ -448,8 +379,9 @@ class _EditProfileScreenScreenState
     Navigator.of(context).pop();
   }
 
-// ------------------------------FROM GALLERY------------------------//
+//! ------------------------------FROM GALLERY------------------------//
   Future<void> _coverImgFromGallery() async {
+    print("run");
     dynamic image = await ImagePicker().pickImage(
         source: ImageSource.gallery,
         // maxHeight: 450.0,
@@ -457,6 +389,7 @@ class _EditProfileScreenScreenState
         imageQuality: 50);
 
     if (image != null) {
+      print("image 243 $image");
       Future.delayed(const Duration(seconds: 0), () {
         setState(() {
           coverImage = image;
@@ -472,69 +405,708 @@ class _EditProfileScreenScreenState
     Navigator.of(context).pop();
   }
 
-  //-------------------------------IMAGE PICKER BOTTOM SHEET--------------------------//
+  //!-------------------------------IMAGE PICKER BOTTOM SHEET--------------------------//
   void coverImagePickerBottomSheet() {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext bc) {
           return SafeArea(
-            child: Container(
-              child: Wrap(
-                children: <Widget>[
-                  ListTile(
-                      leading: const Icon(Icons.photo_library),
-                      title: Text(AppLanguage.photoGalleryText[language]),
-                      onTap: () {
-                        _coverImgFromGallery();
-                        setState(() {});
-                        // Navigator.of(context).pop();
-                      }),
-                  ListTile(
-                    leading: const Icon(Icons.photo_camera),
-                    title: Text(AppLanguage.cameraText[language]),
+            child: Wrap(
+              children: <Widget>[
+                ListTile(
+                    leading: const Icon(Icons.photo_library),
+                    title: Text(AppLanguage.photoGalleryText[language]),
                     onTap: () {
-                      _coverImgFromCamera();
+                      _coverImgFromGallery();
                       setState(() {});
                       // Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
+                    }),
+                ListTile(
+                  leading: const Icon(Icons.photo_camera),
+                  title: Text(AppLanguage.cameraText[language]),
+                  onTap: () {
+                    _coverImgFromCamera();
+                    setState(() {});
+                    // Navigator.of(context).pop();
+                  },
+                ),
+              ],
             ),
           );
         });
   }
 
+  //!--------------------GET USER DETAILS-----------------------//
+  Future<dynamic> getUserDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    userDetails = prefs.getString("userDetails");
+    setState(() {
+      isApiCalling = true;
+    });
+
+    // print("userDetails $userDetails");
+    if (userDetails != null) {
+      dynamic data = json.decode(userDetails);
+      print("up $data");
+      userId = data['user_id'];
+      userType = data['user_type'];
+    }
+    isApiCalling = false;
+    getAdDetailsApi(userId);
+    getCountriesApi(userId);
+    getDestinationApi(userId);
+    getPropertyApi(userId);
+    getCitiesApi(userId);
+  }
+
+  searchResultCity(String query) {
+    citySearchList
+        .where((value) => value['city_name'][language]
+            .toString()
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+        .toList();
+
+    cityList = [];
+
+    // cityList = results1;
+
+    setState(() {});
+  }
+
   var refreshKey = GlobalKey<RefreshIndicatorState>();
 
-  //--------------------REFRESH FUNCION-----------------------//
+  //!--------------------REFRESH FUNCION-----------------------//
   Future<Null> _refreshPage() async {
     refreshKey.currentState?.show(atTop: false);
     await Future.delayed(const Duration(seconds: 1));
     // getTopStories(0);
+    getUserDetails();
+    return null;
+  }
+
+  //!=============Validate Coupon==================
+  Future<void> validateCouponApiCall(userId, couponCode) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}check_coupon_exist?user_id=$userId?&coupon_code=$couponCode");
+    print("url $url");
+    setState(() {
+      isApiCalling = true;
+    });
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      // return;
+    }
+
+    Map<String, String> headers = {'Authorization': 'Bearer $token'};
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          isCouponExist = res['exist_status'];
+          if (!isCouponExist) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          setState(() {
+            isApiCalling = false;
+          });
+          // ignore: use_build_context_synchronously
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const Login()));
+          }
+        }
+      } else {
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+// Simplified add advertisement validation method
+  void addAdvertisementValidation(
+      XFile? coverImage,
+      List<XFile> serverImageList,
+      String guardNameEnglish,
+      String guardNameArabic,
+      String number,
+      String gender,
+      String nationality,
+      String destination,
+      String property,
+      String location,
+      String city,
+      String numOfPeople,
+      String descEnglish,
+      String descArabic,
+      String couponCode,
+      String startDate,
+      String endDate,
+      String couponDiscount,
+      String discount) {
+    // Perform all validations first
+    String? validationError = _validateAddInputs(
+      coverImage: coverImage,
+      serverImageList: serverImageList,
+      guardNameEnglish: guardNameEnglish,
+      number: number,
+      gender: gender,
+      nationality: nationality,
+      destination: destination,
+      property: property,
+      location: location,
+      city: city,
+      adult: adultCount.toString(),
+      child: childCount.toString(),
+      couponCode: couponCode,
+      startDate: startDate,
+      endDate: endDate,
+      couponDiscount: couponDiscount,
+      discount: discount,
+    );
+
+    // If validation fails, show error and return
+    if (validationError != null) {
+      SnackBarToastMessage.showSnackBar(context, validationError);
+      return;
+    }
+
+    // If all validations pass, navigate to next screen
+    _navigateToAddSecondScreen(
+      coverImage,
+      serverImageList,
+      guardNameEnglish,
+      guardNameArabic,
+      number,
+      couponDiscount,
+      discount,
+      couponCode,
+      startDate,
+      endDate,
+      descEnglish,
+      descArabic,
+    );
+  }
+
+// Separate validation logic for add advertisement
+  String? _validateAddInputs({
+    required XFile? coverImage,
+    required List<XFile> serverImageList,
+    required String guardNameEnglish,
+    required String number,
+    required String gender,
+    required String nationality,
+    required String destination,
+    required String property,
+    required String location,
+    required String city,
+    required String adult,
+    required String child,
+    required String couponCode,
+    required String startDate,
+    required String endDate,
+    required String couponDiscount,
+    required String discount,
+  }) {
+    // Basic field validations
+    if (coverImage == null && showCoverImage.isEmpty) {
+      return AppLanguage.coverImageMsg[language];
+    }
+
+    if (propertyImageList.isEmpty) {
+      return AppLanguage.imagesMsg[language];
+    }
+
+    if (guardNameEnglish.isEmpty) {
+      return AppLanguage.guardNameEngMsg[language];
+    }
+
+    if (number.isEmpty) {
+      return AppLanguage.guardNumberMessage[language];
+    }
+
+    if (number.length < 7) {
+      return AppLanguage.guardNumbervalidMessage[language];
+    }
+
+    if (gender.isEmpty) {
+      return AppLanguage.genderMsg[language];
+    }
+
+    if (nationality.isEmpty) {
+      return AppLanguage.nationalityMsg[language];
+    }
+
+    // if (destination.isEmpty) {
+    //   return AppLanguage.selectDestinationMsg[language];
+    // }
+
+    if (property.isEmpty) {
+      return AppLanguage.selectPropertyMsg[language];
+    }
+
+    if (location.isEmpty) {
+      return AppLanguage.selectPropertyLocation[language];
+    }
+
+    if (city.isEmpty) {
+      return AppLanguage.cityMsg[language];
+    }
+    // if (adultCount <= 0) {
+    //   return AppLanguage.minPeopleMsg[language];
+    // }
+    // if (childCount <= 0) {
+    //   return AppLanguage.minPeopleMsg[language];
+    // }
+    // int capacity = int.tryParse(boatCapacity) ?? 0;
+    if ((adultCount + childCount) <= 0) {
+      return AppLanguage.minPeopleMsg[language];
+    }
+
+    //! Coupon validations (only if coupon code is provided)
+    if (couponCode.isNotEmpty) {
+      String? couponError =
+          _validateCoupon(couponCode, startDate, endDate, couponDiscount);
+      if (couponError != null) return couponError;
+    }
+
+    //! Discount validation (only if discount is provided)
+    if (discount.isNotEmpty) {
+      String? discountError = _validateDiscount(discount);
+      if (discountError != null) return discountError;
+    }
+
+    return null; // All validations passed
+  }
+
+  //! Separate coupon validation
+  String? _validateCoupon(String couponCode, String startDate, String endDate,
+      String couponDiscount) {
+    if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(couponCode)) {
+      return AppLanguage.couponCodeValidMsg[language];
+    }
+
+    if (couponCode.length != 8) {
+      return AppLanguage.couponCodeLengthMsg[language];
+    }
+
+    if (!isCouponExist) {
+      return AppLanguage.couponAlreadyExistMsg[language];
+    }
+
+    if (startDate.isEmpty) {
+      return AppLanguage.selectStartDateMsg[language];
+    }
+
+    if (endDate.isEmpty) {
+      return AppLanguage.selectEndDateMsg[language];
+    }
+
+    if (couponDiscount.isEmpty) {
+      return AppLanguage.couponDiscountMsg[language];
+    }
+    int discountValue = int.tryParse(couponDiscount) ?? 0;
+    if (discountValue == 0 || discountValue == 0.0) {
+      return AppLanguage.couponDiscountGreaterMsg[language];
+    }
+
+    if (discountValue >= 100) {
+      return AppLanguage.couponDiscountLessMsg[language];
+    }
 
     return null;
   }
 
-  // =====================remove==============//
-  removeItemFromList(index) {
-    List itemListdemo = boatImageList;
-    List deleteData = deleteId;
-    if (boatImageList[index]['trip_image_id'] != 0) {
-      deleteData.add(boatImageList[index]['trip_image_id']);
+  //! Separate discount validation
+  String? _validateDiscount(String discount) {
+    int discountValue = int.tryParse(discount) ?? 0;
+    if (discountValue == 0 || discountValue == 0.0) {
+      return AppLanguage.discountGreaterMsg[language];
+    }
+    if (discountValue >= 100) {
+      return AppLanguage.discountLesserMsg[language];
     }
 
-    List itemList1 = [];
-    if (itemListdemo.isNotEmpty) {
-      for (var i = 0; i < itemListdemo.length; i++) {
-        if (i != index) {
-          itemList1.add(itemListdemo[i]);
-        }
-      }
+    return null;
+  }
+
+  //! Separate navigation logic for add advertisement (no duplication)
+  void _navigateToAddSecondScreen(
+      XFile? coverImage,
+      List<XFile> serverImageList,
+      String guardNameEnglish,
+      String guardNameArabic,
+      String number,
+      String couponDiscount,
+      String discount,
+      String couponCode,
+      String startDate,
+      String endDate,
+      String descEnglish,
+      String descArabic) {
+    // Unfocus any active text fields
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPropertyAdSecondScreen(
+          coverImage: coverImage,
+          serverImageList: serverImageList,
+          propertyImageList: propertyImageList,
+          deleteIds: deleteId.join(", "),
+          guardNameEnglish: guardNameEnglish,
+          guardNameArabic: guardNameArabic,
+          number: number,
+          genderId: selectedGender.toString(),
+          nationalityId: isSelectedNationality.toString(),
+          destinationId: isSelectedDestination.toString(),
+          propertyId: isSelectedProperty.toString(),
+          location: locationTextEditingController.text,
+          lat: lat.toString(),
+          long: long.toString(),
+          cityId: isSelectedCity.toString(),
+          adultCount: adultCount.toString(),
+          childCount: childCount.toString(),
+          descEng: descEnglish,
+          descArab: descArabic,
+          isPrivate: isToggle.toString(),
+          couponDiscount: couponDiscount,
+          discount: discount,
+          couponCode: couponCode,
+          startDate: sendStartDate,
+          endDate: sendEndDate,
+          adDetails: adDetails,
+        ),
+      ),
+    );
+  }
+
+  //!=============================GET Countries DETAILS===================================//
+  Future<void> getCountriesApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}fetch_country_list?user_id=$userId");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
     }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
     setState(() {
-      boatImageList = itemList1;
+      isApiCalling = true;
     });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['country_arr'];
+          nationsList = (item != "NA") ? item : [];
+          nationsSearchList = (item != "NA") ? item : [];
+
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  //!=============================GET destination DETAILS===================================//
+  Future<void> getDestinationApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}get_desctination?user_id=$userId");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isApiCalling = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['destination_arr'];
+          destinationList = (item != "NA") ? item : [];
+          searchDestinationList = (item != "NA") ? item : [];
+
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  //!=============================GET Property DETAILS===================================//
+  Future<void> getPropertyApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}get_all_owner_properties?user_id=$userId&type=3");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isApiCalling = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['data'];
+          propertyList = (item != "NA") ? item : [];
+          // activitySearchList = (item != "NA") ? item : [];
+
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  //!=============================GET cities DETAILS===================================//
+  Future<void> getCitiesApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}fetch_city_by_country?$userId=5&country_id=$isSelectedNationality");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isApiCalling = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['city_arr'];
+          cityList = (item != "NA") ? item : [];
+          citySearchList = (item != "NA") ? item : [];
+
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          cityList = [];
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isApiCalling = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  //!---------------------SEARCH FUNCTION COUNTRY--------------------///
+  searchResultCountry(String query) {
+    print(query);
+
+    var results1 = nationsSearchList
+        .where((value) => value['country_name'][language]
+            .toString()
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+        .toList();
+
+    print("results1 $results1");
+
+    nationsList = [];
+
+    nationsList = results1;
+
+    setState(() {});
+  }
+
+  //!---------------------SEARCH FUNCTION COUNTRY--------------------///
+  searchResultDestination(String query) {
+    print(query);
+
+    var results1 = searchDestinationList
+        .where((value) => value['destination'][language]
+            .toString()
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+        .toList();
+
+    print("results1 $results1");
+
+    destinationList = [];
+
+    destinationList = results1;
+
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    startDateController.dispose();
+    endDateController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   Future<void> selectStartDate(BuildContext context) async {
@@ -588,7 +1160,6 @@ class _EditProfileScreenScreenState
       return;
     }
 
-    // Calculate the next day after start date
     final DateTime nextDayAfterStart = startDate!.add(const Duration(days: 1));
 
     final DateTime? picked = await showDatePicker(
@@ -624,159 +1195,27 @@ class _EditProfileScreenScreenState
     }
   }
 
-  //!=============Validate Coupon==================
-  Future<void> validateCouponApiCall(userId, couponCode) async {
-    Uri url = Uri.parse(
-        "${AppConfigProvider.apiUrl}check_coupon_exist?user_id=$userId?&coupon_code=$couponCode");
-    setState(() {
-      isApiCalling = true;
-    });
-    String token = AppConstant.token;
-
-    if (token.isEmpty) {
-      // return;
+  // =====================remove==============//
+  removeItemFromList(index) {
+    List itemListdemo = propertyImageList;
+    List deleteData = deleteId;
+    if (propertyImageList[index]['property_image_id'] != 0) {
+      deleteData.add(propertyImageList[index]['property_image_id']);
     }
 
-    Map<String, String> headers = {'Authorization': 'Bearer $token'};
-
-    try {
-      final response = await http.get(url, headers: headers);
-
-      if (response.statusCode == 200) {
-        dynamic res = jsonDecode(response.body);
-
-        if (res['success'] == true) {
-          isCouponExist = res['exist_status'];
-          if (!isCouponExist) {
-            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
-          }
-          setState(() {
-            isApiCalling = false;
-          });
-        } else {
-          setState(() {
-            isApiCalling = false;
-          });
-          // ignore: use_build_context_synchronously
-          if (res['active_status'] == 0) {
-            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const Login()));
-          }
+    List itemList1 = [];
+    if (itemListdemo.isNotEmpty) {
+      for (var i = 0; i < itemListdemo.length; i++) {
+        if (i != index) {
+          itemList1.add(itemListdemo[i]);
         }
-      } else {
-        setState(() {
-          isApiCalling = false;
-        });
       }
-    } catch (e) {
-      setState(() {
-        isApiCalling = false;
-      });
     }
+    setState(() {
+      propertyImageList = itemList1;
+    });
   }
-  // ================= STATIC PROPERTY IMAGE LIST =================
 
-  List<Map<String, dynamic>> propertyImageList = [
-    {
-      "trip_image_id": 1,
-      "image": AppImage.boatImage,
-    },
-    {
-      "trip_image_id": 1,
-      "image": AppImage.boatImage,
-    },
-    {
-      "trip_image_id": 1,
-      "image": AppImage.boatImage,
-    },
-    {
-      "trip_image_id": 1,
-      "image": AppImage.boatImage,
-    },
-  ];
-
-  List<Map<String, dynamic>> cityList = [
-    {
-      "city_id": 1,
-      "city_name": {0: "Om Al Maradim Island", 1: "جزيرة أم المرادم"}
-    },
-    {
-      "city_id": 2,
-      "city_name": {0: "Garouh Island", 1: "جزيرة قاروه"}
-    },
-    {
-      "city_id": 3,
-      "city_name": {0: "Failaka Island", 1: "جزيرة فيلكا"}
-    },
-    {
-      "city_id": 4,
-      "city_name": {0: "Kubbar Island", 1: "جزيرة كبر"}
-    },
-  ];
-  final List<String> destinationList = [
-    'Om Al Maradem',
-    'Qarouh',
-    'Kubbar',
-    'Om Al Namel',
-    'Failka',
-    'Ouha',
-  ];
-// Static property list - class ke andar add karo
-  final List<Map<String, String>> propertyList = [
-    {'name': 'PalmResort', 'type': 'Resort'},
-    {'name': 'Sunset Farmhouse', 'type': 'Farmhouse'},
-  ];
-  String selectedDestination = '';
-
-  final List<Map<String, dynamic>> staticNationsList = [
-    {
-      "country_id": 1,
-      "country_name": {0: "Kuwaiti", 1: "كويتي"}
-    },
-    {
-      "country_id": 2,
-      "country_name": {0: "Saudi", 1: "سعودي"}
-    },
-    {
-      "country_id": 3,
-      "country_name": {0: "Emirati", 1: "إماراتي"}
-    },
-    {
-      "country_id": 4,
-      "country_name": {0: "Qatari", 1: "قطري"}
-    },
-    {
-      "country_id": 5,
-      "country_name": {0: "Bahraini", 1: "بحريني"}
-    },
-    {
-      "country_id": 6,
-      "country_name": {0: "Omani", 1: "عماني"}
-    },
-    {
-      "country_id": 7,
-      "country_name": {0: "Indian", 1: "هندي"}
-    },
-    {
-      "country_id": 8,
-      "country_name": {0: "Pakistani", 1: "باكستاني"}
-    },
-    {
-      "country_id": 9,
-      "country_name": {0: "Egyptian", 1: "مصري"}
-    },
-    {
-      "country_id": 10,
-      "country_name": {0: "Filipino", 1: "فلبيني"}
-    },
-  ];
-  List<String> filteredDestinationList = [];
-  List<Map<String, dynamic>> nationsList = [];
-// int isSelectedNationality = 0;
-
-  String selectedProperty = '';
-  List<Map<String, String>> filteredPropertyList = [];
   @override
   Widget build(BuildContext context) {
     return ProgressHUD(
@@ -808,6 +1247,7 @@ class _EditProfileScreenScreenState
               color: AppColor.secondaryColor,
               child: Column(
                 children: [
+                  //image header
                   Container(
                     width: MediaQuery.of(context).size.width * 100 / 100,
                     height: screenWidth > 600
@@ -828,11 +1268,14 @@ class _EditProfileScreenScreenState
                               ? MediaQuery.of(context).size.height * 6 / 100
                               : MediaQuery.of(context).size.height * 4 / 100,
                         ),
+
+                        //profile edit setting
                         Container(
                           width: MediaQuery.of(context).size.width,
                           alignment: Alignment.center,
                           child: Row(
                             children: [
+                              //back
                               GestureDetector(
                                 onTap: () {
                                   Navigator.pop(context);
@@ -890,218 +1333,336 @@ class _EditProfileScreenScreenState
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 2 / 100,
                   ),
+
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height * 2 / 100,
-                          ),
-                          Stack(
-                            children: [
-                              // ================= MAIN PROPERTY IMAGE =================
-                              Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.20,
-                                width: MediaQuery.of(context).size.width * 0.90,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  image: const DecorationImage(
-                                    image: AssetImage(AppImage.boatImage),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-
-                              Positioned(
-                                top: 12,
-                                right: 12,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    // remove image logic here
-                                  },
-                                  child: Container(
-                                    height: 28,
-                                    width: 28,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.red,
-                                    ),
-                                    child: const Icon(
-                                      Icons.close,
-                                      size: 16,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height * 2 / 100,
-                          ),
                           buildCoverImage(screenWidth),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
 
-                          SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height * 2 / 100,
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 90 / 100,
-                            child: Text(
-                              AppLanguage.addMoreText[language],
-                              style: const TextStyle(
-                                  fontFamily: AppFont.fontFamily,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColor.primaryColor),
-                            ),
-                          ),
-                          SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height * 2 / 100,
-                          ),
-//! Property Image List
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                    left: screenWidth > 600 ? 38 : 20.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: List.generate(
-                                    propertyImageList.length,
-                                    (index) {
-                                      return Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 6.0),
-                                        child: SizedBox(
-                                          width: screenWidth > 600
-                                              ? MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  12 /
-                                                  100
-                                              : MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  17 /
-                                                  100,
-                                          height: screenWidth > 600
-                                              ? screenHeight <= 800
+                          //!============upload image container
+                          if (propertyImageList.length < 7)
+                            GestureDetector(
+                              onTap: () {
+                                imagePickerBottomSheet();
+                              },
+                              child: Container(
+                                width: MediaQuery.of(context).size.width *
+                                    90 /
+                                    100,
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                    color: AppColor.textColor,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20))),
+                                child: Column(
+                                  children: [
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              2 /
+                                              100,
+                                    ),
+                                    Container(
+                                      // color: Colors.red,
+                                      alignment: Alignment.center,
+                                      width: MediaQuery.of(context).size.width *
+                                          90 /
+                                          100,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10.0),
+                                        child: Text(
+                                          "${AppLanguage.uploadImageMsg[language]}*",
+                                          style: const TextStyle(
+                                              fontFamily: AppFont.fontFamily,
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.w400,
+                                              color: AppColor.secondaryColor),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          80 /
+                                          100,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              imagePickerBottomSheet();
+                                            },
+                                            child: SizedBox(
+                                              width: screenWidth > 600
                                                   ? MediaQuery.of(context)
                                                           .size
-                                                          .height *
+                                                          .width *
                                                       10 /
                                                       100
                                                   : MediaQuery.of(context)
                                                           .size
-                                                          .height *
-                                                      7 /
+                                                          .width *
+                                                      15 /
+                                                      100,
+                                              height: screenWidth > 600
+                                                  ? MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      10 /
                                                       100
-                                              : MediaQuery.of(context)
-                                                      .size
-                                                      .height *
-                                                  8 /
-                                                  100,
-                                          child: Stack(
-                                            clipBehavior: Clip.none,
-                                            children: [
-                                              // IMAGE
-                                              Container(
-                                                margin:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 5,
-                                                        vertical: 5),
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    22 /
-                                                    100,
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    22 /
-                                                    100,
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                  child: Image.asset(
-                                                    propertyImageList[index]
-                                                        ['image'],
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
+                                                  : MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      15 /
+                                                      100,
+                                              child: Image.asset(
+                                                AppImage.addImageIcon,
+                                                fit: BoxFit.cover,
                                               ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              2 /
+                                              100,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
 
-                                              // CANCEL BUTTON
-                                              Positioned(
-                                                right: 0,
-                                                top: 0,
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    removeItemFromList(index);
-                                                  },
-                                                  child: SizedBox(
-                                                    width: screenWidth > 600
-                                                        ? MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            4 /
-                                                            100
-                                                        : MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            5 /
-                                                            100,
-                                                    height: screenWidth > 600
-                                                        ? MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            4 /
-                                                            100
-                                                        : MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            5 /
-                                                            100,
-                                                    child: Image.asset(
-                                                      AppImage.cancelIcon,
-                                                      fit: BoxFit.cover,
+                          //!==============add image==========
+                          if (propertyImageList.isNotEmpty)
+                            SizedBox(
+                              width:
+                                  MediaQuery.of(context).size.width * 90 / 100,
+                              child: Text(
+                                AppLanguage.addMoreText[language],
+                                style: const TextStyle(
+                                    fontFamily: AppFont.fontFamily,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColor.primaryColor),
+                              ),
+                            ),
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 2 / 100,
+                          ),
+
+                          //!list
+                          if (propertyImageList.isNotEmpty)
+                            SizedBox(
+                              width:
+                                  MediaQuery.of(context).size.width * 100 / 100,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      left: screenWidth > 600 ? 38 : 20.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: List.generate(
+                                        propertyImageList.length, (index) {
+                                      return Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 6.0),
+                                        child: Column(
+                                          children: [
+                                            SizedBox(
+                                              // color: Colors.red,
+                                              width: screenWidth > 600
+                                                  ? MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      12 /
+                                                      100
+                                                  : MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      17 /
+                                                      100,
+                                              height: screenWidth > 600
+                                                  ? screenHeight <= 800
+                                                      ? MediaQuery.of(context)
+                                                              .size
+                                                              .height *
+                                                          10 /
+                                                          100
+                                                      : MediaQuery.of(context)
+                                                              .size
+                                                              .height *
+                                                          7 /
+                                                          100
+                                                  : MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      8 /
+                                                      100,
+                                              child: Stack(
+                                                clipBehavior: Clip.none,
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  Container(
+                                                    child: propertyImageList[
+                                                                    index][
+                                                                'property_image_id'] !=
+                                                            0
+                                                        ? Container(
+                                                            margin:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        5,
+                                                                    vertical:
+                                                                        5),
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                22 /
+                                                                100,
+                                                            height: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                22 /
+                                                                100,
+                                                            child: ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            10),
+                                                                child: Image
+                                                                    .network(
+                                                                  "${AppConfigProvider.imageURL}${"/"}${propertyImageList[index]['image_path']}",
+                                                                  fit: BoxFit
+                                                                      .cover,
+                                                                )),
+                                                          )
+                                                        : Container(
+                                                            margin:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        5,
+                                                                    vertical:
+                                                                        5),
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                22 /
+                                                                100,
+                                                            height: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                22 /
+                                                                100,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10),
+                                                              image:
+                                                                  DecorationImage(
+                                                                image: FileImage(
+                                                                    propertyImageList[
+                                                                            index]
+                                                                        [
+                                                                        'image_path']),
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                  ),
+
+                                                  //cancel button
+                                                  Positioned(
+                                                    right: 0,
+                                                    top: 0,
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        removeItemFromList(
+                                                            index);
+                                                      },
+                                                      child: SizedBox(
+                                                        width: screenWidth > 600
+                                                            ? MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                4 /
+                                                                100
+                                                            : MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                5 /
+                                                                100,
+                                                        height: screenWidth >
+                                                                600
+                                                            ? MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                4 /
+                                                                100
+                                                            : MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                5 /
+                                                                100,
+                                                        child: Image.asset(
+                                                          AppImage.cancelIcon,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
+                                                ],
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
                                       );
-                                    },
+                                    }),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 2 / 100),
 
                           //!==============advertisement type==========
-
                           SizedBox(
                               height:
-                                  MediaQuery.of(context).size.height * 2 / 100),
+                                  MediaQuery.of(context).size.height * 1 / 100),
 
                           //!================Enter Captain Name in English field
                           CustomTextFormFieldBlackWidth(
-                              controller: captainEnglishNameTextController,
-                              hintText: "${AppLanguage.shawnText[language]}*",
+                              controller: guardEnglishNameTextController,
+                              hintText:
+                                  "${AppLanguage.enterGuardNameinEnglishText[language]}*",
                               keyboardtype: TextInputType.text,
                               maxLength: AppConstant.fullnameLength,
                               fillColorStatus: 0,
@@ -1114,9 +1675,9 @@ class _EditProfileScreenScreenState
 
                           //!================Enter Captain Name in arabic field
                           CustomTextFormFieldBlackWidth(
-                              controller: captainArabicNameTextController,
+                              controller: guardArabicNameTextController,
                               hintText: AppLanguage
-                                  .enterGuardNameArabicText[language],
+                                  .enterGuardNameinArabicText[language],
                               keyboardtype: TextInputType.text,
                               maxLength: AppConstant.fullnameLength,
                               fillColorStatus: 0,
@@ -1129,12 +1690,13 @@ class _EditProfileScreenScreenState
 
                           //!================enter captain number field
                           CustomTextFormFieldBlackWidth(
-                              controller: captainNumberTextController,
+                              controller: guardNumberTextController,
                               hintText:
-                                  "${AppLanguage.enterGuardNumberText[language]}",
+                                  "${AppLanguage.enterGuardNumberText[language]}*",
                               keyboardtype: TextInputType.number,
                               maxLength: AppConstant.mobileLength,
                               fillColorStatus: 0,
+                              inputFormatter: AppConstant.onlyDigitFormatter,
                               width:
                                   MediaQuery.of(context).size.width * 90 / 100,
                               readOnly: false),
@@ -1158,6 +1720,7 @@ class _EditProfileScreenScreenState
                               height:
                                   MediaQuery.of(context).size.height * 3 / 100),
 
+                          //!gender selection
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 90 / 100,
                             child: Row(
@@ -1216,7 +1779,7 @@ class _EditProfileScreenScreenState
                                   ),
                                 ),
 
-                                //!female
+                                //female
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -1270,7 +1833,7 @@ class _EditProfileScreenScreenState
                                   ),
                                 ),
 
-                                //!company
+                                //company
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -1331,6 +1894,7 @@ class _EditProfileScreenScreenState
                                 MediaQuery.of(context).size.height * 2 / 100,
                           ),
 
+                          //!line
                           Container(
                             width: MediaQuery.of(context).size.width * 90 / 100,
                             height:
@@ -1342,6 +1906,7 @@ class _EditProfileScreenScreenState
                                 MediaQuery.of(context).size.height * 1 / 100,
                           ),
 
+                          //!=== nationality===
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 90 / 100,
                             height:
@@ -1379,7 +1944,7 @@ class _EditProfileScreenScreenState
                                   filled: true,
                                   counterText: '',
                                   hintText:
-                                      "${AppLanguage.guardNationalityText[language]}*",
+                                      "${AppLanguage.nationalityText[language]}*",
                                   hintStyle: const TextStyle(
                                       color: AppColor.textColor,
                                       fontWeight: FontWeight.w400,
@@ -1413,6 +1978,77 @@ class _EditProfileScreenScreenState
                           ),
 
                           //!=== select destination===
+                          // SizedBox(
+                          //   width: MediaQuery.of(context).size.width * 90 / 100,
+                          //   height:
+                          //       MediaQuery.of(context).size.height * 5.5 / 100,
+                          //   child: TextFormField(
+                          //     readOnly: true,
+                          //     style: const TextStyle(
+                          //         height: 1.1,
+                          //         color: AppColor.textColor,
+                          //         fontSize: 16,
+                          //         fontWeight: FontWeight.w400),
+                          //     textAlignVertical: TextAlignVertical.center,
+                          //     controller: destinationTextEditingController,
+                          //     onTap: () {
+                          //       dropDownModelForDestination(
+                          //           context, screenWidth);
+                          //     },
+                          //     decoration: InputDecoration(
+                          //         border: const UnderlineInputBorder(
+                          //           // Use UnderlineInputBorder
+                          //           borderSide:
+                          //               BorderSide(color: AppColor.boaderColor),
+                          //         ),
+                          //         enabledBorder: const UnderlineInputBorder(
+                          //           borderSide:
+                          //               BorderSide(color: AppColor.boaderColor),
+                          //         ),
+                          //         focusedBorder: const UnderlineInputBorder(
+                          //           borderSide: BorderSide(
+                          //               color: AppColor.themeColor, width: 1),
+                          //         ),
+                          //         contentPadding:
+                          //             const EdgeInsets.symmetric(vertical: 10),
+                          //         fillColor: Colors.transparent,
+                          //         filled: true,
+                          //         counterText: '',
+                          //         hintText: AppLanguage
+                          //             .chooseDestinationText[language],
+                          //         hintStyle: const TextStyle(
+                          //             color: AppColor.textColor,
+                          //             fontWeight: FontWeight.w400,
+                          //             fontSize: 16),
+                          //         suffixIcon: IconButton(
+                          //           icon: Container(
+                          //             alignment: language == 0
+                          //                 ? Alignment.centerRight
+                          //                 : Alignment.centerLeft,
+                          //             width: MediaQuery.of(context).size.width *
+                          //                 20 /
+                          //                 100,
+                          //             height:
+                          //                 MediaQuery.of(context).size.width *
+                          //                     5 /
+                          //                     100,
+                          //             child: Image.asset(
+                          //               AppImage.dropDownIcon,
+                          //             ),
+                          //           ),
+                          //           onPressed: () {
+                          //             dropDownModelForDestination(
+                          //                 context, screenWidth);
+                          //           },
+                          //         )),
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //   height:
+                          //       MediaQuery.of(context).size.height * 2 / 100,
+                          // ),
+
+                          //!=== select boat===
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 90 / 100,
                             height:
@@ -1425,10 +2061,9 @@ class _EditProfileScreenScreenState
                                   fontSize: 16,
                                   fontWeight: FontWeight.w400),
                               textAlignVertical: TextAlignVertical.center,
-                              controller: destinationTextEditingController,
+                              controller: propertyTextEditingController,
                               onTap: () {
-                                dropDownModelForDestination(
-                                    context, screenWidth);
+                                dropDownModelForProperty(context, screenWidth);
                               },
                               decoration: InputDecoration(
                                   border: const UnderlineInputBorder(
@@ -1450,7 +2085,7 @@ class _EditProfileScreenScreenState
                                   filled: true,
                                   counterText: '',
                                   hintText:
-                                      "${AppLanguage.chooseDestinationText[language]}",
+                                      AppLanguage.choosepropertyText[language],
                                   hintStyle: const TextStyle(
                                       color: AppColor.textColor,
                                       fontWeight: FontWeight.w400,
@@ -1472,7 +2107,7 @@ class _EditProfileScreenScreenState
                                       ),
                                     ),
                                     onPressed: () {
-                                      dropDownModelForDestination(
+                                      dropDownModelForProperty(
                                           context, screenWidth);
                                     },
                                   )),
@@ -1483,98 +2118,7 @@ class _EditProfileScreenScreenState
                                 MediaQuery.of(context).size.height * 2 / 100,
                           ),
 
-                          //!=== select activity===
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 90 / 100,
-                            height:
-                                MediaQuery.of(context).size.height * 5.5 / 100,
-                            child: TextFormField(
-                              readOnly: true,
-                              style: const TextStyle(
-                                  height: 1.1,
-                                  color: AppColor.textColor,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400),
-                              textAlignVertical: TextAlignVertical.center,
-                              controller: activityTextEditingController,
-                              onTap: () {
-                                if (destinationTextEditingController
-                                    .text.isEmpty) {
-                                  SnackBarToastMessage.showSnackBar(
-                                      context,
-                                      AppLanguage
-                                          .selectDestinationMsg[language]);
-                                } else {
-                                  dropDownModelForProperty(
-                                    context,
-                                    screenWidth,
-                                  );
-                                }
-                              },
-                              decoration: InputDecoration(
-                                  border: const UnderlineInputBorder(
-                                    // Use UnderlineInputBorder
-                                    borderSide:
-                                        BorderSide(color: AppColor.boaderColor),
-                                  ),
-                                  enabledBorder: const UnderlineInputBorder(
-                                    borderSide:
-                                        BorderSide(color: AppColor.boaderColor),
-                                  ),
-                                  focusedBorder: const UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: AppColor.themeColor, width: 1),
-                                  ),
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(vertical: 10),
-                                  fillColor: Colors.transparent,
-                                  filled: true,
-                                  counterText: '',
-                                  hintText:
-                                      "${AppLanguage.choosepropertyText[language]}",
-                                  hintStyle: const TextStyle(
-                                      color: AppColor.textColor,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 16),
-                                  suffixIcon: IconButton(
-                                    icon: Container(
-                                      alignment: language == 0
-                                          ? Alignment.centerRight
-                                          : Alignment.centerLeft,
-                                      width: MediaQuery.of(context).size.width *
-                                          20 /
-                                          100,
-                                      height:
-                                          MediaQuery.of(context).size.width *
-                                              5 /
-                                              100,
-                                      child: Image.asset(
-                                        AppImage.dropDownIcon,
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      if (destinationTextEditingController
-                                          .text.isEmpty) {
-                                        SnackBarToastMessage.showSnackBar(
-                                            context,
-                                            AppLanguage.selectDestinationMsg[
-                                                language]);
-                                      } else {
-                                        dropDownModelForProperty(
-                                          context,
-                                          screenWidth,
-                                        );
-                                      }
-                                    },
-                                  )),
-                            ),
-                          ),
-
-                          SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height * 2 / 100,
-                          ),
-
+                          //!=== select city===
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 90 / 100,
                             height:
@@ -1592,67 +2136,67 @@ class _EditProfileScreenScreenState
                                 dropDownModelForCity(context, screenWidth);
                               },
                               decoration: InputDecoration(
-                                border: const UnderlineInputBorder(
-                                  // Use UnderlineInputBorder
-                                  borderSide:
-                                      BorderSide(color: AppColor.boaderColor),
-                                ),
-                                enabledBorder: const UnderlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: AppColor.boaderColor),
-                                ),
-                                focusedBorder: const UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: AppColor.themeColor, width: 1),
-                                ),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(vertical: 10),
-                                fillColor: Colors.transparent,
-                                filled: true,
-                                counterText: '',
-                                hintText:
-                                    "${AppLanguage.selectCityText[language]}*",
-                                hintStyle: const TextStyle(
-                                    color: AppColor.textColor,
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 16),
-                                suffixIcon: IconButton(
-                                  icon: Container(
-                                    alignment: language == 0
-                                        ? Alignment.centerRight
-                                        : Alignment.centerLeft,
-                                    width: MediaQuery.of(context).size.width *
-                                        20 /
-                                        100,
-                                    height: MediaQuery.of(context).size.width *
-                                        5 /
-                                        100,
-                                    child: Image.asset(
-                                      AppImage.dropDownIcon,
-                                    ),
+                                  border: const UnderlineInputBorder(
+                                    // Use UnderlineInputBorder
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
                                   ),
-                                  onPressed: () {
-                                    String text =
-                                        nationalityTextEditingController.text;
-                                    if (text.isEmpty) {
-                                      SnackBarToastMessage.showSnackBar(context,
-                                          AppLanguage.nationalityMsg[language]);
-                                    } else {
-                                      dropDownModelForCity(
-                                          context, screenWidth);
-                                    }
-                                  },
-                                ),
-                              ),
+                                  enabledBorder: const UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: AppColor.boaderColor),
+                                  ),
+                                  focusedBorder: const UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: AppColor.themeColor, width: 1),
+                                  ),
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  fillColor: Colors.transparent,
+                                  filled: true,
+                                  counterText: '',
+                                  hintText:
+                                      AppLanguage.selectCityText[language],
+                                  hintStyle: const TextStyle(
+                                      color: AppColor.textColor,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16),
+                                  suffixIcon: IconButton(
+                                    icon: Container(
+                                      alignment: language == 0
+                                          ? Alignment.centerRight
+                                          : Alignment.centerLeft,
+                                      width: MediaQuery.of(context).size.width *
+                                          20 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              5 /
+                                              100,
+                                      child: Image.asset(
+                                        AppImage.dropDownIcon,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      String text =
+                                          nationalityTextEditingController.text;
+                                      if (text.isEmpty) {
+                                        SnackBarToastMessage.showSnackBar(
+                                            context,
+                                            AppLanguage
+                                                .nationalityMsg[language]);
+                                      } else {
+                                        dropDownModelForCity(
+                                            context, screenWidth);
+                                      }
+                                    },
+                                  )),
                             ),
                           ),
-
                           SizedBox(
                             height:
                                 MediaQuery.of(context).size.height * 2 / 100,
                           ),
 
-                          //!=== select pickup===
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 90 / 100,
                             height:
@@ -1665,12 +2209,13 @@ class _EditProfileScreenScreenState
                                   fontSize: 16,
                                   fontWeight: FontWeight.w400),
                               textAlignVertical: TextAlignVertical.center,
-                              controller: pickUpTextEditingController,
+                              controller: locationTextEditingController,
                               onTap: () {
                                 setState(() {
                                   mapshow = true;
                                 });
-                                // alertBoxsearch(context);
+
+                                alertBoxsearch(context);
                               },
                               decoration: InputDecoration(
                                   border: const UnderlineInputBorder(
@@ -1691,8 +2236,8 @@ class _EditProfileScreenScreenState
                                   fillColor: Colors.transparent,
                                   filled: true,
                                   counterText: '',
-                                  hintText:
-                                      "${AppLanguage.enterPickUpText[language]}*",
+                                  hintText: AppLanguage
+                                      .propertylocationText[language],
                                   hintStyle: const TextStyle(
                                       color: AppColor.textColor,
                                       fontWeight: FontWeight.w400,
@@ -1717,44 +2262,39 @@ class _EditProfileScreenScreenState
                                       setState(() {
                                         mapshow = true;
                                       });
-
-                                      // alertBoxsearch(context);
+                                      alertBoxsearch(context);
                                     },
                                   )),
                             ),
                           ),
-
                           SizedBox(
                             height:
                                 MediaQuery.of(context).size.height * 2 / 100,
                           ),
 
                           //!================enter number of people
-
                           Padding(
                             padding: EdgeInsets.symmetric(
                                 horizontal: size.width * 0.04),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  "Max Number Of People*",
-                                  style: TextStyle(
+                                Text(
+                                  "${AppLanguage.maxNumberOfPeopleText[language]}*",
+                                  style: const TextStyle(
                                       color: AppColor.textColor,
                                       fontWeight: FontWeight.w400,
                                       fontSize: 16),
                                 ),
-
                                 SizedBox(height: size.height * 0.02),
-
                                 // Adult counter
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "Adult",
-                                      style: TextStyle(
+                                      AppLanguage.adultText[language],
+                                      style: const TextStyle(
                                         fontSize: 18,
                                         fontFamily: AppFont.fontFamily,
                                         fontWeight: FontWeight.w400,
@@ -1779,7 +2319,7 @@ class _EditProfileScreenScreenState
                                             onTap: () {
                                               setState(() {
                                                 adultCount = (adultCount - 1)
-                                                    .clamp(0, 10);
+                                                    .clamp(0, 50);
                                               });
                                             },
                                             child: Container(
@@ -1787,7 +2327,7 @@ class _EditProfileScreenScreenState
                                                   size.width * 0.015),
                                               decoration: BoxDecoration(
                                                 color: AppColor.themeColor
-                                                    .withOpacity(0.1),
+                                                    .withOpacity(0.2),
                                                 shape: BoxShape.circle,
                                               ),
                                               child: Icon(
@@ -1812,7 +2352,7 @@ class _EditProfileScreenScreenState
                                             onTap: () {
                                               setState(() {
                                                 adultCount = (adultCount + 1)
-                                                    .clamp(0, 10);
+                                                    .clamp(0, 50);
                                               });
                                             },
                                             child: Container(
@@ -1820,7 +2360,7 @@ class _EditProfileScreenScreenState
                                                   size.width * 0.01),
                                               decoration: BoxDecoration(
                                                 color: AppColor.themeColor
-                                                    .withOpacity(0.1),
+                                                    .withOpacity(0.2),
                                                 shape: BoxShape.circle,
                                               ),
                                               child: Icon(
@@ -1836,21 +2376,20 @@ class _EditProfileScreenScreenState
                                   ],
                                 ),
                                 SizedBox(height: size.height * 0.01),
-                                Divider(
+                                const Divider(
                                   color: AppColor.boaderColor,
                                   thickness: 1,
                                   height: 1,
                                 ),
                                 SizedBox(height: size.height * 0.02),
-
                                 // Child counter
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "Child",
-                                      style: TextStyle(
+                                      AppLanguage.childText[language],
+                                      style: const TextStyle(
                                         fontSize: 18,
                                         fontFamily: AppFont.fontFamily,
                                         fontWeight: FontWeight.w400,
@@ -1875,7 +2414,7 @@ class _EditProfileScreenScreenState
                                             onTap: () {
                                               setState(() {
                                                 childCount = (childCount - 1)
-                                                    .clamp(0, 10);
+                                                    .clamp(0, 50);
                                               });
                                             },
                                             child: Container(
@@ -1883,7 +2422,7 @@ class _EditProfileScreenScreenState
                                                   size.width * 0.015),
                                               decoration: BoxDecoration(
                                                 color: AppColor.themeColor
-                                                    .withOpacity(0.1),
+                                                    .withOpacity(0.2),
                                                 shape: BoxShape.circle,
                                               ),
                                               child: Icon(
@@ -1908,7 +2447,7 @@ class _EditProfileScreenScreenState
                                             onTap: () {
                                               setState(() {
                                                 childCount = (childCount + 1)
-                                                    .clamp(0, 10);
+                                                    .clamp(0, 50);
                                               });
                                             },
                                             child: Container(
@@ -1916,7 +2455,7 @@ class _EditProfileScreenScreenState
                                                   size.width * 0.01),
                                               decoration: BoxDecoration(
                                                 color: AppColor.themeColor
-                                                    .withOpacity(0.1),
+                                                    .withOpacity(0.2),
                                                 shape: BoxShape.circle,
                                               ),
                                               child: Icon(
@@ -1932,7 +2471,7 @@ class _EditProfileScreenScreenState
                                   ],
                                 ),
                                 SizedBox(height: size.height * 0.01),
-                                Divider(
+                                const Divider(
                                   color: AppColor.boaderColor,
                                   thickness: 1,
                                   height: 1,
@@ -1940,10 +2479,9 @@ class _EditProfileScreenScreenState
                               ],
                             ),
                           ),
-
                           SizedBox(
                               height:
-                                  MediaQuery.of(context).size.height * 2 / 100),
+                                  MediaQuery.of(context).size.height * 1 / 100),
 
                           //!==============description in english==========
                           SizedBox(
@@ -2012,7 +2550,7 @@ class _EditProfileScreenScreenState
                               height:
                                   MediaQuery.of(context).size.height * 2 / 100),
 
-                          //!=============descriptionin arabic==========
+                          //!==============descriptionin arabic==========
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 90 / 100,
                             child: Text(
@@ -2028,6 +2566,7 @@ class _EditProfileScreenScreenState
                               height:
                                   MediaQuery.of(context).size.height * 1 / 100),
 
+                          //!----------- Message Input Arabic-------------
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 90 / 100,
                             child: TextFormField(
@@ -2074,18 +2613,66 @@ class _EditProfileScreenScreenState
                                       fontSize: 16)),
                             ),
                           ),
-
-                          SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height * 2 / 100,
-                          ),
-
-                          //!================enter number of people
-
                           SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 2 / 100),
 
+                          //!================enter coupon code
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            height:
+                                MediaQuery.of(context).size.height * 5.5 / 100,
+                            child: TextFormField(
+                              readOnly: false,
+                              style: const TextStyle(
+                                height: 1.1,
+                                color: AppColor.primaryColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              textAlignVertical: TextAlignVertical.center,
+                              keyboardType: TextInputType.text,
+                              controller: couponCodeTextEditingController,
+                              maxLength: 8,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'[a-zA-Z0-9]')),
+                              ],
+                              onChanged: (value) {
+                                if (value.length == 8) {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  validateCouponApiCall(userId, value);
+                                }
+                              },
+                              decoration: InputDecoration(
+                                border: const UnderlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: AppColor.boaderColor),
+                                ),
+                                enabledBorder: const UnderlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: AppColor.boaderColor),
+                                ),
+                                focusedBorder: const UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: AppColor.themeColor, width: 1),
+                                ),
+                                contentPadding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                fillColor: Colors.transparent,
+                                filled: true,
+                                counterText: '',
+                                hintText:
+                                    AppLanguage.enterCouponCodeText[language],
+                                hintStyle: AppConstant.textFilledStyle,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!Start end date pickers
                           if (isCouponExist)
                             Column(
                               children: [
@@ -2264,6 +2851,8 @@ class _EditProfileScreenScreenState
                                               100,
                                       child: TextFormField(
                                         readOnly: false,
+                                        inputFormatters:
+                                            AppConstant.onlyDigitFormatter,
                                         style: const TextStyle(
                                             height: 1.1,
                                             color: AppColor.textColor,
@@ -2340,6 +2929,7 @@ class _EditProfileScreenScreenState
                               keyboardtype: TextInputType.number,
                               maxLength: 2,
                               fillColorStatus: 0,
+                              inputFormatter: AppConstant.onlyDigitFormatter,
                               width:
                                   MediaQuery.of(context).size.width * 90 / 100,
                               readOnly: false),
@@ -2349,15 +2939,30 @@ class _EditProfileScreenScreenState
 
                           //!============next button=================//
                           AppButton(
-                            text: AppLanguage.nextText[language],
-                            onPress: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          EditPropertyAdSecondScreen()));
-                            },
-                          ),
+                              text: AppLanguage.nextText[language],
+                              onPress: () {
+                                addAdvertisementValidation(
+                                  coverImage,
+                                  serverImageList,
+                                  guardEnglishNameTextController.text,
+                                  guardArabicNameTextController.text,
+                                  guardNumberTextController.text,
+                                  isSelectedGender,
+                                  nationalityTextEditingController.text,
+                                  destinationTextEditingController.text,
+                                  propertyTextEditingController.text,
+                                  locationTextEditingController.text,
+                                  cityTextEditingController.text,
+                                  maxNumberTextController.text,
+                                  messageTextEditingController.text,
+                                  messageArabicTextEditingController.text,
+                                  couponCodeTextEditingController.text,
+                                  startDateController.text,
+                                  endDateController.text,
+                                  coupanDiscountTextEditingController.text,
+                                  discountTextEditingController.text,
+                                );
+                              }),
                           SizedBox(
                               height: MediaQuery.of(context).size.height *
                                   10 /
@@ -2377,7 +2982,6 @@ class _EditProfileScreenScreenState
   }
 
   Widget buildCoverImage(screenWidth) {
-    final size = MediaQuery.of(context).size;
     if (coverImage == null && showCoverImage == "") {
       // Case 1: No image selected or shown yet
       return GestureDetector(
@@ -2395,20 +2999,14 @@ class _EditProfileScreenScreenState
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.02),
               Padding(
-                padding: EdgeInsets.symmetric(
-                    vertical: size.height * 0.01,
-                    horizontal: size.width * 0.05),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    textAlign: TextAlign.left,
-                    AppLanguage.pleaseUploadsidepicsText[language],
-                    style: const TextStyle(
-                      fontFamily: AppFont.fontFamily,
-                      fontSize: 19,
-                      fontWeight: FontWeight.w400,
-                      color: AppColor.secondaryColor,
-                    ),
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: Text(
+                  "${AppLanguage.uploadCoverImageMsg[language]}*",
+                  style: const TextStyle(
+                    fontFamily: AppFont.fontFamily,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w400,
+                    color: AppColor.secondaryColor,
                   ),
                 ),
               ),
@@ -2470,7 +3068,7 @@ class _EditProfileScreenScreenState
               },
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.06,
-                child: Image.asset(AppImage.crossIcon),
+                child: Image.asset(AppImage.cancelRedIcon),
               ),
             ),
           ),
@@ -2503,7 +3101,7 @@ class _EditProfileScreenScreenState
               },
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.06,
-                child: Image.asset(AppImage.crossIcon),
+                child: Image.asset(AppImage.cancelRedIcon),
               ),
             ),
           ),
@@ -2513,9 +3111,6 @@ class _EditProfileScreenScreenState
   }
 
   void dropDownModelForNationality(BuildContext context, screenWidth) {
-    nationsList =
-        List.from(staticNationsList); // reset every time dropdown opens
-
     showModalBottomSheet<void>(
       constraints: BoxConstraints.expand(width: screenWidth),
       isScrollControlled: true,
@@ -2541,24 +3136,33 @@ class _EditProfileScreenScreenState
                     ),
                     child: Column(
                       children: [
-                        /// 🔶 Header
-                        AppHeaderOrange(
-                          text: AppLanguage.nationalityText[language],
-                          onPress: () {
-                            Navigator.pop(context);
-                          },
-                        ),
+                        // SizedBox(
+                        //   height: MediaQuery.of(context).size.height * 4 / 100,
+                        // ),
 
+                        AppHeaderOrange(
+                            text: AppLanguage.nationalityText[language],
+                            onPress: () {
+                              Navigator.pop(context);
+                            }),
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 4 / 100,
                         ),
 
-                        /// 🔍 Search Field
+                        // Search field
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           height:
                               MediaQuery.of(context).size.height * 6.5 / 100,
                           child: TextFormField(
+                            style: const TextStyle(
+                              height: 1.1,
+                              color: AppColor.primaryColor,
+                              fontFamily: AppFont.fontFamily,
+                            ),
+                            textAlignVertical: TextAlignVertical.center,
+                            readOnly: false,
+                            keyboardType: TextInputType.text,
                             controller: searchCountryTextEditingController,
                             maxLength: 50,
                             decoration: InputDecoration(
@@ -2591,142 +3195,104 @@ class _EditProfileScreenScreenState
                             onChanged: (input) {
                               setState(() {
                                 if (input.isNotEmpty) {
-                                  nationsList =
-                                      staticNationsList.where((country) {
-                                    return country["country_name"][language]
-                                        .toString()
-                                        .toLowerCase()
-                                        .contains(input.toLowerCase());
-                                  }).toList();
+                                  searchResultCountry(input);
                                 } else {
-                                  nationsList = List.from(staticNationsList);
+                                  nationsList = nationsSearchList;
                                 }
                               });
                             },
                           ),
                         ),
-
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 2 / 100,
                         ),
 
-                        /// 📋 List
-                        Expanded(
-                          child: nationsList.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    AppLanguage.noCitiesMsg[language],
-                                    style: const TextStyle(
-                                      fontFamily: AppFont.fontFamily,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColor.primaryColor,
-                                    ),
+                        // List
+                        Flexible(
+                          child: ListView.builder(
+                            itemCount: nationsList.length,
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        2 /
+                                        100,
                                   ),
-                                )
-                              : ListView.builder(
-                                  itemCount: nationsList.length,
-                                  itemBuilder: (context, index) {
-                                    return Column(
-                                      children: [
-                                        SizedBox(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              2 /
-                                              100,
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              isSelectedNationality =
-                                                  nationsList[index]
-                                                      ["country_id"];
-
-                                              nationalityTextEditingController
-                                                      .text =
-                                                  nationsList[index]
-                                                          ['country_name']
-                                                      [language];
-
-                                              Navigator.pop(context);
-                                            });
-                                          },
-                                          child: Container(
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        isSelectedNationality =
+                                            nationsList[index]["country_id"];
+                                        nationalityTextEditingController.text =
+                                            nationsList[index]['country_name']
+                                                [language];
+                                        Navigator.pop(context);
+                                      });
+                                    },
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          90 /
+                                          100,
+                                      color: AppColor.secondaryColor,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            nationsList[index]['country_name']
+                                                [language],
+                                            style: const TextStyle(
+                                              fontFamily: AppFont.fontFamily,
+                                              fontSize: 17,
+                                              color: AppColor.primaryColor,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          SizedBox(
                                             width: MediaQuery.of(context)
                                                     .size
                                                     .width *
-                                                90 /
+                                                5 /
                                                 100,
-                                            color: AppColor.secondaryColor,
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Text(
-                                                  nationsList[index]
-                                                          ['country_name']
-                                                      [language],
-                                                  style: const TextStyle(
-                                                    fontFamily:
-                                                        AppFont.fontFamily,
-                                                    fontSize: 17,
-                                                    color:
-                                                        AppColor.primaryColor,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      5 /
-                                                      100,
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      5 /
-                                                      100,
-                                                  child:
-                                                      isSelectedNationality ==
-                                                              nationsList[index]
-                                                                  ["country_id"]
-                                                          ? Image.asset(
-                                                              AppImage
-                                                                  .tickOrangeIcon,
-                                                              fit: BoxFit.fill,
-                                                            )
-                                                          : null,
-                                                ),
-                                              ],
-                                            ),
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                5 /
+                                                100,
+                                            child: isSelectedNationality ==
+                                                    nationsList[index]
+                                                        ["country_id"]
+                                                ? Image.asset(
+                                                    AppImage.tickOrangeIcon,
+                                                    fit: BoxFit.fill,
+                                                  )
+                                                : null,
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              2 /
-                                              100,
-                                        ),
-                                        Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              90 /
-                                              100,
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        2 /
+                                        100,
+                                  ),
+                                  if (index < nationsList.length)
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          90 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.height *
                                               .2 /
                                               100,
-                                          color: AppColor.textColor,
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
+                                      color: AppColor.textColor,
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),
@@ -2741,159 +3307,6 @@ class _EditProfileScreenScreenState
   }
 
   void dropDownModelForProperty(BuildContext context, screenWidth) {
-    filteredPropertyList = List.from(propertyList);
-
-    showModalBottomSheet<void>(
-      constraints: BoxConstraints.expand(width: screenWidth),
-      isScrollControlled: true,
-      isDismissible: true,
-      context: context,
-      backgroundColor: AppColor.secondaryColor,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return GestureDetector(
-              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-              child: Padding(
-                padding: MediaQuery.of(context).viewInsets,
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  color: AppColor.secondaryColor,
-                  child: Column(
-                    children: [
-                      // Image header
-                      AppHeaderOrange(
-                          text: AppLanguage.choosepropertyText[language],
-                          onPress: () {
-                            Navigator.pop(context);
-                          }),
-
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 2 / 100),
-
-                      // Property list
-                      Expanded(
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: EdgeInsets.symmetric(
-                            horizontal:
-                                MediaQuery.of(context).size.width * 0.05,
-                            vertical: MediaQuery.of(context).size.height * 0.01,
-                          ),
-                          child: Column(
-                            children: List.generate(filteredPropertyList.length,
-                                (index) {
-                              final item = filteredPropertyList[index];
-                              final isSelected =
-                                  selectedProperty == item['name'];
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    selectedProperty = item['name']!;
-                                  });
-                                  // ✅ controller update karo agar hai toh
-                                  // propertyTextEditingController.text = item['name']!;
-                                  Navigator.pop(context);
-                                },
-                                child: Container(
-                                  width: double.infinity,
-                                  margin: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context).size.height *
-                                        0.015,
-                                  ),
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal:
-                                        MediaQuery.of(context).size.width *
-                                            0.04,
-                                    vertical:
-                                        MediaQuery.of(context).size.height *
-                                            0.018,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? AppColor.themeColor
-                                          : Colors.transparent,
-                                      width: 1.5,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.shade200,
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            item['name']!,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              fontFamily: AppFont.fontFamily,
-                                              color: AppColor.primaryColor,
-                                            ),
-                                          ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            item['type']!,
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w400,
-                                              fontFamily: AppFont.fontFamily,
-                                              color: Colors.grey.shade500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      // ✅ Tick icon selected pe
-                                      if (isSelected)
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              5 /
-                                              100,
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              5 /
-                                              100,
-                                          child: Image.asset(
-                                            AppImage.tickOrangeIcon,
-                                            fit: BoxFit.fill,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void dropDownModelForBoat(BuildContext context, screenWidth) {
     showModalBottomSheet<void>(
       constraints: BoxConstraints.expand(width: screenWidth),
       isScrollControlled: true,
@@ -2923,7 +3336,7 @@ class _EditProfileScreenScreenState
                         //   height: MediaQuery.of(context).size.height * 4 / 100,
                         // ),
                         AppHeaderOrange(
-                            text: AppLanguage.chooseBoatText[language],
+                            text: AppLanguage.choosepropertyText[language],
                             onPress: () {
                               Navigator.pop(context);
                             }),
@@ -2938,7 +3351,8 @@ class _EditProfileScreenScreenState
                               ),
                               Wrap(
                                 children: [
-                                  ...List.generate(boatList.length, (index) {
+                                  ...List.generate(propertyList.length,
+                                      (index) {
                                     return Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
@@ -2955,39 +3369,41 @@ class _EditProfileScreenScreenState
                                                   3 /
                                                   100,
                                             ),
-                                            Container(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    90 /
-                                                    100,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                  boxShadow: const [
-                                                    BoxShadow(
-                                                      color: AppColor
-                                                          .textLightColor,
-                                                      blurRadius: 2.0,
-                                                      offset: Offset(0, 4),
-                                                    ),
-                                                  ], //BoxShadow
-                                                  color: isSelectedBoat ==
-                                                          boatList[index]
-                                                              ['boat_id']
-                                                      ? AppColor.themeColor
-                                                      : AppColor.secondaryColor,
-                                                  border: Border.all(
-                                                      width: 1,
-                                                      color: AppColor
-                                                          .textLightColor),
-                                                  borderRadius:
-                                                      BorderRadius.circular(15),
-                                                ),
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    selectBoat(index);
-                                                    Navigator.pop(context);
-                                                  },
+                                            GestureDetector(
+                                              onTap: () {
+                                                selectBoat(index);
+                                                Navigator.pop(context);
+                                              },
+                                              child: Container(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      90 /
+                                                      100,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    boxShadow: const [
+                                                      BoxShadow(
+                                                        color: AppColor
+                                                            .textLightColor,
+                                                        blurRadius: 2.0,
+                                                        offset: Offset(0, 4),
+                                                      ),
+                                                    ], //BoxShadow
+                                                    color: isSelectedProperty ==
+                                                            propertyList[index]
+                                                                ['property_id']
+                                                        ? AppColor.themeColor
+                                                        : AppColor
+                                                            .secondaryColor,
+                                                    border: Border.all(
+                                                        width: 1,
+                                                        color: AppColor
+                                                            .textLightColor),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15),
+                                                  ),
                                                   child: SizedBox(
                                                     width:
                                                         MediaQuery.of(context)
@@ -3007,26 +3423,31 @@ class _EditProfileScreenScreenState
                                                                         context)
                                                                     .size
                                                                     .width *
-                                                                45 /
+                                                                80 /
                                                                 100,
                                                             child: Column(
                                                               children: [
-                                                                SizedBox(
+                                                                Container(
+                                                                  color: AppColor
+                                                                      .transparent,
                                                                   width: MediaQuery.of(
                                                                               context)
                                                                           .size
                                                                           .width *
-                                                                      45 /
+                                                                      80 /
                                                                       100,
                                                                   child: Text(
-                                                                    "${AppLanguage.yearText[language]}-${boatList[index]['boat_year']}",
+                                                                    propertyList[index]
+                                                                            [
+                                                                            'property_name_english'] ??
+                                                                        "",
                                                                     style: TextStyle(
                                                                         fontSize:
                                                                             20,
                                                                         fontWeight:
                                                                             FontWeight
                                                                                 .w500,
-                                                                        color: isSelectedBoat == boatList[index]['boat_id']
+                                                                        color: isSelectedProperty == propertyList[index]['property_id']
                                                                             ? AppColor
                                                                                 .secondaryColor
                                                                             : AppColor
@@ -3035,79 +3456,30 @@ class _EditProfileScreenScreenState
                                                                             AppFont.fontFamily),
                                                                   ),
                                                                 ),
-                                                                SizedBox(
+                                                                Container(
+                                                                  color: AppColor
+                                                                      .transparent,
                                                                   width: MediaQuery.of(
                                                                               context)
                                                                           .size
                                                                           .width *
-                                                                      45 /
+                                                                      80 /
                                                                       100,
                                                                   child: Text(
-                                                                    "Capacity-${boatList[index]['boat_capacity']}",
+                                                                    "${propertyList[index]['property_type_name'] ?? ""}",
                                                                     style: TextStyle(
                                                                         fontSize:
                                                                             16,
                                                                         fontWeight:
                                                                             FontWeight
                                                                                 .w400,
-                                                                        color: isSelectedBoat == boatList[index]['boat_id']
+                                                                        color: isSelectedProperty == propertyList[index]['property_id']
                                                                             ? AppColor
                                                                                 .secondaryColor
                                                                             : AppColor
                                                                                 .primaryColor,
                                                                         fontFamily:
                                                                             AppFont.fontFamily),
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-
-                                                          //right side
-                                                          Container(
-                                                            alignment: Alignment
-                                                                .centerRight,
-                                                            width: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                35 /
-                                                                100,
-                                                            //color: Colors.amber,
-                                                            child: Row(
-                                                              children: [
-                                                                SizedBox(
-                                                                  width: MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width *
-                                                                      35 /
-                                                                      100,
-                                                                  // color: Colors.black,
-                                                                  child:
-                                                                      Padding(
-                                                                    padding: const EdgeInsets
-                                                                        .only(
-                                                                        bottom:
-                                                                            2.0),
-                                                                    child: Text(
-                                                                      boatList[
-                                                                              index]
-                                                                          [
-                                                                          'boat_name_english'],
-                                                                      textAlign:
-                                                                          TextAlign
-                                                                              .end,
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              20,
-                                                                          fontWeight: FontWeight
-                                                                              .w400,
-                                                                          color: isSelectedBoat == boatList[index]['boat_id']
-                                                                              ? AppColor.secondaryColor
-                                                                              : AppColor.primaryColor,
-                                                                          fontFamily: AppFont.fontFamily),
-                                                                    ),
                                                                   ),
                                                                 ),
                                                               ],
@@ -3116,8 +3488,8 @@ class _EditProfileScreenScreenState
                                                         ],
                                                       ),
                                                     ),
-                                                  ),
-                                                )),
+                                                  )),
+                                            ),
                                             SizedBox(
                                               width: MediaQuery.of(context)
                                                       .size
@@ -3156,9 +3528,10 @@ class _EditProfileScreenScreenState
 
   selectBoat(index) {
     setState(() {
-      isSelectedBoat = boatList[index]['boat_id'];
-      boatTextEditingController.text = boatList[index]['boat_name_english'];
-      boatCapacity = boatList[index]['boat_capacity'].toString().trim();
+      isSelectedProperty = propertyList[index]['property_id'];
+      propertyTextEditingController.text =
+          propertyList[index]['property_name_english'];
+      // boatCapacity = propertyList[index]['boat_capacity'].toString().trim();
     });
   }
 
@@ -3188,9 +3561,6 @@ class _EditProfileScreenScreenState
                     ),
                     child: Column(
                       children: [
-                        // SizedBox(
-                        //   height: MediaQuery.of(context).size.height * 4 / 100,
-                        // ),
                         //image header
                         Container(
                           width: MediaQuery.of(context).size.width * 100 / 100,
@@ -3339,7 +3709,7 @@ class _EditProfileScreenScreenState
                                 if (input.isNotEmpty) {
                                   searchResultCity(input);
                                 } else {
-                                  // cityList = citySearchList;
+                                  cityList = citySearchList;
                                 }
                               });
                             },
@@ -3490,8 +3860,6 @@ class _EditProfileScreenScreenState
   }
 
   void dropDownModelForDestination(BuildContext context, screenWidth) {
-    filteredDestinationList = List.from(destinationList);
-
     showModalBottomSheet<void>(
       constraints: BoxConstraints.expand(width: screenWidth),
       isScrollControlled: true,
@@ -3501,225 +3869,633 @@ class _EditProfileScreenScreenState
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return GestureDetector(
-              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-              child: Padding(
-                padding: MediaQuery.of(context).viewInsets,
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  color: AppColor.secondaryColor,
-                  child: Column(
-                    children: [
-                      // Image header
-                      Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height * 20 / 100,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage(AppImage.headerBgImage),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(50),
-                            bottomRight: Radius.circular(50),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 6 / 100,
-                            ),
-                            Row(
-                              children: [
-                                // Back button
-                                GestureDetector(
-                                  onTap: () => Navigator.pop(context),
-                                  child: Container(
-                                    color: Colors.transparent,
-                                    alignment: Alignment.center,
-                                    width: MediaQuery.of(context).size.width *
-                                        15 /
+            return Directionality(
+              textDirection:
+                  language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+              child: GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: Padding(
+                  padding: MediaQuery.of(context).viewInsets,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      color: AppColor.secondaryColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+                        // SizedBox(
+                        //   height: MediaQuery.of(context).size.height * 4 / 100,
+                        // ),
+                        //image header
+                        Container(
+                          width: MediaQuery.of(context).size.width * 100 / 100,
+                          height: screenWidth > 600
+                              ? null
+                              : MediaQuery.of(context).size.height * 20 / 100,
+                          decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                  image: AssetImage(AppImage.headerBgImage),
+                                  fit: BoxFit.cover),
+                              // color: AppColor.themeColor,
+                              borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(50),
+                                  bottomRight: Radius.circular(50))),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: AppConstant.deviceType == "ios"
+                                    ? MediaQuery.of(context).size.height *
+                                        6 /
+                                        100
+                                    : MediaQuery.of(context).size.height *
+                                        6 /
                                         100,
-                                    height: MediaQuery.of(context).size.width *
-                                        7 /
-                                        100,
-                                    child: Image.asset(AppImage.backIcon),
-                                  ),
-                                ),
-                                // Title
-                                SizedBox(
-                                  width: MediaQuery.of(context).size.width *
-                                      70 /
-                                      100,
-                                  child: Center(
-                                    child: Text(
-                                      AppLanguage.destinationText[language],
-                                      style: const TextStyle(
-                                        color: AppColor.secondaryColor,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w600,
-                                        fontFamily: AppFont.fontFamily,
+                              ),
+
+                              //change lang
+                              Container(
+                                width: MediaQuery.of(context).size.width *
+                                    100 /
+                                    100,
+                                alignment: Alignment.center,
+                                child: Row(
+                                  children: [
+                                    //edit
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Transform.rotate(
+                                        angle: language == 1 ? 3.1416 : 0,
+                                        child: Container(
+                                          color: Colors.transparent,
+                                          alignment: Alignment.center,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              15 /
+                                              100,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              7 /
+                                              100,
+                                          child: Image.asset(AppImage.backIcon),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                                SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        15 /
-                                        100),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
 
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 2 / 100),
-
-                      // Search field
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 90 / 100,
-                        height: MediaQuery.of(context).size.height * 6.5 / 100,
-                        child: TextFormField(
-                          style: const TextStyle(
-                            height: 1.1,
-                            color: AppColor.primaryColor,
-                            fontFamily: AppFont.fontFamily,
-                          ),
-                          textAlignVertical: TextAlignVertical.center,
-                          controller: searchDestinationController,
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: AppColor.boaderColor),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(50)),
-                            ),
-                            enabledBorder: const OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: AppColor.boaderColor),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(50)),
-                            ),
-                            focusedBorder: const OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: AppColor.themeColor),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(50)),
-                            ),
-                            contentPadding:
-                                const EdgeInsets.only(right: 10, left: 10),
-                            fillColor: Colors.white,
-                            filled: true,
-                            counterText: '',
-                            hintText: AppLanguage.searchText[language],
-                            hintStyle: AppConstant.textFilledStyle,
-                          ),
-                          onChanged: (input) {
-                            setState(() {
-                              if (input.isNotEmpty) {
-                                filteredDestinationList = destinationList
-                                    .where((item) => item
-                                        .toLowerCase()
-                                        .contains(input.toLowerCase()))
-                                    .toList();
-                              } else {
-                                filteredDestinationList =
-                                    List.from(destinationList);
-                              }
-                            });
-                          },
-                        ),
-                      ),
-
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 2 / 100),
-
-                      // List
-                      Expanded(
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: Column(
-                            children: List.generate(
-                                filteredDestinationList.length, (index) {
-                              final item = filteredDestinationList[index];
-                              final isSelected = selectedDestination == item;
-                              return Column(
-                                children: [
-                                  SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              2 /
-                                              100),
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        selectedDestination = item;
-                                      });
-                                      destinationTextEditingController.text =
-                                          item; // ✅ yeh add karo
-                                      Navigator.pop(context);
-                                    },
-                                    child: Container(
+                                    //profile
+                                    Container(
+                                      alignment: Alignment.center,
                                       width: MediaQuery.of(context).size.width *
-                                          90 /
+                                          70 /
                                           100,
-                                      color: AppColor.secondaryColor,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                      child: Text(
+                                        AppLanguage.destinationText[language],
+                                        style: const TextStyle(
+                                            color: AppColor.secondaryColor,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: AppFont.fontFamily),
+                                      ),
+                                    ),
+
+                                    Container(
+                                      alignment: Alignment.centerRight,
+                                      width: MediaQuery.of(context).size.width *
+                                          15 /
+                                          100,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              7 /
+                                              100,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height *
+                                    10 /
+                                    100,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 2 / 100,
+                        ),
+                        // Search field
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          height:
+                              MediaQuery.of(context).size.height * 6.5 / 100,
+                          child: TextFormField(
+                            style: const TextStyle(
+                              height: 1.1,
+                              color: AppColor.primaryColor,
+                              fontFamily: AppFont.fontFamily,
+                            ),
+                            textAlignVertical: TextAlignVertical.center,
+                            readOnly: false,
+                            keyboardType: TextInputType.text,
+                            controller: searchDestinationTextEditingController,
+                            maxLength: 50,
+                            decoration: InputDecoration(
+                              border: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.boaderColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              enabledBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.boaderColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              focusedBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColor.themeColor),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              contentPadding:
+                                  const EdgeInsets.only(right: 10, left: 10),
+                              fillColor: Colors.white,
+                              filled: true,
+                              counterText: '',
+                              hintText: AppLanguage.searchText[language],
+                              hintStyle: AppConstant.textFilledStyle,
+                            ),
+                            onChanged: (input) {
+                              setState(() {
+                                if (input.isNotEmpty) {
+                                  searchResultDestination(input);
+                                } else {
+                                  destinationList = searchDestinationList;
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 2 / 100,
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: Column(
+                              children: [
+                                //trip list
+                                Wrap(
+                                  children: [
+                                    ...List.generate(destinationList.length,
+                                        (index) {
+                                      return Column(
                                         children: [
-                                          Text(
-                                            item,
-                                            style: const TextStyle(
-                                              fontFamily: AppFont.fontFamily,
-                                              fontSize: 17,
-                                              color: AppColor.primaryColor,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                          SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                2 /
+                                                100,
                                           ),
-                                          if (isSelected)
-                                            SizedBox(
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                isSelectedDestination =
+                                                    destinationList[index]
+                                                        ["destination_id"];
+                                                destinationTextEditingController
+                                                        .text =
+                                                    destinationList[index]
+                                                            ['destination']
+                                                        [language];
+
+                                                Navigator.pop(context);
+                                              });
+                                            },
+                                            child: Container(
                                               width: MediaQuery.of(context)
                                                       .size
                                                       .width *
-                                                  5 /
+                                                  90 /
+                                                  100,
+                                              color: AppColor.secondaryColor,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    destinationList[index]
+                                                            ['destination']
+                                                        [language],
+                                                    style: const TextStyle(
+                                                      fontFamily:
+                                                          AppFont.fontFamily,
+                                                      fontSize: 17,
+                                                      color:
+                                                          AppColor.primaryColor,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            5 /
+                                                            100,
+                                                    height:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            5 /
+                                                            100,
+                                                    child: isSelectedDestination ==
+                                                            destinationList[
+                                                                    index][
+                                                                "destination_id"]
+                                                        ? Image.asset(
+                                                            AppImage
+                                                                .tickOrangeIcon,
+                                                            fit: BoxFit.fill,
+                                                          )
+                                                        : null,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                2 /
+                                                100,
+                                          ),
+                                          if (index < destinationList.length)
+                                            Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  90 /
                                                   100,
                                               height: MediaQuery.of(context)
                                                       .size
-                                                      .width *
-                                                  5 /
+                                                      .height *
+                                                  .2 /
                                                   100,
-                                              child: Image.asset(
-                                                AppImage.tickOrangeIcon,
-                                                fit: BoxFit.fill,
-                                              ),
+                                              color: AppColor.textColor,
                                             ),
                                         ],
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void alertBoxsearch(BuildContext context) {
+    print("Opening bottom sheet...");
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: false,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, StateSetter modalSetState) {
+            return Scaffold(
+              backgroundColor: Colors.white,
+              body: SafeArea(
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  color: Colors.white,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 3 / 100,
+                      ),
+                      CustomAppHeader(
+                        text: AppLanguage.locationText[language],
+                        onPress: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            if (mapshow)
+                              GoogleMap(
+                                myLocationButtonEnabled: false,
+                                zoomControlsEnabled: false,
+                                mapType: MapType.normal,
+                                initialCameraPosition: CameraPosition(
+                                  target: initialPosition,
+                                  zoom: 15.0,
+                                ),
+                                onMapCreated: (controller) {
+                                  modalSetState(() {
+                                    mapController = controller;
+                                  });
+                                },
+                                onTap: (LatLng tappedLocation) {
+                                  // When user taps on map, move pin and get address
+                                  modalSetState(() {
+                                    latitudex = tappedLocation.latitude;
+                                    longtitudex = tappedLocation.longitude;
+                                    initialPosition = tappedLocation;
+                                  });
+                                  _getAddressFromLatLng(
+                                    Position(
+                                      longitude: tappedLocation.longitude,
+                                      latitude: tappedLocation.latitude,
+                                      timestamp: DateTime.now(),
+                                      accuracy: 0,
+                                      altitude: 0,
+                                      altitudeAccuracy: 0,
+                                      heading: 0,
+                                      speed: 0,
+                                      speedAccuracy: 0,
+                                      headingAccuracy: 0,
+                                    ),
+                                    modalSetState,
+                                  );
+                                },
+                                markers: {
+                                  Marker(
+                                    markerId:
+                                        const MarkerId('selected_location'),
+                                    position: LatLng(latitudex, longtitudex),
+                                    draggable: true,
+                                    icon: BitmapDescriptor.defaultMarkerWithHue(
+                                        BitmapDescriptor.hueRed),
+                                    onDragEnd: (LatLng newPosition) {
+                                      modalSetState(() {
+                                        latitudex = newPosition.latitude;
+                                        longtitudex = newPosition.longitude;
+                                        initialPosition = newPosition;
+                                      });
+                                      _getAddressFromLatLng(
+                                        Position(
+                                          longitude: newPosition.longitude,
+                                          latitude: newPosition.latitude,
+                                          timestamp: DateTime.now(),
+                                          accuracy: 0,
+                                          altitude: 0,
+                                          altitudeAccuracy: 0,
+                                          heading: 0,
+                                          speed: 0,
+                                          speedAccuracy: 0,
+                                          headingAccuracy: 0,
+                                        ),
+                                        modalSetState,
+                                      );
+                                      FocusManager.instance.primaryFocus
+                                          ?.unfocus();
+                                    },
+                                  ),
+                                },
+                              ),
+                            Column(
+                              children: [
+                                const SizedBox(height: 15),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 8,
+                                          offset: Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: TextField(
+                                      controller: searchController,
+                                      decoration: InputDecoration(
+                                        contentPadding: const EdgeInsets.only(
+                                            left: 16,
+                                            top: 14,
+                                            bottom: 14,
+                                            right: 10),
+                                        border: InputBorder.none,
+                                        hintText: AppLanguage
+                                            .searchLocation[language],
+                                        hintStyle:
+                                            TextStyle(color: Colors.grey[600]),
+                                        prefixIcon: Icon(Icons.search,
+                                            color: Colors.grey[600]),
+                                        suffixIcon: IconButton(
+                                          icon: const Icon(Icons.clear),
+                                          onPressed: () {
+                                            modalSetState(() {
+                                              searchController.clear();
+                                              predictions.clear();
+                                            });
+                                          },
+                                        ),
                                       ),
+                                      onChanged: (value) {
+                                        fetchPlaceSuggestionsWithCallback(
+                                            value, modalSetState);
+                                        if (_debounce?.isActive ?? false)
+                                          _debounce!.cancel();
+                                        _debounce = Timer(
+                                          const Duration(milliseconds: 300),
+                                          () {},
+                                        );
+                                      },
                                     ),
                                   ),
-                                  SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              2 /
-                                              100),
-                                  // Divider
-                                  Container(
-                                    width: MediaQuery.of(context).size.width *
-                                        90 /
-                                        100,
-                                    height: MediaQuery.of(context).size.height *
-                                        0.2 /
-                                        100,
-                                    color: AppColor.textColor,
+                                ),
+                              ],
+                            ),
+                            if (predictions.isNotEmpty)
+                              Positioned(
+                                top: 85,
+                                left: 15,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 8,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              );
-                            }),
-                          ),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.9,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.4,
+                                  child: ListView.builder(
+                                    itemCount: predictions.length,
+                                    itemBuilder: (context, index) {
+                                      final suggestion = predictions[index];
+                                      return ListTile(
+                                        leading: const Icon(Icons.location_on,
+                                            color: Colors.red),
+                                        title: Text(suggestion['description']),
+                                        onTap: () async {
+                                          searchController.text =
+                                              suggestion['description'];
+                                          final placeId =
+                                              suggestion['place_id'];
+                                          final apiKey = AppConstant.mapkey;
+
+                                          final detailsUrl =
+                                              'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey';
+                                          final response = await http
+                                              .get(Uri.parse(detailsUrl));
+
+                                          if (response.statusCode == 200) {
+                                            final data =
+                                                json.decode(response.body);
+                                            final location = data['result']
+                                                ['geometry']['location'];
+                                            FocusManager.instance.primaryFocus
+                                                ?.unfocus();
+
+                                            modalSetState(() {
+                                              latitudex = location['lat'];
+                                              longtitudex = location['lng'];
+                                              initialPosition = LatLng(
+                                                  latitudex, longtitudex);
+                                              predictions.clear();
+                                            });
+
+                                            mapController?.animateCamera(
+                                              CameraUpdate.newCameraPosition(
+                                                CameraPosition(
+                                                  target: initialPosition,
+                                                  zoom: 16,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0, vertical: 20.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () => _getCurrentPosition(
+                                              modalSetState),
+                                          child: Container(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.13,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.13,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: Colors.black26,
+                                                  blurRadius: 8,
+                                                  offset: Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.my_location,
+                                                color: Colors.blue,
+                                                size: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.06,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 20),
+                                    AppButton(
+                                      text: AppLanguage.continueText[language],
+                                      onPress: () {
+                                        print(searchController.text);
+                                        if (searchController.text.isEmpty) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              backgroundColor:
+                                                  AppColor.themeColor,
+                                              content: Text(
+                                                AppLanguage
+                                                    .locationMessage[language],
+                                                style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                            ),
+                                          );
+                                          return;
+                                        } else {
+                                          locationAdreesSet();
+                                        }
+                                      },
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.03),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -3733,6 +4509,53 @@ class _EditProfileScreenScreenState
     );
   }
 
+  Future<void> fetchPlaceSuggestionsWithCallback(
+      String input, Function modalSetState) async {
+    if (input.isEmpty) {
+      modalSetState(() => predictions = []);
+      return;
+    }
+
+    final apiKey = AppConstant.mapkey;
+    final url =
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        modalSetState(() {
+          predictions = data['predictions'];
+        });
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  Future<void> _getCurrentPosition([StateSetter? modalSetState]) async {
+    // setState(() {
+    //   isApiCalling = true;
+    // });
+    final hasPermission = await _handleLocationPermission();
+
+    if (!hasPermission) return;
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) {
+      if (modalSetState != null) {
+        // Called from modal
+        _getAddressFromLatLng(position, modalSetState);
+      } else {
+        // Called from initState
+        // setState(() => _currentPosition = position);
+        _getAddressFromLatLng(position);
+      }
+    }).catchError((e) {
+      print("Line 71");
+      debugPrint(e);
+    });
+  }
+
   Future<bool> _handleLocationPermission() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -3740,8 +4563,7 @@ class _EditProfileScreenScreenState
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content:
-              Text("${AppLanguage.loctionPermissionenableText[language]}")));
+          content: Text(AppLanguage.loctionPermissionenableText[language])));
       return false;
     }
     permission = await Geolocator.checkPermission();
@@ -3769,6 +4591,7 @@ class _EditProfileScreenScreenState
     await placemarkFromCoordinates(position.latitude, position.longitude)
         .then((List<Placemark> placemarks) {
       Placemark place = placemarks[0];
+      print("Line 95${position.latitude}");
 
       final addressText =
           '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
@@ -3778,6 +4601,7 @@ class _EditProfileScreenScreenState
           latitudex = position.latitude;
           longtitudex = position.longitude;
           initialPosition = LatLng(position.latitude, position.longitude);
+          country = addressText;
           searchController.text = addressText;
         });
 
@@ -3793,6 +4617,7 @@ class _EditProfileScreenScreenState
           initialPosition = LatLng(position.latitude, position.longitude);
           latitudex = position.latitude;
           longtitudex = position.longitude;
+          country = addressText;
           searchController.text = addressText;
           isApiCalling = false;
         });
@@ -3800,7 +4625,11 @@ class _EditProfileScreenScreenState
         mapController?.animateCamera(CameraUpdate.newCameraPosition(
             CameraPosition(target: initialPosition, zoom: 16.0)));
       }
+
+      print("Line 95${mapshow}");
+      print("Line 100000${country}");
     }).catchError((e) {
+      print("Line 95");
       debugPrint(e);
     });
   }
@@ -3811,7 +4640,7 @@ class _EditProfileScreenScreenState
       longtitudex = 14.723027497529984;
       lat = 32.44745630896057;
       long = 14.723027497529984;
-      initialPosition = LatLng(32.44745630896057, 14.723027497529984);
+      initialPosition = const LatLng(32.44745630896057, 14.723027497529984);
       isApiCalling = false;
       mapshow = true;
     });
@@ -3819,16 +4648,11 @@ class _EditProfileScreenScreenState
 
   locationAdreesSet() {
     setState(() {
-      pickUpTextEditingController.text = searchController.text;
+      locationTextEditingController.text = searchController.text;
       lat = latitudex;
       long = longtitudex;
     });
+    print("LatLong: $lat and $long");
     Navigator.pop(context);
-  }
-
-  @override
-  void dispose() {
-    _debounce?.cancel();
-    super.dispose();
   }
 }
