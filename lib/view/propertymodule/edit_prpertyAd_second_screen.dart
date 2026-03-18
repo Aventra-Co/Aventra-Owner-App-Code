@@ -129,7 +129,7 @@ class _EditPropertyAdSecondScreenState
     }
     fullweek = data['full_week_active'] == 1;
     if (fullweek) {
-      weekDayController.text = data['full_week_price']?.toString() ?? '';
+      fullWeekController.text = data['full_week_price']?.toString() ?? '';
     }
     List<dynamic> selectedAmenities = data['amenities'] ?? [];
     if (selectedAmenities.isNotEmpty) {

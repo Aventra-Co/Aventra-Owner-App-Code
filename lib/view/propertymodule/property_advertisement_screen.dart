@@ -375,13 +375,13 @@ class _PropertyAdvertisementScreenState
                                     "${adDetails['max_adult']} ${AppLanguage.adultText[language]} \u2022 ${adDetails['max_child']} ${AppLanguage.childText[language]}"),
                                 _detailRow(
                                     "${AppLanguage.roomsText[language]}:",
-                                    "${adDetails['no_of_rooms']?.toString() ?? "NA"} ${AppLanguage.roomsText[language]}"),
+                                    "${adDetails['no_of_rooms']?.toString() ?? "0"} ${AppLanguage.roomsText[language]}"),
                                 _detailRow(
                                     "${AppLanguage.washroomsText[language]}:",
-                                    "${adDetails['no_of_washroom']?.toString() ?? "NA"} ${AppLanguage.washroomsText[language]}"),
+                                    "${adDetails['no_of_washroom']?.toString() ?? "0"} ${AppLanguage.washroomsText[language]}"),
                                 _detailRow(
                                     "${AppLanguage.hallsText[language]}:",
-                                    "${adDetails['no_of_halls']?.toString() ?? "NA"} ${AppLanguage.hallsText[language]}"),
+                                    "${adDetails['no_of_halls']?.toString() ?? "0"} ${AppLanguage.hallsText[language]}"),
                                 _detailRow(
                                     AppLanguage.outdoorSeatingText[language],
                                     adDetails['outdoor_seating'] ?? "NA"),
@@ -568,43 +568,40 @@ class FeatureItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: size.width * 0.04),
-      child: Row(
-        children: [
-          Image.network(
-            '${AppConfigProvider.imageURL}$icon',
-            fit: BoxFit.cover,
-            height: 20,
-            loadingBuilder: (BuildContext context, Widget child,
-                ImageChunkEvent? loadingProgress) {
-              if (loadingProgress == null) {
-                return child;
-              } else {
-                return Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: Container(
-                    color: Colors.grey.shade300,
-                  ),
-                );
-              }
-            },
-          ),
-          SizedBox(width: size.width * 0.02),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontFamily: AppFont.fontFamily,
-                fontWeight: FontWeight.w500,
-                color: textColor ?? Colors.black,
-              ),
+    return Row(
+      children: [
+        Image.network(
+          '${AppConfigProvider.imageURL}$icon',
+          fit: BoxFit.cover,
+          height: 20,
+          loadingBuilder: (BuildContext context, Widget child,
+              ImageChunkEvent? loadingProgress) {
+            if (loadingProgress == null) {
+              return child;
+            } else {
+              return Shimmer.fromColors(
+                baseColor: Colors.grey.shade300,
+                highlightColor: Colors.grey.shade100,
+                child: Container(
+                  color: Colors.grey.shade300,
+                ),
+              );
+            }
+          },
+        ),
+        SizedBox(width: size.width * 0.02),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontFamily: AppFont.fontFamily,
+              fontWeight: FontWeight.w500,
+              color: textColor ?? Colors.black,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
