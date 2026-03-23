@@ -711,8 +711,9 @@ class _CalenderScreenScreenState extends State<CalenderScreen> {
                                                             100,
                                                         child: Text(
                                                           unavailabilityList[
-                                                                  index]
-                                                              ['specific_time'],
+                                                                      index][
+                                                                  'specific_time'] ??
+                                                              "",
                                                           textAlign:
                                                               TextAlign.center,
                                                           style: const TextStyle(
@@ -742,8 +743,9 @@ class _CalenderScreenScreenState extends State<CalenderScreen> {
                                                   SizedBox(
                                                     width: screenWidth * 0.35,
                                                     child: Text(
-                                                      unavailabilityList[index]
-                                                          ['boat_type_label'],
+                                                      unavailabilityList[index][
+                                                              'entity_type_label'] ??
+                                                          '',
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: const TextStyle(

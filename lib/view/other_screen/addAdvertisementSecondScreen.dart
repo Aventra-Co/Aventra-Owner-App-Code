@@ -503,9 +503,7 @@ class _AddAdvertisementSecondScreenState
                     ],
                   ),
                 ),
-              
-              
-              
+
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 2 / 100,
                 ),
@@ -1149,7 +1147,7 @@ class _AddAdvertisementSecondScreenState
                       ),
 
                       // //!=== Equipments Text ===
-                  
+
                       //add-ons list
                       Container(
                         alignment: Alignment.centerLeft,
@@ -1197,8 +1195,6 @@ class _AddAdvertisementSecondScreenState
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 2 / 100,
                       ),
-
-                  
 
                       //!=== Customer Cancel days ===
                       SizedBox(

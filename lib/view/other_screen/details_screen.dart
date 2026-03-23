@@ -198,6 +198,7 @@ class _DetailsScreen extends State<DetailsScreen> {
         'user_id': userId.toString(),
         'trip_booking_id': widget.tripId,
         'date': addCalendarDate,
+        'entity': "0"
       };
 
       print("body $body");

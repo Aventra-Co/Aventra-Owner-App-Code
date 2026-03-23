@@ -195,6 +195,7 @@ class _DetailsScreen extends State<UpcomingDetailsScreen> {
         'user_id': userId.toString(),
         'trip_booking_id': widget.tripId,
         'date': addCalendarDate,
+        'entity': "0"
       };
 
       print("body $body");
@@ -1801,4 +1802,6 @@ class _DetailsScreen extends State<UpcomingDetailsScreen> {
       }
     });
   }
+
+
 }

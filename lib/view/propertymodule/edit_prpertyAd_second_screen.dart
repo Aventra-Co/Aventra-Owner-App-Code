@@ -554,16 +554,16 @@ class _EditPropertyAdSecondScreenState
                         ),
                         SizedBox(height: size.height * 0.015),
 
-                        _buildPriceRow(
-                          label: AppLanguage.oneDayText[language],
-                          // subLabel: "",
-                          value: oneDay,
-                          onChanged: (val) => setState(() => oneDay = val!),
-                          controller: oneDayController,
-                          readOnly: !oneDay,
-                          size: size,
-                        ),
-                        SizedBox(height: size.height * 0.015),
+                        // _buildPriceRow(
+                        //   label: AppLanguage.oneDayText[language],
+                        //   // subLabel: "",
+                        //   value: oneDay,
+                        //   onChanged: (val) => setState(() => oneDay = val!),
+                        //   controller: oneDayController,
+                        //   readOnly: !oneDay,
+                        //   size: size,
+                        // ),
+                        // SizedBox(height: size.height * 0.015),
 
                         _buildPriceRow(
                           label: AppLanguage.weekDaysText[language],
@@ -1058,14 +1058,28 @@ class _EditPropertyAdSecondScreenState
                 ),
               ),
               const SizedBox(
-                child: Text(
-                  " KWD",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: AppFont.fontFamily,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      " KWD",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: AppFont.fontFamily,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      "/Day",
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontFamily: AppFont.fontFamily,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -29,6 +29,7 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   List<dynamic> ongoingTripsList = <dynamic>[];
+  List<dynamic> propBookingHistoryList = [];
   bool isApiCalling = false;
   bool isLoading = true;
   int userId = 0;
@@ -58,6 +59,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     // print("userDataArr $userDataArr");
     getHistoryApiCall(userId);
+    getPropBookingHistoryApi(userId);
     isApiCalling = false;
     setState(() {});
   }
@@ -123,36 +125,71 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  List<Map<String, dynamic>> propertyList = [
-    {
-      "property_name": "Palm Resort Chalet",
-      "place": "Jeddah - Obhur",
-      "booking_id": "357220241113112731",
-      "booking_date": "12 Feb 2026",
-      "total_amount": "250",
-      "status": 0, // 0 = completed , 1 = cancelled
-      "image": AppImage.house1Icon,
-    },
-    {
-      "property_name": "Palm Resort",
-      "place": "Diriyah - Riyadh",
+  //=============================GET FAQS DETAILS===================================//
+  Future<void> getPropBookingHistoryApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}get_property_history_booking?user_id=$userId");
+    print("url $url");
 
-      "booking_id": "357220241113112732",
-      "booking_date": "12 Feb 2026",
-      "total_amount": "250",
-      "status": 0, // 0 = completed , 1 = cancelled
-      "image": AppImage.house1Icon,
-    },
-    {
-      "property_name": "Royal Villa",
-      "place": "Jeddah - Obhur",
-      "booking_id": "RV45896",
-      "booking_date": "15 Feb 2026",
-      "total_amount": "400",
-      "status": 1,
-      "image": AppImage.house1Icon,
-    },
-  ];
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isLoading = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['data'];
+          propBookingHistoryList = (item != "NA") ? item : [];
+
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(
+                context, res['message'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ProgressHUD(
@@ -162,7 +199,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildUIScreen(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    // final size = MediaQuery.of(context).size;
     double screenWidth = MediaQuery.of(context).size.width;
     // double screenHeight = MediaQuery.of(context).size.height;s
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -173,11 +210,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
       body: Directionality(
         textDirection:
             language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
-        child: Container(
+        child: SizedBox(
           width: MediaQuery.of(context).size.width * 100 / 100,
           height: MediaQuery.of(context).size.height * 100 / 100,
           child: Column(
             children: [
+              //! Header
               Container(
                 width: MediaQuery.of(context).size.width * 100 / 100,
                 decoration: const BoxDecoration(
@@ -220,7 +258,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   onTap: () {
                                     Navigator.pop(context);
                                   },
-                                  child: Container(
+                                  child: SizedBox(
                                     width: MediaQuery.of(context).size.width *
                                         15 /
                                         100,
@@ -342,30 +380,45 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 4 / 100,
-              ),
-              if (status == 2 && propertyList.isNotEmpty)
+
+              if (status == 2 && propBookingHistoryList.isNotEmpty) ...[
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 5 / 100,
+                ),
                 Wrap(
                   children: [
-                    ...List.generate(propertyList.length, (index) {
+                    ...List.generate(propBookingHistoryList.length, (index) {
                       return Column(
                         children: [
                           GestureDetector(
                             onTap: () {
-                              if (index == 0) {
+                              if (propBookingHistoryList[index]
+                                      ['booking_status'] ==
+                                  2) {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            CompletedPropertyDetailsScreen(isCompleted: true,)));
+                                            CompletedPropertyDetailsScreen(
+                                              propertyBookingId:
+                                                  propBookingHistoryList[index]
+                                                      ['property_booking_id'],
+                                              isCompleted: true,
+                                            )));
                               }
-                                if (index == 2) {
+                              if (propBookingHistoryList[index]
+                                      ['booking_status'] ==
+                                  3) {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            CompletedPropertyDetailsScreen(isCompleted: false,)));
+                                            CompletedPropertyDetailsScreen(
+                                              propertyBookingId:
+                                                  propBookingHistoryList[index]
+                                                      ['property_booking_id'],
+                                              isCompleted: false,
+                                            )));
                               }
                             },
                             child: Row(
@@ -394,14 +447,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     color: AppColor.secondaryColor,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Container(
+                                  child: SizedBox(
                                     width: MediaQuery.of(context).size.width *
                                         80 /
                                         100,
                                     child: Row(
                                       children: [
                                         /// IMAGE
-                                        Container(
+                                        SizedBox(
                                           width: MediaQuery.of(context)
                                                   .size
                                                   .width *
@@ -414,11 +467,40 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                               100,
                                           child: ClipRRect(
                                             borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.asset(
-                                              propertyList[index]['image'],height: size.height *12/100,
-                                              // fit: BoxFit.cover,
-                                            ),
+                                                BorderRadius.circular(10),
+                                            child: propBookingHistoryList[index]
+                                                        ['cover_image'] !=
+                                                    null
+                                                ? Image.network(
+                                                    '${AppConfigProvider.imageURL}${propBookingHistoryList[index]['cover_image']}',
+                                                    fit: BoxFit.cover,
+                                                    loadingBuilder: (BuildContext
+                                                            context,
+                                                        Widget child,
+                                                        ImageChunkEvent?
+                                                            loadingProgress) {
+                                                      if (loadingProgress ==
+                                                          null) {
+                                                        return child;
+                                                      } else {
+                                                        return Shimmer
+                                                            .fromColors(
+                                                          baseColor: Colors
+                                                              .grey.shade300,
+                                                          highlightColor: Colors
+                                                              .grey.shade100,
+                                                          child: Container(
+                                                            color: Colors
+                                                                .grey.shade300,
+                                                          ),
+                                                        );
+                                                      }
+                                                    },
+                                                  )
+                                                : Image.asset(
+                                                    AppImage.imageFrame,
+                                                    fit: BoxFit.cover,
+                                                  ),
                                           ),
                                         ),
 
@@ -430,7 +512,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                 100),
 
                                         /// LEFT SIDE
-                                        Container(
+                                        SizedBox(
                                           width: MediaQuery.of(context)
                                                   .size
                                                   .width *
@@ -441,21 +523,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                propertyList[index]
-                                                    ['property_name'],
+                                                propBookingHistoryList[index][
+                                                        'property_name_english'] ??
+                                                    '',
                                                 style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w700,
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w500,
                                                     color:
                                                         AppColor.primaryColor,
                                                     fontFamily:
                                                         AppFont.fontFamily),
                                               ),
                                               Text(
-                                                propertyList[index]['place'],
-                                                style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
+                                                propBookingHistoryList[index][
+                                                            'property_type_name']
+                                                        [language] ??
+                                                    '',
+                                                style: const TextStyle(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w500,
                                                     color: AppColor.textColor,
                                                     fontFamily:
                                                         AppFont.fontFamily),
@@ -467,8 +553,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                       .5 /
                                                       100),
                                               Text(
-                                                propertyList[index]
-                                                    ['booking_id'],
+                                                "#${propBookingHistoryList[index]['booking_random_id']?.toString() ?? ''}",
                                                 style: const TextStyle(
                                                     fontSize: 10,
                                                     fontWeight: FontWeight.w500,
@@ -484,8 +569,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                       .5 /
                                                       100),
                                               Text(
-                                                propertyList[index]
-                                                    ['booking_date'],
+                                                propBookingHistoryList[index]
+                                                        ['checkin_date'] ??
+                                                    "",
                                                 style: const TextStyle(
                                                     fontSize: 10,
                                                     fontWeight: FontWeight.w500,
@@ -500,7 +586,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         const Spacer(),
 
                                         /// RIGHT SIDE
-                                        Container(
+                                        SizedBox(
                                           width: MediaQuery.of(context)
                                                   .size
                                                   .width *
@@ -510,18 +596,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.end,
                                             children: [
+                                              // const Text(
+                                              //   "KWD",
+                                              //   style: TextStyle(
+                                              //       fontSize: 14,
+                                              //       fontWeight: FontWeight.w500,
+                                              //       color: AppColor.cyan,
+                                              //       fontFamily:
+                                              //           AppFont.fontFamily),
+                                              // ),
                                               Text(
-                                                AppLanguage.fullDay[language],
-                                                style: const TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w400,
-                                                    color:
-                                                        AppColor.grey5959Color,
-                                                    fontFamily:
-                                                        AppFont.fontFamily),
-                                              ),
-                                              Text(
-                                                "KWD ${propertyList[index]['total_amount']}",
+                                                "KWD ${propBookingHistoryList[index]['total_amount']}",
                                                 style: const TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w500,
@@ -543,9 +628,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                     23 /
                                                     100,
                                                 decoration: BoxDecoration(
-                                                  color: propertyList[index]
-                                                              ['status'] ==
-                                                          0
+                                                  color: propBookingHistoryList[
+                                                                  index][
+                                                              'booking_status'] ==
+                                                          2
                                                       ? AppColor.themeColor
                                                       : Colors.red,
                                                   borderRadius:
@@ -555,9 +641,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                   padding: const EdgeInsets
                                                       .symmetric(vertical: 4),
                                                   child: Text(
-                                                    propertyList[index]
-                                                                ['status'] ==
-                                                            0
+                                                    propBookingHistoryList[
+                                                                    index][
+                                                                'booking_status'] ==
+                                                            2
                                                         ? AppLanguage
                                                                 .completedText[
                                                             language]
@@ -598,6 +685,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     })
                   ],
                 ),
+              ],
+
               if (status == 1)
                 isLoading
                     ? tripsShimmerEffect(context)
@@ -606,9 +695,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         child: Column(
                           children: [
                             SizedBox(
-                                height: MediaQuery.of(context).size.height *
-                                    3 /
-                                    100),
+                              height:
+                                  MediaQuery.of(context).size.height * 5 / 100,
+                            ),
                             if (ongoingTripsList.isNotEmpty)
                               Wrap(
                                 children: [
@@ -679,12 +768,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                         BorderRadius.circular(
                                                             8),
                                                   ),
-                                                  child: Container(
+                                                  child: SizedBox(
                                                     width:
                                                         MediaQuery.of(context)
                                                                 .size
                                                                 .width *
-                                                            80 /
+                                                            90 /
                                                             100,
                                                     child: Row(
                                                       children: [
@@ -694,13 +783,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                                       context)
                                                                   .size
                                                                   .width *
-                                                              15 /
+                                                              17 /
                                                               100,
                                                           height: MediaQuery.of(
                                                                       context)
                                                                   .size
                                                                   .width *
-                                                              15 /
+                                                              17 /
                                                               100,
                                                           decoration:
                                                               BoxDecoration(
@@ -768,7 +857,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                         ),
 
                                                         //left side
-                                                        Container(
+                                                        SizedBox(
                                                           width: MediaQuery.of(
                                                                       context)
                                                                   .size
@@ -777,7 +866,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                               100,
                                                           child: Column(
                                                             children: [
-                                                              Container(
+                                                              SizedBox(
                                                                 width: MediaQuery.of(
                                                                             context)
                                                                         .size
@@ -802,7 +891,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                                               .fontFamily),
                                                                 ),
                                                               ),
-                                                              Container(
+                                                              SizedBox(
                                                                 width: MediaQuery.of(
                                                                             context)
                                                                         .size
@@ -833,7 +922,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                                     .5 /
                                                                     100,
                                                               ),
-                                                              Container(
+                                                              SizedBox(
                                                                 // color: Colors.red,
                                                                 width: MediaQuery.of(
                                                                             context)
@@ -868,7 +957,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                                     .5 /
                                                                     100,
                                                               ),
-                                                              Container(
+                                                              SizedBox(
                                                                 width: MediaQuery.of(
                                                                             context)
                                                                         .size
@@ -899,7 +988,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                         const Spacer(),
 
                                                         //right side
-                                                        Container(
+                                                        SizedBox(
                                                           width: MediaQuery.of(
                                                                       context)
                                                                   .size
@@ -914,7 +1003,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                                 MainAxisAlignment
                                                                     .spaceBetween,
                                                             children: [
-                                                              Container(
+                                                              SizedBox(
                                                                 width: MediaQuery.of(
                                                                             context)
                                                                         .size
@@ -1065,7 +1154,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                               20 /
                                               100),
                                   //!text msg
-                                  Container(
+                                  SizedBox(
                                     width: screenWidth * 70 / 100,
                                     child: Text(
                                       AppLanguage.hidtoryNodataMsg[language],

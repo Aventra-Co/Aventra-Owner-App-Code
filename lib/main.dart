@@ -34,7 +34,7 @@ Future<void> main() async {
 
   runApp(const MyApp());
 
-  // Initialize Firebase first
+// Initialize Firebase first
   await Firebase.initializeApp(
       options: FirebaseOptions(
           apiKey: AppConstant.apiKey,

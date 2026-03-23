@@ -1402,8 +1402,8 @@ class AppLanguage {
   ];
 
   static const guardText = [
-    "Guard:",
-    "الحارس:",
+    "Guard",
+    "الحارس",
   ];
 
   static const weekdayText = [
@@ -1563,8 +1563,32 @@ class AppLanguage {
   static const viewPropertyText = ["View Property", "عرض العقار"];
   static const bookingsText = [
     "Bookings",
+    "الحجوزات",
   ];
   static const todayText = [
     "Today",
+    "اليوم",
   ];
+  static const homeNoPropdataMsg = [
+    "No bookings added yet. Start planning your first property booking to get started!",
+    "لا توجد حجوزات مضافة بعد. ابدأ في التخطيط لحجز العقار الأول للبدء!",
+  ];
+
+  static const checkoutText = ["Checkout", "الدفع"];
+  static const checkInDateText = ["Check-in Date", "تاريخ تسجيل الوصول"];
+
+  static const bookingDate = ['Booking Date', 'تاريخ الحجز'];
+  static const bookingDays = ['Booking Days', 'أيام الحجز'];
+  static const whatThisplaceOfferText = [
+    'What this place offers',
+    'ما يوفره هذا المكان'
+  ];
+
+  static const childrenText = [
+    "Children",
+    "أطفال",
+  ];
+  static const bookNowText = ["Book Now", "احجز الآن"];
+    static const withText = ["With", "مع"];
+
 }

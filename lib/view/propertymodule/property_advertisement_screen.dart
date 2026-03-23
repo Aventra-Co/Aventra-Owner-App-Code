@@ -387,7 +387,7 @@ class _PropertyAdvertisementScreenState
                                     adDetails['outdoor_seating'] ?? "NA"),
                                 _detailRow(AppLanguage.poolText[language],
                                     adDetails['pool'] ?? "NA"),
-                                _detailRow(AppLanguage.guardText[language],
+                                _detailRow("${AppLanguage.guardText[language]}:",
                                     adDetails['guard_name_english']),
                                 _detailRow(AppLanguage.oneDayText[language],
                                     "${adDetails['one_day_active'] == 1 ? adDetails['one_day_price']?.toString() : "NA"} ${adDetails['one_day_active'] == 1 ? "KWD" : ""}"),

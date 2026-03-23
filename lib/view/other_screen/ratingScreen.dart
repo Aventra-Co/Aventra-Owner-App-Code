@@ -376,10 +376,11 @@ class _RatingScreenState extends State<RatingScreen> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 2 / 100,
-              ),
-              if (status == 2 && propertyRatingList.isNotEmpty)
+
+              if (status == 2 && propertyRatingList.isNotEmpty) ...[
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 2 / 100,
+                ),
                 Wrap(
                   children: [
                     ...List.generate(propertyRatingList.length, (index) {
@@ -388,11 +389,10 @@ class _RatingScreenState extends State<RatingScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>      RatingDetailsScreen(
-                                              ratingId: ratingList[index]
-                                                      ['rating_review_id']
-                                                  .toString(),
-                                            ),
+                              builder: (context) => RatingDetailsScreen(
+                                ratingId: ratingList[index]['rating_review_id']
+                                    .toString(),
+                              ),
                             ),
                           );
                         },
@@ -471,7 +471,7 @@ class _RatingScreenState extends State<RatingScreen> {
                     }),
                   ],
                 ),
-
+              ],
               isLoading
                   ? ratingShimmerEffect(context)
                   : Expanded(

@@ -37,6 +37,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int status = 1;
   List<dynamic> ongoingTripsList = <dynamic>[];
   List<dynamic> upcomingTripsList = <dynamic>[];
+  List<dynamic> ongoingPropBookings = [];
+  List<dynamic> upcomingPropBookings = [];
+
   bool isApiCalling = false;
   bool isLoading = true;
   int userId = 0;
@@ -202,6 +205,69 @@ class _HomeScreenState extends State<HomeScreen> {
           item = res['ongoing_trip'];
           ongoingTripsList = (item != "NA") ? item : [];
           notificationCount = res['notificationCount'];
+
+          setState(() {
+            isApiCalling = false;
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            isApiCalling = false;
+            isLoading = false;
+          });
+          //! ignore: use_build_context_synchronously
+          SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+          if (res['active_status'] == 0) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const Login()));
+          }
+        }
+      } else {
+        setState(() {
+          isApiCalling = false;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isApiCalling = false;
+        isLoading = false;
+      });
+    }
+  }
+
+  //!------------------------Property Details API CALL--------------------------------//!
+  Future<void> getPropertyDetailsApiCall(userId) async {
+    setState(() {
+      isApiCalling = true;
+      isLoading = true;
+    });
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}get_owner_property_booking?user_id=$userId");
+
+    print("URL $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      //! return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', //! Use 'Bearer' if required
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+
+        if (res['success'] == true) {
+          var item = res['data']['upcoming'];
+          upcomingPropBookings = (item != "NA") ? item : [];
+          item = res['data']['ongoing'];
+          ongoingPropBookings = (item != "NA") ? item : [];
 
           setState(() {
             isApiCalling = false;
@@ -569,73 +635,10 @@ class _HomeScreenState extends State<HomeScreen> {
     refreshKey.currentState?.show(atTop: false);
     await Future.delayed(const Duration(seconds: 1));
     getUserDetails();
+    getPropertyDetailsApiCall(userId);
     return null;
   }
 
-  final List<Map<String, dynamic>> ongoingBookings = [
-    {
-      'boat_name': 'Greenleaf Villa',
-      'boat_type': 'Riyadh – Al Narjis',
-      'booking_id': '4567687687',
-      'status': 'Ongoing',
-      'amount': '200 KWD',
-      'date': '2026-02-18',
-      'image': AppImage.house2Icon,
-      'status_color': AppColor.green,
-    },
-    {
-      'boat_name': 'Palm Resort Chalet',
-      'boat_type': 'Jeddah – Obhur',
-      'booking_id': '4567687687',
-      'status': 'Ongoing',
-      'amount': '220 KWD',
-      'date': '2024-11-05',
-      'image': AppImage.house1Icon,
-      'status_color': AppColor.green,
-    },
-    {
-      'boat_name': 'Sunset Farmhouse',
-      'boat_type': 'Diriyah – Riyadh',
-      'booking_id': '4567687687',
-      'status': 'Ongoing',
-      'amount': '240 KWD',
-      'date': '2024-11-05',
-      'image': AppImage.house2Icon,
-      'status_color': AppColor.green,
-    },
-  ];
-  final List<Map<String, dynamic>> upcomingBookings = [
-    {
-      'boat_name': 'Palm Resort Chalet',
-      'boat_type': 'Jeddah – Obhur',
-      'booking_id': '4567687687',
-      'status': 'Upcoming',
-      'amount': '200 KWD',
-      'date': '2024-11-05',
-      'image': AppImage.house1Icon,
-      'status_color': AppColor.themeColor, // Orange
-    },
-    {
-      'boat_name': 'Royal Majlis Villa',
-      'boat_type': 'Jeddah – Obhur',
-      'booking_id': '4567687687',
-      'status': 'Upcoming',
-      'amount': '220 KWD',
-      'date': '2024-11-05',
-      'image': AppImage.house2Icon,
-      'status_color': AppColor.themeColor,
-    },
-    {
-      'boat_name': 'Oasis Garden Chalet',
-      'boat_type': 'Jeddah – Obhur',
-      'booking_id': '4567687687',
-      'status': 'Upcoming',
-      'amount': '240 KWD',
-      'date': '2024-11-05',
-      'image': AppImage.house1Icon,
-      'status_color': AppColor.themeColor,
-    },
-  ];
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -861,6 +864,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   setState(() {
                                     status = 2;
                                   });
+                                  getPropertyDetailsApiCall(userId);
                                 },
                                 child: Container(
                                   alignment: Alignment.center,
@@ -901,6 +905,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 4 / 100,
                   ),
+
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 90 / 100,
                     child: Row(
@@ -985,7 +990,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   //       booking,
                   //     )),
                   // upcoming Booking cards
-                  // ...upcomingBookings
+                  // ...upcomingPropBookings
                   //     .map((booking) => _buildUpcomingBookingCard(
                   //           size,
                   //           booking,
@@ -1243,7 +1248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                                 Padding(
                                                                               padding: const EdgeInsets.only(bottom: 2.0),
                                                                               child: Text(
-                                                                                "KD${ongoingTripsList[index]['total_amount']}",
+                                                                                "${ongoingTripsList[index]['total_amount']}KWD",
                                                                                 textAlign: TextAlign.end,
                                                                                 style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColor.cyan, fontFamily: AppFont.fontFamily),
                                                                               ),
@@ -1554,7 +1559,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                                 Padding(
                                                                               padding: const EdgeInsets.only(bottom: 2.0),
                                                                               child: Text(
-                                                                                "KD${upcomingTripsList[index]['total_amount']}",
+                                                                                "${upcomingTripsList[index]['total_amount']}KWD",
                                                                                 textAlign: TextAlign.end,
                                                                                 style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColor.cyan, fontFamily: AppFont.fontFamily),
                                                                               ),
@@ -1636,27 +1641,55 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                   ] else ...[
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            // Show ongoing or upcoming based on selectedTab
-                            ...(selectedTab == 0
-                                    ? ongoingBookings
-                                    : upcomingBookings)
-                                .asMap()
-                                .entries
-                                .map((entry) => _buildBookingCard(
-                                      size,
-                                      entry.value,
-                                      entry.key,
-                                    )),
+                    isLoading
+                        ? tripsShimmerEffect(context)
+                        : Expanded(
+                            child: SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: Column(
+                                children: [
+                                  // Show ongoing or upcoming based on selectedTab
 
-                            SizedBox(height: size.height * 0.02),
-                          ],
-                        ),
-                      ),
-                    ),
+                                  if ((selectedTab == 0
+                                          ? ongoingPropBookings
+                                          : upcomingPropBookings)
+                                      .isNotEmpty) ...[
+                                    ...(selectedTab == 0
+                                            ? ongoingPropBookings
+                                            : upcomingPropBookings)
+                                        .asMap()
+                                        .entries
+                                        .map((entry) => _buildBookingCard(
+                                              size,
+                                              entry.value,
+                                              entry.key,
+                                            )),
+                                  ] else ...[
+                                    SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                20 /
+                                                100),
+                                    //!!text msg
+                                    SizedBox(
+                                      width: screenWidth * 70 / 100,
+                                      child: Text(
+                                        AppLanguage.homeNoPropdataMsg[language],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                            fontFamily: AppFont.fontFamily,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColor.primaryColor),
+                                      ),
+                                    ),
+                                  ],
+
+                                  SizedBox(height: size.height * 0.02),
+                                ],
+                              ),
+                            ),
+                          ),
                   ],
 
                   const NoInternetBanner(),
@@ -1677,18 +1710,22 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: GestureDetector(
         onTap: () {
-          if (selectedTab == 0 && index == 0) {
+          if (selectedTab == 0) {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const PropertyDetailsScreen(),
+                builder: (context) => PropertyDetailsScreen(
+                  propertyBookingId: booking['property_booking_id'],
+                ),
               ),
             );
-          } else if (selectedTab == 1 && index == 0) {
+          } else if (selectedTab == 1) {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const TripStartDetailsScreen(),
+                builder: (context) => TripStartDetailsScreen(
+                  propertyBookingId: booking['property_booking_id'],
+                ),
               ),
             );
           }
@@ -1709,13 +1746,34 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             children: [
               // Left - Image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  booking['image'],
-                  width: size.width * 0.15,
-                  height: size.width * 0.15,
-                  fit: BoxFit.cover,
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 15 / 100,
+                height: MediaQuery.of(context).size.width * 15 / 100,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: booking['cover_image'] != null
+                      ? Image.network(
+                          '${AppConfigProvider.imageURL}${booking['cover_image']}',
+                          fit: BoxFit.cover,
+                          loadingBuilder: (BuildContext context, Widget child,
+                              ImageChunkEvent? loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            } else {
+                              return Shimmer.fromColors(
+                                baseColor: Colors.grey.shade300,
+                                highlightColor: Colors.grey.shade100,
+                                child: Container(
+                                  color: Colors.grey.shade300,
+                                ),
+                              );
+                            }
+                          },
+                        )
+                      : Image.asset(
+                          AppImage.imageFrame,
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
 
@@ -1727,7 +1785,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      booking['boat_name'],
+                      booking['property_name_english'] ?? "",
                       style: const TextStyle(
                         fontSize: 14,
                         fontFamily: AppFont.fontFamily,
@@ -1737,7 +1795,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(height: size.height * 0.002),
                     Text(
-                      booking['boat_type'],
+                      booking['property_type_name'][language] ?? '',
                       style: TextStyle(
                         fontSize: 11,
                         fontFamily: AppFont.fontFamily,
@@ -1747,7 +1805,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(height: size.height * 0.005),
                     Text(
-                      booking['booking_id'],
+                      "#${booking['booking_random_id']?.toString() ?? "NA"}",
                       style: const TextStyle(
                         fontSize: 11,
                         fontFamily: AppFont.fontFamily,
@@ -1764,17 +1822,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    booking['status'],
+                    booking['booking_status_label'],
                     style: TextStyle(
                       fontSize: 11,
                       fontFamily: AppFont.fontFamily,
                       fontWeight: FontWeight.w500,
-                      color: booking['status_color'],
+                      color: booking['booking_status'] == 0
+                          ? AppColor.yellowColor
+                          : AppColor.green,
                     ),
                   ),
                   SizedBox(height: size.height * 0.005),
                   Text(
-                    booking['amount'],
+                    "${booking['total_amount']?.toString() ?? "NA"}KWD",
                     style: const TextStyle(
                       fontSize: 12,
                       fontFamily: AppFont.fontFamily,
@@ -1784,7 +1844,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: size.height * 0.002),
                   Text(
-                    booking['date'],
+                    booking['checkin_date'] ?? '',
                     style: TextStyle(
                       fontSize: 10,
                       fontFamily: AppFont.fontFamily,
