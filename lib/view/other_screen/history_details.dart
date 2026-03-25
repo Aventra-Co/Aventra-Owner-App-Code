@@ -59,7 +59,6 @@ class _HistoryDetails extends State<HistoryDetails> {
 
     // print("userDetails $userDetails");
     if (data == null) {
-
     } else {
       userDataArr = jsonDecode(data);
       userId = userDataArr['user_id'] ?? 0;
@@ -175,7 +174,6 @@ class _HistoryDetails extends State<HistoryDetails> {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
-
           body: Directionality(
         textDirection:
             language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
@@ -192,9 +190,9 @@ class _HistoryDetails extends State<HistoryDetails> {
                   onPress: () {
                     Navigator.pop(context);
                   }),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 2 / 100,
-              ),
+              // SizedBox(
+              //   height: MediaQuery.of(context).size.height * 2 / 100,
+              // ),
               if (tripDetails.isNotEmpty)
                 Expanded(
                   flex: 1,
@@ -223,7 +221,6 @@ class _HistoryDetails extends State<HistoryDetails> {
                                       color: AppColor.primaryColor),
                                 ),
                               ),
-              
                             ],
                           ),
                         ),
@@ -408,8 +405,6 @@ class _HistoryDetails extends State<HistoryDetails> {
                                       width: MediaQuery.of(context).size.width *
                                           2 /
                                           100),
-
-                    
                                 ],
                               ),
                             ),
@@ -1011,7 +1006,6 @@ class _HistoryDetails extends State<HistoryDetails> {
                                                             ),
                                                           ),
                                                         ),
-                                                  
                                                       ],
                                                     )
                                                   ],
@@ -1176,7 +1170,6 @@ class _HistoryDetails extends State<HistoryDetails> {
                                   height: MediaQuery.of(context).size.height *
                                       .5 /
                                       100),
-
                               SizedBox(
                                   height: MediaQuery.of(context).size.height *
                                       2 /
@@ -1263,9 +1256,6 @@ class _HistoryDetails extends State<HistoryDetails> {
                                   height: MediaQuery.of(context).size.height *
                                       2 /
                                       100),
-
-                           
-
                               Container(
                                 width: MediaQuery.of(context).size.width *
                                     85 /
@@ -1368,8 +1358,6 @@ class _HistoryDetails extends State<HistoryDetails> {
                         SizedBox(
                             height:
                                 MediaQuery.of(context).size.height * 3 / 100),
-
-                        
                       ],
                     ),
                   ),

@@ -19,7 +19,9 @@ import '../authentication/login_screen.dart';
 class RatingDetailsScreen extends StatefulWidget {
   static String routeName = './RatingDetailsScreen';
   final String ratingId;
-  const RatingDetailsScreen({super.key, required this.ratingId});
+  final bool isProperty;
+  const RatingDetailsScreen(
+      {super.key, required this.ratingId, required this.isProperty});
 
   @override
   State<RatingDetailsScreen> createState() => _RatingDetailsScreenState();
@@ -254,7 +256,7 @@ class _RatingDetailsScreenState extends State<RatingDetailsScreen> {
                                           },
                                         )
                                       : Image.asset(
-                                          AppImage.boatImage,
+                                          AppImage.profilePlaceholderImage,
                                           fit: BoxFit.cover,
                                         ),
                                 ),
@@ -334,30 +336,33 @@ class _RatingDetailsScreenState extends State<RatingDetailsScreen> {
                         child: Column(
                           children: [
                             //! Time Rating
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "${AppLanguage.timeText[language]}:",
-                                  style: const TextStyle(
-                                      fontFamily: AppFont.fontFamily,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColor.primaryColor),
-                                ),
-                                RatingBarIndicator(
-                                  rating: ratingDetails['time']
-                                      .toDouble(), // Use your desired rating value here
-                                  itemCount: 5,
-                                  itemSize: 20, // Specify the size of each star
-                                  unratedColor: AppColor.textColor,
-                                  itemBuilder: (context, _) => const Icon(
-                                    Icons.star,
-                                    color: Colors.yellow,
+                            if (!widget.isProperty)
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "${AppLanguage.timeText[language]}:",
+                                    style: const TextStyle(
+                                        fontFamily: AppFont.fontFamily,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColor.primaryColor),
                                   ),
-                                ),
-                              ],
-                            ),
+                                  RatingBarIndicator(
+                                    rating: ratingDetails['time']
+                                        .toDouble(), // Use your desired rating value here
+                                    itemCount: 5,
+                                    itemSize:
+                                        20, // Specify the size of each star
+                                    unratedColor: AppColor.textColor,
+                                    itemBuilder: (context, _) => const Icon(
+                                      Icons.star,
+                                      color: Colors.yellow,
+                                    ),
+                                  ),
+                                ],
+                              ),
 
                             //! Clean Rating
                             Row(
@@ -386,56 +391,91 @@ class _RatingDetailsScreenState extends State<RatingDetailsScreen> {
                             ),
 
                             //! Captain Rating
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "${AppLanguage.captainText[language]}:",
-                                  style: const TextStyle(
-                                      fontFamily: AppFont.fontFamily,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColor.primaryColor),
-                                ),
-                                RatingBarIndicator(
-                                  rating: ratingDetails['captain']
-                                      .toDouble(), // Use your desired rating value here
-                                  itemCount: 5,
-                                  itemSize: 20, // Specify the size of each star
-                                  unratedColor: AppColor.textColor,
-                                  itemBuilder: (context, _) => const Icon(
-                                    Icons.star,
-                                    color: Colors.yellow,
+                            if (!widget.isProperty)
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "${AppLanguage.captainText[language]}:",
+                                    style: const TextStyle(
+                                        fontFamily: AppFont.fontFamily,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColor.primaryColor),
                                   ),
-                                ),
-                              ],
-                            ),
+                                  RatingBarIndicator(
+                                    rating: ratingDetails['captain']
+                                        .toDouble(), // Use your desired rating value here
+                                    itemCount: 5,
+                                    itemSize:
+                                        20, // Specify the size of each star
+                                    unratedColor: AppColor.textColor,
+                                    itemBuilder: (context, _) => const Icon(
+                                      Icons.star,
+                                      color: Colors.yellow,
+                                    ),
+                                  ),
+                                ],
+                              ),
 
                             //! Hospitality Rating
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "${AppLanguage.hospitalityText[language]}:",
-                                  style: const TextStyle(
-                                      fontFamily: AppFont.fontFamily,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColor.primaryColor),
-                                ),
-                                RatingBarIndicator(
-                                  rating: ratingDetails['hospitality']
-                                      .toDouble(), // Use your desired rating value here
-                                  itemCount: 5,
-                                  itemSize: 20, // Specify the size of each star
-                                  unratedColor: AppColor.textColor,
-                                  itemBuilder: (context, _) => const Icon(
-                                    Icons.star,
-                                    color: Colors.yellow,
+                            if (!widget.isProperty)
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "${AppLanguage.hospitalityText[language]}:",
+                                    style: const TextStyle(
+                                        fontFamily: AppFont.fontFamily,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColor.primaryColor),
                                   ),
-                                ),
-                              ],
-                            ),
+                                  RatingBarIndicator(
+                                    rating: ratingDetails['hospitality']
+                                        .toDouble(), // Use your desired rating value here
+                                    itemCount: 5,
+                                    itemSize:
+                                        20, // Specify the size of each star
+                                    unratedColor: AppColor.textColor,
+                                    itemBuilder: (context, _) => const Icon(
+                                      Icons.star,
+                                      color: Colors.yellow,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                            //! Arragements Rating
+                            if (widget.isProperty)
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "${AppLanguage.arrangementsText[language]}:",
+                                    style: const TextStyle(
+                                        fontFamily: AppFont.fontFamily,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColor.primaryColor),
+                                  ),
+                                  RatingBarIndicator(
+                                    rating: ratingDetails['arrangements']
+                                        .toDouble(), // Use your desired rating value here
+                                    itemCount: 5,
+                                    itemSize:
+                                        20, // Specify the size of each star
+                                    unratedColor: AppColor.textColor,
+                                    itemBuilder: (context, _) => const Icon(
+                                      Icons.star,
+                                      color: Colors.yellow,
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
                       ),

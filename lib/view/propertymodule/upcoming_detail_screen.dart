@@ -297,37 +297,38 @@ class _TripStartDetailsScreenState extends State<TripStartDetailsScreen> {
                         children: [
                           SizedBox(height: size.height * 0.01),
                           if (bookingDetails['add_status'] == 0)
-                          Container(
-                            alignment: Alignment.centerRight,
-                            width: MediaQuery.of(context).size.width * 95 / 100,
-                            child: GestureDetector(
-                              onTap: () {
-                                addCalendarApiCall();
-                              },
-                              child: Container(
-                                alignment: Alignment.center,
-                                width: MediaQuery.of(context).size.width *
-                                    25 /
-                                    100,
-                                decoration: BoxDecoration(
-                                    color: AppColor.themeColor,
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Text(
-                                    AppLanguage.addToCalenderText[language],
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColor.secondaryColor,
-                                        fontFamily: AppFont.fontFamily),
+                            Container(
+                              alignment: Alignment.centerRight,
+                              width:
+                                  MediaQuery.of(context).size.width * 95 / 100,
+                              child: GestureDetector(
+                                onTap: () {
+                                  addCalendarApiCall();
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  width: MediaQuery.of(context).size.width *
+                                      25 /
+                                      100,
+                                  decoration: BoxDecoration(
+                                      color: AppColor.themeColor,
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Text(
+                                      AppLanguage.addToCalenderText[language],
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColor.secondaryColor,
+                                          fontFamily: AppFont.fontFamily),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
                           SizedBox(height: size.height * 0.02),
                           Container(
                             padding: EdgeInsets.symmetric(
@@ -350,7 +351,7 @@ class _TripStartDetailsScreenState extends State<TripStartDetailsScreen> {
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
                                               fontFamily: AppFont.fontFamily,
-                                              color: AppColor.pendingColor,
+                                              color: AppColor.themeColor,
                                             ),
                                           ),
                                           TextButton(
@@ -569,35 +570,45 @@ class _TripStartDetailsScreenState extends State<TripStartDetailsScreen> {
                                 SizedBox(height: size.height * 0.03),
 
                                 // Description
-                                Text(
-                                  AppLanguage.descriptionText[language],
-                                  style: const TextStyle(
-                                    fontSize: 21,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: AppFont.fontFamily,
-                                    color: Colors.black,
+                                if (bookingDetails['description_english']
+                                            [language] !=
+                                        null &&
+                                    bookingDetails['description_english']
+                                            [language]
+                                        .isNotEmpty &&
+                                    bookingDetails['description_english']
+                                            [language] !=
+                                        "NA") ...[
+                                  Text(
+                                    AppLanguage.descriptionText[language],
+                                    style: const TextStyle(
+                                      fontSize: 21,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: AppFont.fontFamily,
+                                      color: Colors.black,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: size.height * 0.015),
-                                Text(
-                                  (bookingDetails['description_english']
-                                                  [language]
-                                              ?.toString()
-                                              .trim()
-                                              .isNotEmpty ??
-                                          false)
-                                      ? bookingDetails['description_english']
-                                          [language]
-                                      : "NA",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: AppFont.fontFamily,
-                                    color: Colors.grey.shade700,
-                                    height: 1.5,
+                                  SizedBox(height: size.height * 0.015),
+                                  Text(
+                                    (bookingDetails['description_english']
+                                                    [language]
+                                                ?.toString()
+                                                .trim()
+                                                .isNotEmpty ??
+                                            false)
+                                        ? bookingDetails['description_english']
+                                            [language]
+                                        : "NA",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: AppFont.fontFamily,
+                                      color: Colors.grey.shade700,
+                                      height: 1.5,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: size.height * 3 / 100),
+                                  SizedBox(height: size.height * 3 / 100),
+                                ],
 
                                 Text(
                                   AppLanguage.whatThisplaceOfferText[language],

@@ -233,7 +233,6 @@ class _ChatScreenState extends State<ChatScreen> {
           });
         },
         child: Scaffold(
-
           backgroundColor: Colors.white,
 
           //body
@@ -392,6 +391,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
               //chat input filed
               _chatInput(screenWidth),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 2 / 100,
+              ),
 
               //show emojis on keyboard emoji button click & vice versa
               if (_showEmoji)
@@ -495,8 +497,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
- 
-
   Widget _chatInput(screenWidth) {
     return Container(
       decoration: const BoxDecoration(
@@ -512,7 +512,7 @@ class _ChatScreenState extends State<ChatScreen> {
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height * 10 / 100,
       alignment: Alignment.center,
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width * 90 / 100,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -597,7 +597,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     fillColor: AppColor.secondaryColor,
                     filled: true,
                     counterText: '',
-                    hintText: "Message",
+                    hintText: AppLanguage.messageText[language],
                     hintStyle: const TextStyle(
                         color: AppColor.textColor,
                         fontWeight: FontWeight.w400,
@@ -619,7 +619,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   _textController.text = '';
                 }
               },
-              child: Container(
+              child: SizedBox(
                 width: screenWidth > 600
                     ? MediaQuery.of(context).size.width * 4 / 100
                     : MediaQuery.of(context).size.width * 6 / 100,
@@ -669,10 +669,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _imgFromCamera() async {
-    dynamic image = await ImagePicker().pickImage(
-        source: ImageSource.camera,
-
-        imageQuality: 50);
+    dynamic image = await ImagePicker()
+        .pickImage(source: ImageSource.camera, imageQuality: 50);
 
     if (image != null) {
       Future.delayed(const Duration(seconds: 2), () {
@@ -694,10 +692,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
 //----- from gallary-------
   Future<void> _imgFromGallery() async {
-    dynamic image = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-   
-        imageQuality: 50);
+    dynamic image = await ImagePicker()
+        .pickImage(source: ImageSource.gallery, imageQuality: 50);
 
     if (image != null) {
       print("image$image");

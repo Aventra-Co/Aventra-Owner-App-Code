@@ -350,6 +350,61 @@ class _CalenderScreenScreenState extends State<CalenderScreen> {
     }
   }
 
+  //------------------------Delete unavailability API CALL--------------------------------//
+  deletePropUnavailabilityApiCall(date, unavailabilityId) async {
+    setState(() {
+      isApiCalling = true;
+    });
+
+    Uri url =
+        Uri.parse("${AppConfigProvider.apiUrl}delete_property_unavailabilty");
+
+    print("Url===> $url");
+
+    try {
+      http.MultipartRequest formData = http.MultipartRequest('POST', url);
+      formData.fields['user_id'] = userId.toString();
+      formData.fields['unavailability_id'] = unavailabilityId.toString();
+
+      log("response--==> ${formData.fields}");
+      // print("response--==> ${formData.files}");
+      http.StreamedResponse response = await formData.send();
+      print("response--==> $response");
+      var responseString = await response.stream.toBytes();
+      var res = jsonDecode(utf8.decode(responseString));
+
+      if (response.statusCode == 200) {
+        print("res : $res");
+        if (res['success'] == true) {
+          getAllDatesApi(userId);
+          getUnavailabilityApi(userId, date);
+          SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+          setState(() {
+            isApiCalling = false;
+          });
+        } else {
+          setState(() {
+            isApiCalling = false;
+          });
+          // ignore: use_build_context_synchronously
+          SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+          if (res['active_status'] == 0) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const Login()));
+          }
+        }
+      } else {
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ProgressHUD(
@@ -759,26 +814,44 @@ class _CalenderScreenScreenState extends State<CalenderScreen> {
                                                       ),
                                                     ),
                                                   ),
-                                                  Spacer(),
+                                                  const Spacer(),
                                                   GestureDetector(
                                                     onTap: () {
                                                       if (userType == 3 ||
                                                           (userType == 2 &&
                                                               manageUnavailability ==
                                                                   1)) {
-                                                        deleteUnavailabilityApiCall(
-                                                            unavailabilityList[
-                                                                        index]
-                                                                    ['date']
-                                                                .toString(),
-                                                            unavailabilityList[
-                                                                        index][
-                                                                    'boat_type']
-                                                                .toString(),
-                                                            unavailabilityList[
-                                                                        index][
-                                                                    'navailability_id']
-                                                                .toString());
+                                                        if (unavailabilityList[
+                                                                    index][
+                                                                'entity_type'] ==
+                                                            0) {
+                                                          deleteUnavailabilityApiCall(
+                                                              unavailabilityList[
+                                                                          index]
+                                                                      ['date']
+                                                                  .toString(),
+                                                              unavailabilityList[
+                                                                          index]
+                                                                      [
+                                                                      'boat_type']
+                                                                  .toString(),
+                                                              unavailabilityList[
+                                                                          index]
+                                                                      [
+                                                                      'unavailability_id']
+                                                                  .toString());
+                                                        } else {
+                                                          deletePropUnavailabilityApiCall(
+                                                              unavailabilityList[
+                                                                          index]
+                                                                      ['date']
+                                                                  .toString(),
+                                                              unavailabilityList[
+                                                                          index]
+                                                                      [
+                                                                      'unavailability_id']
+                                                                  .toString());
+                                                        }
                                                       }
                                                     },
                                                     child: Image.asset(

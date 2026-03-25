@@ -234,6 +234,7 @@ class AppLanguage {
 
 // Shree
   static const messagesText = ["Messages", "الرسائل"];
+  static const messageText = ["Message", "الرسائل"];
   static const manageUnavailabilityText = [
     "Manage Unavailability",
     "إدارة عدم التوفر"
@@ -1028,97 +1029,119 @@ class AppLanguage {
   static const guestsText = ["Guests", "ضيف"];
 
   static const blueNaturedescriptionText = [
-    "Blue Nature is a 5 star complemented with 80 well bedroom and suit, modern residence in a very strategic location from the city center..."
+    "Blue Nature is a 5 star complemented with 80 well bedroom and suit, modern residence in a very strategic location from the city center...",
+    "بلو نيتشر هو فندق 5 نجوم مكتمل بـ 80 غرفة وجناح فاخر، مكان إقامة عصري في موقع استراتيجي جداً من وسط المدينة...",
   ];
   static const bookingTimeText = [
     "Booking Time",
+    "وقت الحجز",
   ];
   static const managePropertyText = [
     "Manage Property",
+    "إدارة العقار",
   ];
 
   static const palmResortText = [
     "PalmResort",
+    "منتجع بالم",
   ];
 
   static const resortText = [
     "Resort",
+    "منتجع",
   ];
 
   static const sunsetFarmhouseText = [
     "Sunset Farmhouse",
+    "مزرعة الغروب",
   ];
 
   static const farmhouseText = [
     "Farmhouse",
+    "مزرعة",
   ];
 
   static const customerDetailsText = [
     "Customer Details",
+    "تفاصيل العميل",
   ];
 
 // Property Title & Location
   static const greenleafInnText = [
     "The Greenleaf Inn",
+    "نزل جرين ليف",
   ];
 
   static const propertyLocationText = [
     "South Kuta",
+    "جنوب كوتا",
   ];
 
 // Sections
 
   static const whatThisPlaceOffersText = [
     "What this place offers",
+    "ما يوفره هذا المكان",
   ];
 
 // Customer Info
   static const customerNameText = [
     "Jane Cooper",
+    "جين كوبر",
   ];
 
 // Booking Info
 
   static const guestCountText = [
     "4 Adults + 2 Children",
+    "4 بالغين + 2 أطفال",
   ];
 
 // Description Paragraph
   static const propertyDescriptionText = [
     "Blue Nature is a 5 star complex...",
+    "بلو نيتشر هو مجمع 5 نجوم...",
   ];
 
 // Features
   static const tvText = [
     "TV",
+    "تلفزيون",
   ];
 
   static const wifiText = [
     "Wifi",
+    "واي فاي",
   ];
 
   static const acText = [
     "AC",
+    "مكيف",
   ];
 
   static const fridgeText = [
     "Fridge",
+    "ثلاجة",
   ];
 
   static const beddingText = [
     "Bedding",
+    "أغطية",
   ];
 
   static const microwaveText = [
     "Microwave",
+    "مايكروويف",
   ];
 
   static const kettleText = [
     "Kettle",
+    "غلاية",
   ];
 
   static const coffeeMachineText = [
     "Coffee Machine",
+    "ماكينة قهوة",
   ];
 
   static const bookingDateText = [
@@ -1130,24 +1153,30 @@ class AppLanguage {
 
   static const propertyText = [
     "Property",
+    "عقار",
   ];
 
   static const seaText = [
     "Sea",
+    "بحر",
   ];
   static const cancellationPolicyText = [
     "Cancellation policy ",
+    "سياسة الإلغاء",
   ];
 
   static const oceanBreezevillaText = [
     "Ocean Breeze Villa",
+    "فيلا أوشن بريز",
   ];
   static const palmSunsetresortText = [
     "Palm Sunset Resort",
+    "منتجع بالم صنست",
   ];
 
   static const propertyAdvertisementText = [
     "property Advertisement",
+    "إعلان العقار",
   ];
 // ── AddAdvertisementSectionScreen ─────────────────────────
 
@@ -1589,6 +1618,6 @@ class AppLanguage {
     "أطفال",
   ];
   static const bookNowText = ["Book Now", "احجز الآن"];
-    static const withText = ["With", "مع"];
-
+  static const withText = ["With", "مع"];
+  static const arrangementsText = ["Arrangements", "الترتيبات"];
 }

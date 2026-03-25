@@ -387,7 +387,8 @@ class _PropertyAdvertisementScreenState
                                     adDetails['outdoor_seating'] ?? "NA"),
                                 _detailRow(AppLanguage.poolText[language],
                                     adDetails['pool'] ?? "NA"),
-                                _detailRow("${AppLanguage.guardText[language]}:",
+                                _detailRow(
+                                    "${AppLanguage.guardText[language]}:",
                                     adDetails['guard_name_english']),
                                 _detailRow(AppLanguage.oneDayText[language],
                                     "${adDetails['one_day_active'] == 1 ? adDetails['one_day_price']?.toString() : "NA"} ${adDetails['one_day_active'] == 1 ? "KWD" : ""}"),
@@ -421,38 +422,77 @@ class _PropertyAdvertisementScreenState
                               ],
                             ),
                           ),
-                          SizedBox(height: sh * 0.02),
-                          // // ── DESCRIPTION ──────────────────────────────────────
-                          Padding(
-                            padding:
-                                EdgeInsets.symmetric(horizontal: sw * 0.04),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  AppLanguage.descriptionText[language],
-                                  style: const TextStyle(
-                                    fontSize: 21,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColor.black2A2AColor,
-                                    fontFamily: AppFont.fontFamily,
-                                  ),
+
+                          // ── DESCRIPTION ──────────────────────────────────────
+                          if (language == 0) ...[
+                            if (adDetails['description_english'] != null &&
+                                adDetails['description_english'].isNotEmpty &&
+                                adDetails['description_english'] != "NA") ...[
+                              SizedBox(height: sh * 0.02),
+                              Padding(
+                                padding:
+                                    EdgeInsets.symmetric(horizontal: sw * 0.04),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      AppLanguage.descriptionText[language],
+                                      style: const TextStyle(
+                                        fontSize: 21,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColor.black2A2AColor,
+                                        fontFamily: AppFont.fontFamily,
+                                      ),
+                                    ),
+                                    SizedBox(height: sh * 0.01),
+                                    Text(
+                                      adDetails['description_english'] ?? "NA",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: AppColor.primaryColor,
+                                        fontFamily: AppFont.fontFamily,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(height: sh * 0.01),
-                                Text(
-                                  language == 0
-                                      ? adDetails['description_english'] ?? "NA"
-                                      : adDetails['description_arabic'] ?? "NA",
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: AppColor.primaryColor,
-                                    fontFamily: AppFont.fontFamily,
-                                  ),
+                              ),
+                            ] else if (adDetails['description_arabic'] !=
+                                    null &&
+                                adDetails['description_arabic'].isNotEmpty &&
+                                adDetails['description_arabic'] != "NA") ...[
+                              SizedBox(height: sh * 0.02),
+                              Padding(
+                                padding:
+                                    EdgeInsets.symmetric(horizontal: sw * 0.04),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      AppLanguage.descriptionText[language],
+                                      style: const TextStyle(
+                                        fontSize: 21,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColor.black2A2AColor,
+                                        fontFamily: AppFont.fontFamily,
+                                      ),
+                                    ),
+                                    SizedBox(height: sh * 0.01),
+                                    Text(
+                                      adDetails['description_arabic'] ?? "NA",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: AppColor.primaryColor,
+                                        fontFamily: AppFont.fontFamily,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
+                              ),
+                            ],
+                          ],
+
                           SizedBox(height: sh * 0.02),
 
                           // Checkboxes
@@ -471,23 +511,31 @@ class _PropertyAdvertisementScreenState
                               ),
                             ),
                             SizedBox(height: sh * 0.01),
-                            Wrap(
-                              runSpacing: 10,
-                              spacing: 20,
-                              children:
-                                  List.generate(offerings.length, (index) {
-                                var sub = offerings[index];
-                                final amenityName =
-                                    sub['name']?.toString() ?? '';
-                                final image =
-                                    sub['amenity_icon']?.toString() ?? '';
-                                return SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        42 /
-                                        100,
-                                    child: FeatureItem(
-                                        title: amenityName, icon: image));
-                              }),
+                            Center(
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width *
+                                    90 /
+                                    100,
+                                child: Wrap(
+                                  runSpacing: 10,
+                                  spacing: 20,
+                                  children:
+                                      List.generate(offerings.length, (index) {
+                                    var sub = offerings[index];
+                                    final amenityName =
+                                        sub['name']?.toString() ?? '';
+                                    final image =
+                                        sub['amenity_icon']?.toString() ?? '';
+                                    return SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                42 /
+                                                100,
+                                        child: FeatureItem(
+                                            title: amenityName, icon: image));
+                                  }),
+                                ),
+                              ),
                             ),
                           ],
 

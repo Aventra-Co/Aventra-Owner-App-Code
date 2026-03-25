@@ -290,9 +290,9 @@ class _DetailsScreen extends State<DetailsScreen> {
                     onPress: () {
                       Navigator.pop(context);
                     }),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 2 / 100,
-                ),
+                // SizedBox(
+                //   height: MediaQuery.of(context).size.height * 2 / 100,
+                // ),
                 if (tripDetails.isNotEmpty)
                   Expanded(
                     flex: 1,
@@ -300,8 +300,9 @@ class _DetailsScreen extends State<DetailsScreen> {
                       child: Column(
                         children: [
                           SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 2 / 100),
+                              height: MediaQuery.of(context).size.height *
+                                  0.2 /
+                                  100),
 
                           //!id, add button
                           SizedBox(
@@ -1408,7 +1409,6 @@ class _DetailsScreen extends State<DetailsScreen> {
                                     ],
                                   ),
                                 ),
-
                                 SizedBox(
                                   width: MediaQuery.of(context).size.width *
                                       85 /
@@ -1450,8 +1450,6 @@ class _DetailsScreen extends State<DetailsScreen> {
                                     height: MediaQuery.of(context).size.height *
                                         2 /
                                         100),
-
-                             
                                 Container(
                                   width: MediaQuery.of(context).size.width *
                                       85 /
@@ -1636,7 +1634,7 @@ class _DetailsScreen extends State<DetailsScreen> {
                               }),
                           SizedBox(
                               height:
-                                  MediaQuery.of(context).size.height * 2 / 100),
+                                  MediaQuery.of(context).size.height * 4 / 100),
 
                           //!change booking date button
                           //! AppButton(

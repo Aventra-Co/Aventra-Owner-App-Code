@@ -30,7 +30,11 @@ class _RatingScreenState extends State<RatingScreen> {
   bool isApiCalling = false;
   bool isLoading = true;
   List<dynamic> ratingList = [];
+  List<dynamic> propertyRatingList = [];
   double totalRating = 0;
+  double totalPropRating = 0;
+  int countRating = 0;
+  int countPropRating = 0;
 
   @override
   void initState() {
@@ -59,6 +63,7 @@ class _RatingScreenState extends State<RatingScreen> {
       isApiCalling = false;
     });
     getRatingsApi(userId);
+    getPropRatingsApi(userId);
     setState(() {});
   }
 
@@ -127,34 +132,72 @@ class _RatingScreenState extends State<RatingScreen> {
     }
   }
 
-  // ================= PROPERTY STATIC RATING LIST =================
+  //=============================GET Ratings DETAILS===================================//
+  Future<void> getPropRatingsApi(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}get_all_property_ratings?owner_id=$userId");
+    print("url $url");
 
-  List<Map<String, dynamic>> propertyRatingList = [
-    {
-      "rating_review_id": "101",
-      "name": "Ahmed Ali",
-      "review": "Amazing property experience",
-      "total_rating_average": 4.5,
-      "createtime": "12 Feb 2026",
-      "image": AppImage.profilePlaceholderImage,
-    },
-    {
-      "rating_review_id": "102",
-      "name": "Sara Khan",
-      "review": "Very clean",
-      "total_rating_average": 5.0,
-      "createtime": "15 Feb 2026",
-      "image": AppImage.profilePlaceholderImage,
-    },
-    {
-      "rating_review_id": "103",
-      "name": "John Smith",
-      "review": "Good Experience Hopefully will have again",
-      "total_rating_average": 3.5,
-      "createtime": "18 Feb 2026",
-      "image": AppImage.profilePlaceholderImage,
-    },
-  ];
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    setState(() {
+      isLoading = true;
+    });
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['rating_arr'];
+          propertyRatingList = (item != "NA") ? item : [];
+          totalPropRating = res['total_rating'].toDouble();
+
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          if (res['active_status'] == 0) {
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+            );
+          }
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Exception: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  // ================= PROPERTY STATIC RATING LIST =================
 
   int status = 1;
   @override
@@ -254,7 +297,9 @@ class _RatingScreenState extends State<RatingScreen> {
                             child: Column(
                               children: [
                                 Text(
-                                  totalRating.toStringAsFixed(2),
+                                  status == 1
+                                      ? totalRating.toStringAsFixed(2)
+                                      : totalPropRating.toStringAsFixed(2),
                                   style: const TextStyle(
                                       color: AppColor.secondaryColor,
                                       fontFamily: AppFont.fontFamily,
@@ -276,7 +321,9 @@ class _RatingScreenState extends State<RatingScreen> {
                                       ),
                                     ),
                                     Text(
-                                      "(${ratingList.length})",
+                                      status == 1
+                                          ? "(${ratingList.length})"
+                                          : "(${propertyRatingList.length})",
                                       style: const TextStyle(
                                           color: AppColor.secondaryColor,
                                           fontFamily: AppFont.fontFamily,
@@ -376,11 +423,14 @@ class _RatingScreenState extends State<RatingScreen> {
                   ],
                 ),
               ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 2 / 100,
+              ),
 
               if (status == 2 && propertyRatingList.isNotEmpty) ...[
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 2 / 100,
-                ),
+                // SizedBox(
+                //   height: MediaQuery.of(context).size.height * 2 / 100,
+                // ),
                 Wrap(
                   children: [
                     ...List.generate(propertyRatingList.length, (index) {
@@ -390,7 +440,9 @@ class _RatingScreenState extends State<RatingScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => RatingDetailsScreen(
-                                ratingId: ratingList[index]['rating_review_id']
+                                isProperty: true,
+                                ratingId: propertyRatingList[index]
+                                        ['rating_review_id']
                                     .toString(),
                               ),
                             ),
@@ -415,8 +467,13 @@ class _RatingScreenState extends State<RatingScreen> {
                           ),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundImage: AssetImage(
-                                  propertyRatingList[index]['image']),
+                              backgroundImage: ratingList[index]['image'] !=
+                                      null
+                                  ? NetworkImage(
+                                      '${AppConfigProvider.imageURL}${ratingList[index]['image']}')
+                                  : const AssetImage(
+                                          AppImage.profilePlaceholderImage)
+                                      as ImageProvider,
                             ),
                             title: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -426,15 +483,16 @@ class _RatingScreenState extends State<RatingScreen> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      propertyRatingList[index]['name'],
+                                      propertyRatingList[index]['name'] ?? "",
                                       style: const TextStyle(
                                           fontWeight: FontWeight.w600,
                                           fontFamily: AppFont.fontFamily,
-                                          fontSize: 12,
+                                          fontSize: 14,
                                           color: AppColor.primaryColor),
                                     ),
                                     Text(
-                                      propertyRatingList[index]['createtime'],
+                                      propertyRatingList[index]['createtime'] ??
+                                          "",
                                       style: const TextStyle(
                                           color: AppColor.primaryColor,
                                           fontSize: 12,
@@ -462,7 +520,7 @@ class _RatingScreenState extends State<RatingScreen> {
                               style: const TextStyle(
                                   fontWeight: FontWeight.w400,
                                   fontFamily: AppFont.fontFamily,
-                                  fontSize: 8,
+                                  fontSize: 12,
                                   color: AppColor.primaryColor),
                             ),
                           ),
@@ -478,9 +536,9 @@ class _RatingScreenState extends State<RatingScreen> {
                       child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 2 / 100),
+                          // SizedBox(
+                          //     height:
+                          //         MediaQuery.of(context).size.height * 2 / 100),
                           if (ratingList.isNotEmpty && status != 2)
                             Wrap(
                               children: [
@@ -492,6 +550,7 @@ class _RatingScreenState extends State<RatingScreen> {
                                           MaterialPageRoute(
                                             builder: (context) =>
                                                 RatingDetailsScreen(
+                                              isProperty: false,
                                               ratingId: ratingList[index]
                                                       ['rating_review_id']
                                                   .toString(),
@@ -568,16 +627,13 @@ class _RatingScreenState extends State<RatingScreen> {
                                               fontSize: 12,
                                               color: AppColor.primaryColor),
                                         ),
-                                        trailing: Container(
-                                          child: Text(
-                                            ratingList[index]['createtime'] ??
-                                                "",
-                                            style: const TextStyle(
-                                                color: AppColor.primaryColor,
-                                                fontSize: 10,
-                                                fontFamily: AppFont.fontFamily,
-                                                fontWeight: FontWeight.w400),
-                                          ),
+                                        trailing: Text(
+                                          ratingList[index]['createtime'] ?? "",
+                                          style: const TextStyle(
+                                              color: AppColor.primaryColor,
+                                              fontSize: 10,
+                                              fontFamily: AppFont.fontFamily,
+                                              fontWeight: FontWeight.w400),
                                         ),
                                       ),
                                     ),
@@ -610,6 +666,9 @@ class _RatingScreenState extends State<RatingScreen> {
                       ),
                     )),
               const NoInternetBanner(),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 3 / 100,
+              ),
             ],
           ),
         ),

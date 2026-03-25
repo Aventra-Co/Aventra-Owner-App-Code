@@ -277,9 +277,9 @@ class _DetailsScreen extends State<UpcomingDetailsScreen> {
                     onPress: () {
                       Navigator.pop(context);
                     }),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 2 / 100,
-                ),
+                // SizedBox(
+                //   height: MediaQuery.of(context).size.height * 2 / 100,
+                // ),
                 if (tripDetails.isNotEmpty)
                   Expanded(
                     flex: 1,
@@ -287,8 +287,9 @@ class _DetailsScreen extends State<UpcomingDetailsScreen> {
                       child: Column(
                         children: [
                           SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 2 / 100),
+                              height: MediaQuery.of(context).size.height *
+                                  .2 /
+                                  100),
 
                           //!id, add button
                           SizedBox(
@@ -1698,10 +1699,10 @@ class _DetailsScreen extends State<UpcomingDetailsScreen> {
                                 navigateToChatScreen(
                                     tripDetails['customer_id'].toString());
                               }),
+
                           SizedBox(
                               height:
-                                  MediaQuery.of(context).size.height * 2 / 100),
-
+                                  MediaQuery.of(context).size.height * 5 / 100),
                           //change booking date button
                           // AppButton(
                           //     text: AppLanguage.changeBookingDateText[language],
@@ -1802,6 +1803,4 @@ class _DetailsScreen extends State<UpcomingDetailsScreen> {
       }
     });
   }
-
-
 }
