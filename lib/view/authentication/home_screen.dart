@@ -279,10 +279,11 @@ class _HomeScreenState extends State<HomeScreen> {
             isLoading = false;
           });
           //! ignore: use_build_context_synchronously
-          SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+
           if (res['active_status'] == 0) {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => const Login()));
+            SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
           }
         }
       } else {
@@ -1714,7 +1715,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PropertyDetailsScreen(
+                builder: (context) => PropertyOngoinDetailsScreen(
                   propertyBookingId: booking['property_booking_id'],
                 ),
               ),
@@ -1723,7 +1724,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TripStartDetailsScreen(
+                builder: (context) => PropertyUpcomingDetails(
                   propertyBookingId: booking['property_booking_id'],
                 ),
               ),
@@ -1822,7 +1823,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    booking['booking_status_label'],
+                    booking['booking_status'] == 0
+                        ? AppLanguage.upcomingText[language]
+                        : booking['booking_status'] == 1
+                            ? AppLanguage.ongoingText[language]
+                            : booking['booking_status_label'] ?? "",
                     style: TextStyle(
                       fontSize: 11,
                       fontFamily: AppFont.fontFamily,

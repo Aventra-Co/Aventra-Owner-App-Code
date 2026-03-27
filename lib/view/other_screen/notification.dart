@@ -14,9 +14,10 @@ import '../../controller/app_constant.dart';
 import '../../controller/app_font.dart';
 import '../../controller/app_image.dart';
 import '../../controller/app_language.dart';
+import '../propertymodule/completed_propertydetail_screen.dart';
+import '../propertymodule/upcoming_detail_screen.dart';
 import 'broadcastScreen.dart';
 import 'history_details.dart';
-import 'upcoming_details.dart';
 import 'dart:ui' as ui;
 
 class Notifications extends StatefulWidget {
@@ -373,15 +374,29 @@ class _Notifications extends State<Notifications> {
                               GestureDetector(
                                 onTap: () {
                                   if (notificationarraylist[index]['action'] ==
+                                      "Broadcast") {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BroadcastScreen(
+                                          broadCastDetails:
+                                              notificationarraylist[index],
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  if (notificationarraylist[index]['action'] ==
                                       "trip_booking") {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                UpcomingDetailsScreen(
-                                                  tripId: notificationarraylist[
-                                                          index]['action_id']
-                                                      .toString(),
+                                                PropertyUpcomingDetails(
+                                                  propertyBookingId:
+                                                      notificationarraylist[
+                                                          index]['action_id'],
                                                 )));
                                   } else if (notificationarraylist[index]
                                           ['action'] ==
@@ -399,13 +414,28 @@ class _Notifications extends State<Notifications> {
                                     );
                                   } else if (notificationarraylist[index]
                                           ['action'] ==
-                                      "Broadcast") {
+                                      "property_booking") {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                PropertyUpcomingDetails(
+                                                  propertyBookingId:
+                                                      notificationarraylist[
+                                                          index]['action_id'],
+                                                )));
+                                  } else if (notificationarraylist[index]
+                                          ['action'] ==
+                                      "property_cancellation") {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => BroadcastScreen(
-                                          broadCastDetails:
-                                              notificationarraylist[index],
+                                        builder: (context) =>
+                                            CompletedPropertyDetailsScreen(
+                                          isCompleted: false,
+                                          propertyBookingId:
+                                              notificationarraylist[index]
+                                                  ['action_id'],
                                         ),
                                       ),
                                     );

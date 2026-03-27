@@ -93,10 +93,10 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
   List<Map<String, dynamic>> offerings = [];
   final Set<String> selectedOfferings = <String>{};
   // List<dynamic> selectedOfferings = [];
-  bool oneDay = false;
-  bool weekend = false;
-  bool weekday = false;
-  bool fullweek = false;
+  bool oneDay = true;
+  bool weekend = true;
+  bool weekday = true;
+  bool fullweek = true;
   int isToggle = 0;
 
   @override
@@ -133,11 +133,13 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
       SnackBarToastMessage.showSnackBar(
           context, AppLanguage.selectOnePriceBoxMsg[language]);
       return;
-    } else if (oneDay && oneDayController.text.trim().isEmpty) {
-      SnackBarToastMessage.showSnackBar(
-          context, AppLanguage.enterAllThePriceMsg[language]);
-      return;
-    } else if (weekday && weekDayController.text.trim().isEmpty) {
+    }
+    // else if (oneDay && oneDayController.text.trim().isEmpty) {
+    //   SnackBarToastMessage.showSnackBar(
+    //       context, AppLanguage.enterAllThePriceMsg[language]);
+    //   return;
+    // }
+    else if (weekday && weekDayController.text.trim().isEmpty) {
       SnackBarToastMessage.showSnackBar(
           context, AppLanguage.enterAllThePriceMsg[language]);
       return;
@@ -261,6 +263,7 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
             MaterialPageRoute(
               builder: (context) => const MyFooterPage(
                 indexOfPage: 1,
+                status: 2,
               ),
             ),
           );
@@ -515,35 +518,35 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
                         // SizedBox(height: size.height * 0.015),
 
                         _buildPriceRow(
-                          label: AppLanguage.weekDaysText[language],
-                          value: weekday,
-                          onChanged: (val) => setState(() => weekday = val!),
-                          controller: weekDayController,
-                          readOnly: !weekday,
-                          size: size,
-                        ),
+                            label: AppLanguage.weekDaysText[language],
+                            value: weekday,
+                            onChanged: (val) => setState(() => weekday = val!),
+                            controller: weekDayController,
+                            readOnly: !weekday,
+                            size: size,
+                            isWeek: false),
                         SizedBox(height: size.height * 0.015),
 
                         // Weekend
                         _buildPriceRow(
-                          label: AppLanguage.weekendDaysText[language],
-                          value: weekend,
-                          onChanged: (val) => setState(() => weekend = val!),
-                          controller: weekendController,
-                          readOnly: !weekend,
-                          size: size,
-                        ),
+                            label: AppLanguage.weekendDaysText[language],
+                            value: weekend,
+                            onChanged: (val) => setState(() => weekend = val!),
+                            controller: weekendController,
+                            readOnly: !weekend,
+                            size: size,
+                            isWeek: false),
                         SizedBox(height: size.height * 0.015),
 
                         // Saturday
                         _buildPriceRow(
-                          label: AppLanguage.fullWeekDaysText[language],
-                          value: fullweek,
-                          onChanged: (val) => setState(() => fullweek = val!),
-                          controller: fullWeekController,
-                          readOnly: !fullweek,
-                          size: size,
-                        ),
+                            label: AppLanguage.fullWeekDaysText[language],
+                            value: fullweek,
+                            onChanged: (val) => setState(() => fullweek = val!),
+                            controller: fullWeekController,
+                            readOnly: !fullweek,
+                            size: size,
+                            isWeek: true),
                         SizedBox(height: size.height * 0.03),
 
                         // What this place offers
@@ -909,6 +912,7 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
     required TextEditingController controller,
     required Size size,
     required bool readOnly,
+    required bool isWeek,
   }) {
     const double checkboxSize = 24; // default checkbox visual size
 
@@ -919,25 +923,25 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Transform.scale(
-              scale: 1,
-              child: SizedBox(
-                width: checkboxSize,
-                height: checkboxSize,
-                child: Checkbox(
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  value: value,
-                  onChanged: onChanged,
-                  activeColor: AppColor.themeColor,
-                  side: const BorderSide(
-                    color: AppColor.themeColor,
-                    width: 1.5,
-                  ),
-                  checkColor: Colors.white,
-                ),
-              ),
-            ),
-            SizedBox(width: size.width * 0.02),
+            // Transform.scale(
+            //   scale: 1,
+            //   child: SizedBox(
+            //     width: checkboxSize,
+            //     height: checkboxSize,
+            //     child: Checkbox(
+            //       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            //       value: value,
+            //       onChanged: onChanged,
+            //       activeColor: AppColor.themeColor,
+            //       side: const BorderSide(
+            //         color: AppColor.themeColor,
+            //         width: 1.5,
+            //       ),
+            //       checkColor: Colors.white,
+            //     ),
+            //   ),
+            // ),
+            // SizedBox(width: size.width * 0.02),
             Expanded(
               child: Text(
                 label,
@@ -1006,11 +1010,11 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
                       counterText: ""),
                 ),
               ),
-              const SizedBox(
+              SizedBox(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
+                    const Text(
                       " KWD",
                       style: TextStyle(
                         fontSize: 14,
@@ -1019,15 +1023,16 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
                         color: Colors.black,
                       ),
                     ),
-                    Text(
-                      "/Day",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontFamily: AppFont.fontFamily,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
+                    if (!isWeek)
+                      const Text(
+                        "/Day",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontFamily: AppFont.fontFamily,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

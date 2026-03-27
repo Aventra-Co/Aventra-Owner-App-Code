@@ -265,9 +265,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     height: MediaQuery.of(context).size.width *
                                         8 /
                                         100,
-                                    child: Image.asset(
-                                      AppImage.leftArrowIcon,
-                                      color: AppColor.secondaryColor,
+                                    child: Transform.rotate(
+                                      angle: language == 1 ? 3.1416 : 0,
+                                      child: Image.asset(
+                                        AppImage.leftArrowIcon,
+                                        color: AppColor.secondaryColor,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -684,6 +687,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       );
                     })
                   ],
+                ),
+              ] else if (status == 2 && propBookingHistoryList.isEmpty) ...[
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 25 / 100,
+                ),
+                SizedBox(
+                  width: screenWidth * 70 / 100,
+                  child: Text(
+                    AppLanguage.hidtoryNodataMsg[language],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontFamily: AppFont.fontFamily,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColor.primaryColor),
+                  ),
                 ),
               ],
 

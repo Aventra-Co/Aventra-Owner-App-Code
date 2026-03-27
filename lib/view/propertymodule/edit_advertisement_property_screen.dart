@@ -663,13 +663,14 @@ class _EditProfileScreenScreenState
       return AppLanguage.selectPropertyMsg[language];
     }
 
+    if (city.isEmpty) {
+      return AppLanguage.cityMsg[language];
+    }
+
     if (location.isEmpty) {
       return AppLanguage.selectPropertyLocation[language];
     }
 
-    if (city.isEmpty) {
-      return AppLanguage.cityMsg[language];
-    }
     // if (adultCount <= 0) {
     //   return AppLanguage.minPeopleMsg[language];
     // }

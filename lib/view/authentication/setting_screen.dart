@@ -581,6 +581,9 @@ class SettingScreenScreenState extends State<SettingScreen> with RouteAware {
                           }),
                         ],
                       ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 2 / 100,
+                      ),
                     ],
                   ),
                 )),
@@ -636,7 +639,6 @@ class SettingScreenScreenState extends State<SettingScreen> with RouteAware {
                               height:
                                   MediaQuery.of(context).size.width * 10 / 100,
                             ),
-                         
                             Container(
                               //color: Colors.amber,
                               alignment: Alignment.center,
@@ -814,7 +816,6 @@ class SettingScreenScreenState extends State<SettingScreen> with RouteAware {
                               height:
                                   MediaQuery.of(context).size.width * 10 / 100,
                             ),
-                        
                             Container(
                               //color: Colors.amber,
                               alignment: Alignment.center,
@@ -845,7 +846,6 @@ class SettingScreenScreenState extends State<SettingScreen> with RouteAware {
                                     fontFamily: AppFont.fontFamily),
                               ),
                             ),
-
                             SizedBox(
                               height:
                                   MediaQuery.of(context).size.height * 4 / 100,

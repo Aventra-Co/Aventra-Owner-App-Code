@@ -16,7 +16,7 @@ import '../../controller/app_shimmers.dart';
 import '../../controller/app_snack_bar_toast_message.dart';
 import '../../controller/route_observer.dart';
 import 'package:http/http.dart' as http;
-
+import 'dart:ui' as ui;
 import '../authentication/login_screen.dart';
 
 class ManagePropertyScreen extends StatefulWidget {
@@ -281,168 +281,199 @@ class _ManagePropertyScreenState extends State<ManagePropertyScreen>
     final size = MediaQuery.of(context).size;
     double screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      backgroundColor: Colors.grey.shade200,
-      body: RefreshIndicator(
-        onRefresh: _refreshPage,
-        color: AppColor.themeColor,
-        child: Column(
-          children: [
-            AppHeaderOrange(
-                text: AppLanguage.managePropertyText[language],
-                onPress: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MyFooterPage(
-                        indexOfPage: 4,
+    return Directionality(
+      textDirection:
+          language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade200,
+        body: RefreshIndicator(
+          onRefresh: _refreshPage,
+          color: AppColor.themeColor,
+          child: Column(
+            children: [
+              AppHeaderOrange(
+                  text: AppLanguage.managePropertyText[language],
+                  onPress: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MyFooterPage(
+                          indexOfPage: 4,
+                        ),
                       ),
-                    ),
-                  );
-                  return Future.value(false);
-                }),
+                    );
+                    return Future.value(false);
+                  }),
 
-            SizedBox(height: size.height * 0.03),
+              SizedBox(height: size.height * 0.03),
 
-            /// ADD BUTTON
-            if (userType == 3 || (userType == 2 && manageProperty == 1))
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: size.width * 0.05,
-                ),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const AddPropertyScreen())),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: size.width * 0.04,
-                        vertical: size.height * 0.008,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColor.themeColor,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.add,
-                            size: 16,
-                            color: Colors.white,
-                          ),
-                          SizedBox(width: size.width * 0.01),
-                          Text(
-                            AppLanguage.addText[language],
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontFamily: AppFont.fontFamily,
-                              fontWeight: FontWeight.w500,
+              /// ADD BUTTON
+              if (userType == 3 || (userType == 2 && manageProperty == 1))
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: size.width * 0.05,
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const AddPropertyScreen())),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: size.width * 0.04,
+                          vertical: size.height * 0.008,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColor.themeColor,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.add,
+                              size: 16,
                               color: Colors.white,
                             ),
-                          ),
-                        ],
+                            SizedBox(width: size.width * 0.01),
+                            Text(
+                              AppLanguage.addText[language],
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontFamily: AppFont.fontFamily,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
 
-            SizedBox(height: size.height * 0.02),
+              SizedBox(height: size.height * 0.02),
 
-            /// PROPERTY LIST
-            isLoading
-                ? boatsShimmerEffect(context)
-                : Expanded(
-                    child: ListView(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: size.width * 0.05,
-                      ),
-                      children: [
-                        /// FIRST PROPERTY
-                        ///
-                        Wrap(
-                          children: List.generate(
-                            propertyList.length,
-                            (index) {
-                              return Container(
-                                margin: EdgeInsets.only(
-                                  bottom: size.height * 0.02,
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: size.width * 0.04,
-                                  vertical: size.height * 0.02,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.08),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 3),
+              /// PROPERTY LIST
+              isLoading
+                  ? boatsShimmerEffect(context)
+                  : Expanded(
+                      child: ListView(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: size.width * 0.05,
+                        ),
+                        children: [
+                          /// FIRST PROPERTY
+                          ///
+                          if (propertyList.isNotEmpty)
+                            Wrap(
+                              children: List.generate(
+                                propertyList.length,
+                                (index) {
+                                  return Container(
+                                    margin: EdgeInsets.only(
+                                      bottom: size.height * 0.02,
                                     ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            propertyList[index]
-                                                    ['property_name_english'] ??
-                                                "",
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              fontFamily: AppFont.fontFamily,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColor.primaryColor,
-                                            ),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: size.width * 0.04,
+                                      vertical: size.height * 0.02,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.08),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                propertyList[index][
+                                                        'property_name_english'] ??
+                                                    "",
+                                                style: const TextStyle(
+                                                  fontSize: 15,
+                                                  fontFamily:
+                                                      AppFont.fontFamily,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppColor.primaryColor,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  height: size.height * 0.005),
+                                              Text(
+                                                propertyList[index][
+                                                        'property_type_name'] ??
+                                                    "",
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontFamily:
+                                                      AppFont.fontFamily,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          SizedBox(height: size.height * 0.005),
-                                          Text(
-                                            propertyList[index]
-                                                    ['property_type_name'] ??
-                                                "",
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              fontFamily: AppFont.fontFamily,
-                                              fontWeight: FontWeight.w400,
+                                        ),
+                                        if (userType == 3 ||
+                                            (userType == 2 &&
+                                                manageProperty == 1))
+                                          GestureDetector(
+                                            onTap: () => optionsBottomSheet(
+                                                context,
+                                                screenWidth,
+                                                propertyList[index]
+                                                    ['property_id'],
+                                                propertyList[index]),
+                                            child: const Icon(
+                                              Icons.more_vert,
                                               color: Colors.grey,
                                             ),
                                           ),
-                                        ],
-                                      ),
+                                      ],
                                     ),
-                                    if (userType == 3 ||
-                                        (userType == 2 && manageProperty == 1))
-                                      GestureDetector(
-                                        onTap: () => optionsBottomSheet(
-                                            context,
-                                            screenWidth,
-                                            propertyList[index]['property_id'],
-                                            propertyList[index]),
-                                        child: const Icon(
-                                          Icons.more_vert,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                  ],
+                                  );
+                                },
+                              ),
+                            ),
+                          if (propertyList.isEmpty)
+                            Column(
+                              children: [
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        20 /
+                                        100),
+                                SizedBox(
+                                  width: screenWidth * 70 / 100,
+                                  child: Text(
+                                    AppLanguage.noPropertyText[language],
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontFamily: AppFont.fontFamily,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColor.primaryColor),
+                                  ),
                                 ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+                              ],
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-          ],
+            ],
+          ),
         ),
       ),
     );

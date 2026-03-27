@@ -1572,9 +1572,13 @@ class AppLanguage {
     "الرجاء اختيار خيار سعر واحد على الأقل"
   ];
 
+  // static const enterAllThePriceMsg = [
+  //   "Please enter all the prices of the selected price fields",
+  //   "الرجاء إدخال جميع أسعار الحقول المحددة"
+  // ];
   static const enterAllThePriceMsg = [
-    "Please enter all the prices of the selected price fields",
-    "الرجاء إدخال جميع أسعار الحقول المحددة"
+    "Please enter all the prices of the price fields",
+    "الرجاء إدخال جميع أسعار حقول الأسعار",
   ];
 
   static const priceValidMsg = [
@@ -1620,4 +1624,12 @@ class AppLanguage {
   static const bookNowText = ["Book Now", "احجز الآن"];
   static const withText = ["With", "مع"];
   static const arrangementsText = ["Arrangements", "الترتيبات"];
+  static const noBoatText = [
+    "No boat found",
+    "لم يتم العثور على قارب",
+  ];
+  static const noPropertyText = [
+    "No property found",
+    "لم يتم العثور على عقار",
+  ];
 }

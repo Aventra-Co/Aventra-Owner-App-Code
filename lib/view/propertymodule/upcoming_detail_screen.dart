@@ -8,7 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../chat/chat_screen.dart';
-import '../../controller/app_button.dart';
+// import '../../controller/app_button.dart';
 import '../../controller/app_color.dart';
 import '../../controller/app_config_provider.dart';
 import '../../controller/app_constant.dart';
@@ -23,15 +23,16 @@ import 'property_ongoing_detail_screen.dart';
 import 'view_property_details_screen.dart';
 import 'dart:ui' as ui;
 
-class TripStartDetailsScreen extends StatefulWidget {
+class PropertyUpcomingDetails extends StatefulWidget {
   final int propertyBookingId;
-  const TripStartDetailsScreen({super.key, required this.propertyBookingId});
+  const PropertyUpcomingDetails({super.key, required this.propertyBookingId});
 
   @override
-  State<TripStartDetailsScreen> createState() => _TripStartDetailsScreenState();
+  State<PropertyUpcomingDetails> createState() =>
+      _PropertyUpcomingDetailsState();
 }
 
-class _TripStartDetailsScreenState extends State<TripStartDetailsScreen> {
+class _PropertyUpcomingDetailsState extends State<PropertyUpcomingDetails> {
   dynamic bookingDetails = {};
   String allActivity = "";
   bool isApiCalling = true;
@@ -298,7 +299,9 @@ class _TripStartDetailsScreenState extends State<TripStartDetailsScreen> {
                           SizedBox(height: size.height * 0.01),
                           if (bookingDetails['add_status'] == 0)
                             Container(
-                              alignment: Alignment.centerRight,
+                              alignment: language == 0
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
                               width:
                                   MediaQuery.of(context).size.width * 95 / 100,
                               child: GestureDetector(
@@ -537,7 +540,7 @@ class _TripStartDetailsScreenState extends State<TripStartDetailsScreen> {
 
                                 _detailRow(
                                     context,
-                                    AppImage.timeIcon,
+                                    AppImage.calenderIcon,
                                     bookingDetails['booking_date'] ?? '',
                                     AppLanguage.checkInDateText[language],
                                     AppLanguage.changeText[language],
@@ -730,15 +733,16 @@ class _TripStartDetailsScreenState extends State<TripStartDetailsScreen> {
                           SizedBox(height: size.height * 0.03),
 
                           //chat button
-                          Center(
-                            child: AppButton(
-                                text: AppLanguage.chatText[language],
-                                onPress: () {
-                                  navigateToChatScreen(
-                                      bookingDetails['user_id'].toString());
-                                }),
-                          ),
+                          // Center(
+                          //   child: AppButton(
+                          //       text: AppLanguage.chatText[language],
+                          //       onPress: () {
+                          //         navigateToChatScreen(
+                          //             bookingDetails['user_id'].toString());
+                          //       }),
+                          // ),
 
+                          // SizedBox(height: size.height * 0.05),
                           // Cancel Booking
                           // InkWell(
                           //   onTap: () {
@@ -785,8 +789,6 @@ class _TripStartDetailsScreenState extends State<TripStartDetailsScreen> {
                           //     ),
                           //   ),
                           // ),
-
-                          SizedBox(height: size.height * 0.05),
                         ],
                       ),
                     ),

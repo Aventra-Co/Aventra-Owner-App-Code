@@ -10,7 +10,7 @@ import 'app_constant.dart';
 
 class OneSignalService {
   // Static variable to store pending notification data
-static Map<String, dynamic>? _pendingNotificationData;
+  static Map<String, dynamic>? _pendingNotificationData;
   static bool _hasPendingBroadcast = false;
   static bool _isAppInitialized = false;
 
@@ -94,6 +94,8 @@ static Map<String, dynamic>? _pendingNotificationData;
 
       if (decodeData.toString().toLowerCase() == "broadcast" ||
           decodeData.toString().toLowerCase() == "trip_booking" ||
+          decodeData.toString().toLowerCase() == "property_booking" ||
+          decodeData.toString().toLowerCase() == "property_cancellation" ||
           decodeData.toString().toLowerCase() == "trip_cancellation") {
         print("Broadcast action received");
 

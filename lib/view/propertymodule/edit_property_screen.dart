@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../controller/app_config_provider.dart';
 import '../../controller/app_header.dart';
 import '../../controller/app_loader.dart';
-
 import '../../controller/app_button.dart';
 import '../../controller/app_snack_bar_toast_message.dart';
 import '../../controller/textinput.dart';
@@ -18,7 +16,6 @@ import '../../controller/app_font.dart';
 import '../../controller/app_image.dart';
 import '../../controller/app_language.dart';
 import 'dart:ui' as ui;
-
 import '../authentication/login_screen.dart';
 
 class EditPropertyScreen extends StatefulWidget {
@@ -67,11 +64,12 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
   //--------------------GET USER DETAILS-----------------------//
   Future<dynamic> getUserDetails() async {
     dynamic details = widget.propertyDetails;
+    log("details $details");
     propertyNameTextEditingController.text =
         details['property_name_english'] ?? "";
     selectedPropertyType = details['property_type'] ?? 0;
     propertytypeTextEditingController.text =
-        details['property_type']?.toString() ?? '';
+        details['property_type_label'][language]?.toString() ?? '';
     propertyaddressTextEditingController.text =
         details['property_address'] ?? "";
     roomsTextEditingController.text = details['no_of_rooms']?.toString() ?? '';
@@ -147,7 +145,8 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
           propertyNameTextEditingController.text.trim();
       formData.fields['property_type'] = selectedPropertyType.toString();
       formData.fields['no_of_rooms'] = roomsTextEditingController.text.trim();
-      formData.fields['no_of_halls'] = hallsTextEditingController.toString();
+      formData.fields['no_of_halls'] =
+          hallsTextEditingController.text.toString();
       formData.fields['no_of_washroom'] =
           washroomsTextEditingController.text.trim();
       formData.fields['property_address'] =
@@ -276,254 +275,277 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
       },
-      child: Scaffold(
-        backgroundColor: AppColor.secondaryColor,
-        body: Container(
-          width: MediaQuery.of(context).size.width * 100 / 100,
-          height: MediaQuery.of(context).size.height * 100 / 100,
-          child: Column(
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width * 100 / 100,
-                height: MediaQuery.of(context).size.height * 20 / 100,
-                decoration: const BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage(AppImage.headerBgImage),
-                        fit: BoxFit.cover),
-                    color: AppColor.themeColor,
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(50),
-                        bottomRight: Radius.circular(50))),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 4 / 100,
-                    ),
-
-                    //manage text
-                    Container(
-                      width: MediaQuery.of(context).size.width * 100 / 100,
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              width:
-                                  MediaQuery.of(context).size.width * 15 / 100,
-                              height:
-                                  MediaQuery.of(context).size.width * 8 / 100,
-                              child: Image.asset(
-                                AppImage.leftArrowIcon,
-                                color: AppColor.secondaryColor,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            child: Text(
-                              AppLanguage.editpropertyText[language],
-                              style: const TextStyle(
-                                  color: AppColor.secondaryColor,
-                                  fontFamily: AppFont.fontFamily,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 20),
-                            ),
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 15 / 100,
-                            height: MediaQuery.of(context).size.width * 6 / 100,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
+      child: Directionality(
+        textDirection:
+            language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+        child: Scaffold(
+          backgroundColor: AppColor.secondaryColor,
+          body: SizedBox(
+            width: MediaQuery.of(context).size.width * 100 / 100,
+            height: MediaQuery.of(context).size.height * 100 / 100,
+            child: Column(
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width * 100 / 100,
+                  height: MediaQuery.of(context).size.height * 20 / 100,
+                  decoration: const BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(AppImage.headerBgImage),
+                          fit: BoxFit.cover),
+                      color: AppColor.themeColor,
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(50),
+                          bottomRight: Radius.circular(50))),
                   child: Column(
                     children: [
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 2 / 100,
-                      ),
-                      //!===Enter Boat Name====
-                      CustomTextFormFieldBlackWidth(
-                        controller: propertyNameTextEditingController,
-                        hintText: AppLanguage.enterPropertyNameText[language],
-                        keyboardtype: TextInputType.name,
-                        maxLength: 50,
-                        fillColorStatus: 0,
-                        readOnly: false,
-                        width: MediaQuery.of(context).size.width * 90 / 100,
-                      ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 1 / 100,
+                        height: MediaQuery.of(context).size.height * 4 / 100,
                       ),
 
-                      //!=== Enter Boat Registration Number ===
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 90 / 100,
-                        height: MediaQuery.of(context).size.height * 5.5 / 100,
-                        child: TextFormField(
-                          readOnly: true,
-                          style: const TextStyle(
-                              height: 1.1,
-                              color: AppColor.textColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400),
-                          textAlignVertical: TextAlignVertical.center,
-                          controller: propertytypeTextEditingController,
-                          onTap: () {
-                            dropDownModelForPropertyType(context, screenWidth);
-                          },
-                          decoration: InputDecoration(
-                              border: const UnderlineInputBorder(
-                                // Use UnderlineInputBorder
-                                borderSide:
-                                    BorderSide(color: AppColor.boaderColor),
-                              ),
-                              enabledBorder: const UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: AppColor.boaderColor),
-                              ),
-                              focusedBorder: const UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: AppColor.themeColor, width: 1),
-                              ),
-                              contentPadding:
-                                  const EdgeInsets.symmetric(vertical: 10),
-                              fillColor: Colors.transparent,
-                              filled: true,
-                              counterText: '',
-                              hintText:
-                                  "${AppLanguage.guardNationalityText[language]}*",
-                              hintStyle: const TextStyle(
-                                  color: AppColor.textColor,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16),
-                              suffixIcon: IconButton(
-                                icon: Container(
-                                  alignment: language == 0
-                                      ? Alignment.centerRight
-                                      : Alignment.centerLeft,
-                                  width: MediaQuery.of(context).size.width *
-                                      20 /
-                                      100,
-                                  height: MediaQuery.of(context).size.width *
-                                      5 /
-                                      100,
+                      //manage text
+                      Container(
+                        width: MediaQuery.of(context).size.width * 100 / 100,
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width *
+                                    15 /
+                                    100,
+                                height:
+                                    MediaQuery.of(context).size.width * 8 / 100,
+                                child: Transform.rotate(
+                                  angle: language == 1 ? 3.1416 : 0,
                                   child: Image.asset(
-                                    AppImage.dropDownIcon,
+                                    AppImage.leftArrowIcon,
+                                    color: AppColor.secondaryColor,
                                   ),
                                 ),
-                                onPressed: () {
-                                  dropDownModelForPropertyType(
-                                      context, screenWidth);
-                                },
-                              )),
+                              ),
+                            ),
+                            Container(
+                              child: Text(
+                                AppLanguage.editpropertyText[language],
+                                style: const TextStyle(
+                                    color: AppColor.secondaryColor,
+                                    fontFamily: AppFont.fontFamily,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 20),
+                              ),
+                            ),
+                            SizedBox(
+                              width:
+                                  MediaQuery.of(context).size.width * 15 / 100,
+                              height:
+                                  MediaQuery.of(context).size.width * 6 / 100,
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 1 / 100,
-                      ),
-
-                      //!=== Enter Boat Brand ===
-                      CustomTextFormFieldBlackWidth(
-                        controller: propertyaddressTextEditingController,
-                        hintText:
-                            AppLanguage.enterPropertyAddressText[language],
-                        keyboardtype: TextInputType.text,
-                        maxLength: 50,
-                        fillColorStatus: 0,
-                        readOnly: false,
-                        width: MediaQuery.of(context).size.width * 90 / 100,
-                      ),
-
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 1 / 100),
-
-                      //!=== Enter Boat Size ==
-                      CustomTextFormFieldBlackWidth(
-                        controller: roomsTextEditingController,
-                        hintText: AppLanguage.enterRoomsText[language],
-                        keyboardtype: TextInputType.name,
-                        maxLength: 50,
-                        fillColorStatus: 0,
-                        readOnly: false,
-                        width: MediaQuery.of(context).size.width * 90 / 100,
-                      ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 1 / 100),
-
-                      //!=== Enter Boat Capacity ===
-                      CustomTextFormFieldBlackWidth(
-                        controller: hallsTextEditingController,
-                        hintText: AppLanguage.enterHallsText[language],
-                        keyboardtype: TextInputType.name,
-                        maxLength: 50,
-                        fillColorStatus: 0,
-                        readOnly: false,
-                        width: MediaQuery.of(context).size.width * 90 / 100,
-                      ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 1 / 100),
-
-                      CustomTextFormFieldBlackWidth(
-                        controller: outdoorSeatingTextEditingController,
-                        hintText: AppLanguage.enterOutdoorSeatingText[language],
-                        keyboardtype: TextInputType.name,
-                        maxLength: 50,
-                        fillColorStatus: 0,
-                        readOnly: false,
-                        width: MediaQuery.of(context).size.width * 90 / 100,
-                      ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 1 / 100),
-
-                      //!=== Enter Toilet ===
-                      CustomTextFormFieldBlackWidth(
-                        controller: washroomsTextEditingController,
-                        hintText: AppLanguage.enterWashroomsText[language],
-                        keyboardtype: TextInputType.name,
-                        maxLength: 50,
-                        fillColorStatus: 0,
-                        readOnly: false,
-                        width: MediaQuery.of(context).size.width * 90 / 100,
-                      ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 1 / 100),
-
-                      //!=== Enter Toilet ===
-                      CustomTextFormFieldBlackWidth(
-                        controller: poolTextEditingController,
-                        hintText: AppLanguage.enterPoolText[language],
-                        keyboardtype: TextInputType.name,
-                        maxLength: 50,
-                        fillColorStatus: 0,
-                        readOnly: false,
-                        width: MediaQuery.of(context).size.width * 90 / 100,
-                      ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 6 / 100),
-
-                      //!=== Add Boat Image Text ===
-
-                      AppButton(
-                          text: AppLanguage.submitText[language],
-                          onPress: () {
-                            validation();
-                          }),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 3 / 100),
                     ],
                   ),
                 ),
-              ),
-              const NoInternetBanner(),
-            ],
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 2 / 100,
+                        ),
+                        //!===Enter Boat Name====
+                        CustomTextFormFieldBlackWidth(
+                          controller: propertyNameTextEditingController,
+                          hintText: AppLanguage.enterPropertyNameText[language],
+                          keyboardtype: TextInputType.name,
+                          maxLength: 50,
+                          fillColorStatus: 0,
+                          readOnly: false,
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 1 / 100,
+                        ),
+
+                        //!=== Enter Boat Registration Number ===
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          height:
+                              MediaQuery.of(context).size.height * 5.5 / 100,
+                          child: TextFormField(
+                            readOnly: true,
+                            style: const TextStyle(
+                                height: 1.1,
+                                color: AppColor.textColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400),
+                            textAlignVertical: TextAlignVertical.center,
+                            controller: propertytypeTextEditingController,
+                            onTap: () {
+                              dropDownModelForPropertyType(
+                                  context, screenWidth);
+                            },
+                            decoration: InputDecoration(
+                                border: const UnderlineInputBorder(
+                                  // Use UnderlineInputBorder
+                                  borderSide:
+                                      BorderSide(color: AppColor.boaderColor),
+                                ),
+                                enabledBorder: const UnderlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: AppColor.boaderColor),
+                                ),
+                                focusedBorder: const UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: AppColor.themeColor, width: 1),
+                                ),
+                                contentPadding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                fillColor: Colors.transparent,
+                                filled: true,
+                                counterText: '',
+                                hintText:
+                                    "${AppLanguage.guardNationalityText[language]}*",
+                                hintStyle: const TextStyle(
+                                    color: AppColor.textColor,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16),
+                                suffixIcon: IconButton(
+                                  icon: Container(
+                                    alignment: language == 0
+                                        ? Alignment.centerRight
+                                        : Alignment.centerLeft,
+                                    width: MediaQuery.of(context).size.width *
+                                        20 /
+                                        100,
+                                    height: MediaQuery.of(context).size.width *
+                                        5 /
+                                        100,
+                                    child: Image.asset(
+                                      AppImage.dropDownIcon,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    dropDownModelForPropertyType(
+                                        context, screenWidth);
+                                  },
+                                )),
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 1 / 100,
+                        ),
+
+                        //!=== Enter Boat Brand ===
+                        CustomTextFormFieldBlackWidth(
+                          controller: propertyaddressTextEditingController,
+                          hintText:
+                              AppLanguage.enterPropertyAddressText[language],
+                          keyboardtype: TextInputType.text,
+                          maxLength: 50,
+                          fillColorStatus: 0,
+                          readOnly: false,
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                        ),
+
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 1 / 100),
+
+                        //!=== Enter Boat Size ==
+                        CustomTextFormFieldBlackWidth(
+                          controller: roomsTextEditingController,
+                          hintText: AppLanguage.enterRoomsText[language],
+                          keyboardtype: TextInputType.number,
+                          inputFormatter: AppConstant.onlyDigitFormatter,
+                          maxLength: 50,
+                          fillColorStatus: 0,
+                          readOnly: false,
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                        ),
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 1 / 100),
+
+                        //!=== Enter Boat Capacity ===
+                        CustomTextFormFieldBlackWidth(
+                          controller: hallsTextEditingController,
+                          hintText: AppLanguage.enterHallsText[language],
+                          keyboardtype: TextInputType.number,
+                          inputFormatter: AppConstant.onlyDigitFormatter,
+                          maxLength: 50,
+                          fillColorStatus: 0,
+                          readOnly: false,
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                        ),
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 1 / 100),
+
+                        CustomTextFormFieldBlackWidth(
+                          controller: outdoorSeatingTextEditingController,
+                          hintText:
+                              AppLanguage.enterOutdoorSeatingText[language],
+                          keyboardtype: TextInputType.name,
+                          maxLength: 50,
+                          fillColorStatus: 0,
+                          readOnly: false,
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                        ),
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 1 / 100),
+
+                        //!=== Enter Toilet ===
+                        CustomTextFormFieldBlackWidth(
+                          controller: washroomsTextEditingController,
+                          hintText: AppLanguage.enterWashroomsText[language],
+                          keyboardtype: TextInputType.number,
+                          inputFormatter: AppConstant.onlyDigitFormatter,
+                          maxLength: 50,
+                          fillColorStatus: 0,
+                          readOnly: false,
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                        ),
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 1 / 100),
+
+                        //!=== Enter Toilet ===
+                        CustomTextFormFieldBlackWidth(
+                          controller: poolTextEditingController,
+                          hintText: AppLanguage.enterPoolText[language],
+                          keyboardtype: TextInputType.name,
+                          maxLength: 50,
+                          fillColorStatus: 0,
+                          readOnly: false,
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                        ),
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 6 / 100),
+
+                        //!=== Add Boat Image Text ===
+
+                        AppButton(
+                            text: AppLanguage.submitText[language],
+                            onPress: () {
+                              validation();
+                            }),
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 3 / 100),
+                      ],
+                    ),
+                  ),
+                ),
+                const NoInternetBanner(),
+              ],
+            ),
           ),
         ),
       ),

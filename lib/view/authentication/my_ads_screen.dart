@@ -24,8 +24,9 @@ import 'dart:ui' as ui;
 import 'login_screen.dart';
 
 class MyAdsScreen extends StatefulWidget {
+  final int status;
   static String routeName = './MyAdsScreen';
-  const MyAdsScreen({super.key});
+  const MyAdsScreen({super.key, this.status = 1});
 
   @override
   State<MyAdsScreen> createState() => _MyAdsScreenScreenState();
@@ -55,10 +56,10 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
   void initState() {
     super.initState();
     getUserDetails();
+    status = widget.status;
   }
 
   int status = 1;
-
   int userId = 0;
   dynamic userDetails;
 

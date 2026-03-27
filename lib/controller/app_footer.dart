@@ -12,8 +12,9 @@ import 'app_language.dart';
 import 'dart:ui' as ui;
 
 class MyFooterPage extends StatefulWidget {
-  const MyFooterPage({required this.indexOfPage, super.key});
+  const MyFooterPage({required this.indexOfPage, super.key, this.status = 1});
   final int indexOfPage;
+  final int status;
 
   @override
   State<MyFooterPage> createState() => _MyFooterPageState();
@@ -55,12 +56,14 @@ class _MyFooterPageState extends State<MyFooterPage> {
       body: PageView(
         controller: _pageController,
         onPageChanged: _onPageChanged,
-        children: const <Widget>[
-          HomeScreen(),
-          MyAdsScreen(),
-          InboxScreen(),
-          CalenderScreen(),
-          ProfileScreen()
+        children: <Widget>[
+          const HomeScreen(),
+          MyAdsScreen(
+            status: widget.status,
+          ),
+          const InboxScreen(),
+          const CalenderScreen(),
+          const ProfileScreen()
         ],
       ),
       bottomNavigationBar: Directionality(

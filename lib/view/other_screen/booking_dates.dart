@@ -17,6 +17,9 @@ import '../../controller/app_image.dart';
 import '../../controller/app_loader.dart';
 import '../../controller/app_snack_bar_toast_message.dart';
 import '../authentication/login_screen.dart';
+import 'dart:ui' as ui;
+
+import '../propertymodule/upcoming_detail_screen.dart';
 
 class BookingDatesScreen extends StatefulWidget {
   static String routeName = './BookingDatesScreen';
@@ -217,277 +220,310 @@ class BookingDatesScreenState extends State<BookingDatesScreen> {
         statusBarIconBrightness: Brightness.light));
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: Scaffold(
-        backgroundColor: AppColor.secondaryColor,
-        body: Container(
-          height: MediaQuery.of(context).size.height * 100 / 100,
-          width: MediaQuery.of(context).size.width * 100 / 100,
-          color: AppColor.secondaryColor,
-          child: Column(
-            children: [
-              AppHeaderOrange(
-                  text: AppLanguage.bookingDates[language],
-                  onPress: () {
-                    Navigator.pop(context);
-                  }),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 2 / 100,
-              ),
-              Expanded(
-                flex: 1,
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.04),
+      child: Directionality(
+        textDirection:
+            language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+        child: Scaffold(
+          backgroundColor: AppColor.secondaryColor,
+          body: Container(
+            height: MediaQuery.of(context).size.height * 100 / 100,
+            width: MediaQuery.of(context).size.width * 100 / 100,
+            color: AppColor.secondaryColor,
+            child: Column(
+              children: [
+                AppHeaderOrange(
+                    text: AppLanguage.bookingDates[language],
+                    onPress: () {
+                      Navigator.pop(context);
+                    }),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 2 / 100,
+                ),
+                Expanded(
+                  flex: 1,
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.04),
 
-                        //!======= Custom Header ==========
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: AppColor.lightblue,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Left Arrow Button
-                              GestureDetector(
-                                onTap:
-                                    isAtCurrentMonth ? null : _onLeftArrowTap,
-                                child: Icon(
-                                  Icons.arrow_back,
-                                  color: isAtCurrentMonth
-                                      ? Colors.grey
-                                      : AppColor.themeColor,
-                                  size: 30,
+                          //!======= Custom Header ==========
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: AppColor.lightblue,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Left Arrow Button
+                                GestureDetector(
+                                  onTap:
+                                      isAtCurrentMonth ? null : _onLeftArrowTap,
+                                  child: Icon(
+                                    Icons.arrow_back,
+                                    color: isAtCurrentMonth
+                                        ? Colors.grey
+                                        : AppColor.themeColor,
+                                    size: 30,
+                                  ),
                                 ),
-                              ),
-                              // Month & Year
-                              Text(
-                                DateFormat.yMMMM().format(today),
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                // Month & Year
+                                Text(
+                                  DateFormat.yMMMM().format(today),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
                                 ),
-                              ),
-                              // Right Arrow Button
-                              GestureDetector(
-                                onTap: _onRightArrowTap,
-                                child: const Icon(
-                                  Icons.arrow_forward,
-                                  color: AppColor.themeColor,
-                                  size: 30,
+                                // Right Arrow Button
+                                GestureDetector(
+                                  onTap: _onRightArrowTap,
+                                  child: const Icon(
+                                    Icons.arrow_forward,
+                                    color: AppColor.themeColor,
+                                    size: 30,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.02),
-
-                        //!============== Calendar ===============
-                        TableCalendar(
-                          focusedDay: today,
-                          firstDay: DateTime(now.year, now.month, 1),
-                          lastDay: DateTime.utc(2100, 12, 31),
-                          headerVisible: false,
-                          availableGestures: AvailableGestures.none,
-                          enabledDayPredicate: (day) {
-                            final today = DateTime.now();
-                            return !day.isBefore(
-                                DateTime(today.year, today.month, today.day));
-                          },
-                          calendarStyle: const CalendarStyle(
-                            selectedDecoration: BoxDecoration(
-                              color: AppColor.themeColor,
-                              shape: BoxShape.circle,
+                              ],
                             ),
                           ),
-                          selectedDayPredicate: (day) => isSameDay(today, day),
-                          onDaySelected: (selectedDay, focusedDay) {
-                            setState(() {
-                              today = focusedDay;
-                              log(DateFormat('yyyy-MM-dd').format(selectedDay));
-                            });
-                            if (unavailableDates.contains(
-                                DateFormat('yyyy-MM-dd').format(selectedDay))) {
-                              getSelectedTripsApi(userId,
-                                  DateFormat('yyyy-MM-dd').format(selectedDay));
-                            } else {
-                              unavailabilityList.clear();
-                            }
-                          },
-                          calendarBuilders: CalendarBuilders(
-                            defaultBuilder: (context, day, focusedDay) {
-                              bool shouldHighlight = false;
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.02),
 
-                              // Case 1: Use markedDates
-                              shouldHighlight = markedDates.any((markedDay) =>
-                                  markedDay.year == day.year &&
-                                  markedDay.month == day.month &&
-                                  markedDay.day == day.day);
-
-                              if (shouldHighlight) {
-                                return Container(
-                                  margin: const EdgeInsets.all(6),
-                                  decoration: const BoxDecoration(
-                                    color: Color.fromARGB(255, 253, 170, 114),
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black26,
-                                        blurRadius: 2,
-                                        spreadRadius: 1,
-                                        offset: Offset(2, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    '${day.day}',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                );
-                              }
-
-                              return null;
+                          //!============== Calendar ===============
+                          TableCalendar(
+                            focusedDay: today,
+                            firstDay: DateTime(now.year, now.month, 1),
+                            lastDay: DateTime.utc(2100, 12, 31),
+                            headerVisible: false,
+                            availableGestures: AvailableGestures.none,
+                            enabledDayPredicate: (day) {
+                              final today = DateTime.now();
+                              return !day.isBefore(
+                                  DateTime(today.year, today.month, today.day));
                             },
-                          ),
-                        ),
-                        SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.02),
+                            calendarStyle: const CalendarStyle(
+                              selectedDecoration: BoxDecoration(
+                                color: AppColor.themeColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            selectedDayPredicate: (day) =>
+                                isSameDay(today, day),
+                            onDaySelected: (selectedDay, focusedDay) {
+                              setState(() {
+                                today = focusedDay;
+                                log(DateFormat('yyyy-MM-dd')
+                                    .format(selectedDay));
+                              });
+                              if (unavailableDates.contains(
+                                  DateFormat('yyyy-MM-dd')
+                                      .format(selectedDay))) {
+                                getSelectedTripsApi(
+                                    userId,
+                                    DateFormat('yyyy-MM-dd')
+                                        .format(selectedDay));
+                              } else {
+                                unavailabilityList.clear();
+                              }
+                            },
+                            calendarBuilders: CalendarBuilders(
+                              defaultBuilder: (context, day, focusedDay) {
+                                bool shouldHighlight = false;
 
-                        //!========== Selected Date Display ==========
-                        if (unavailabilityList.isNotEmpty)
-                          Wrap(
-                            children: List.generate(
-                              unavailabilityList.length,
-                              (index) {
-                                return Column(
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                UpcomingDetailsScreen(
-                                              tripId: unavailabilityList[index]
-                                                      ['trip_booking_id']
-                                                  .toString(),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          border:
-                                              Border.all(color: Colors.grey),
-                                          borderRadius:
-                                              BorderRadius.circular(20),
+                                // Case 1: Use markedDates
+                                shouldHighlight = markedDates.any((markedDay) =>
+                                    markedDay.year == day.year &&
+                                    markedDay.month == day.month &&
+                                    markedDay.day == day.day);
+
+                                if (shouldHighlight) {
+                                  return Container(
+                                    margin: const EdgeInsets.all(6),
+                                    decoration: const BoxDecoration(
+                                      color: Color.fromARGB(255, 253, 170, 114),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 2,
+                                          spreadRadius: 1,
+                                          offset: Offset(2, 2),
                                         ),
-                                        child: Row(
-                                          children: [
-                                            // Calendar Icon and Date
-                                            Container(
-                                              // color: Colors.green,
-                                              width: screenWidth * 0.35,
-                                              child: Row(
-                                                children: [
-                                                  Container(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            5 /
-                                                            100,
-                                                    height:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            5 /
-                                                            100,
-                                                    child: Image.asset(
-                                                      AppImage.clockIconOrange,
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                      width:
-                                                          screenWidth * 0.015),
-                                                  Text(
-                                                    unavailabilityList[index]
-                                                            ['booking_time'] ??
-                                                        "",
-                                                    style: const TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      fontFamily:
-                                                          AppFont.fontFamily,
-                                                      color:
-                                                          AppColor.primaryColor,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const Spacer(),
-                                            // All Boats + Delete
-                                            Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  44 /
-                                                  100,
-                                              alignment: Alignment.centerRight,
-                                              // color: Colors.red,
-                                              child: Text(
-                                                unavailabilityList[index]
-                                                        ['boat_name_english'] ??
-                                                    "",
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontFamily:
-                                                      AppFont.fontFamily,
-                                                  color: AppColor.primaryColor,
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  4 /
-                                                  100,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                      ],
                                     ),
-                                    SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              2 /
-                                              100,
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      '${day.day}',
+                                      style:
+                                          const TextStyle(color: Colors.white),
                                     ),
-                                  ],
-                                );
+                                  );
+                                }
+
+                                return null;
                               },
                             ),
                           ),
-                      ],
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.02),
+
+                          //!========== Selected Date Display ==========
+                          if (unavailabilityList.isNotEmpty)
+                            Wrap(
+                              children: List.generate(
+                                unavailabilityList.length,
+                                (index) {
+                                  return Column(
+                                    children: [
+                                      InkWell(
+                                        onTap: () {
+                                          if (unavailabilityList[index]
+                                                  ['entity_type'] ==
+                                              1) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    PropertyUpcomingDetails(
+                                                  propertyBookingId:
+                                                      unavailabilityList[index]
+                                                          ['trip_booking_id'],
+                                                ),
+                                              ),
+                                            );
+                                          } else {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    UpcomingDetailsScreen(
+                                                  tripId: unavailabilityList[
+                                                              index]
+                                                          ['trip_booking_id']
+                                                      .toString(),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            border:
+                                                Border.all(color: Colors.grey),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              // Calendar Icon and Date
+                                              Container(
+                                                // color: Colors.green,
+                                                width: screenWidth * 0.35,
+                                                child: Row(
+                                                  children: [
+                                                    Container(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              5 /
+                                                              100,
+                                                      height:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              5 /
+                                                              100,
+                                                      child: Image.asset(
+                                                        AppImage
+                                                            .clockIconOrange,
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                        width: screenWidth *
+                                                            0.015),
+                                                    Text(
+                                                      unavailabilityList[index][
+                                                              'booking_time'] ??
+                                                          "",
+                                                      style: const TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        fontFamily:
+                                                            AppFont.fontFamily,
+                                                        color: AppColor
+                                                            .primaryColor,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const Spacer(),
+                                              // All Boats + Delete
+                                              Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    44 /
+                                                    100,
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                // color: Colors.red,
+                                                child: Text(
+                                                  unavailabilityList[index][
+                                                          'boat_name_english'] ??
+                                                      "",
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w700,
+                                                    fontFamily:
+                                                        AppFont.fontFamily,
+                                                    color:
+                                                        AppColor.primaryColor,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    4 /
+                                                    100,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                2 /
+                                                100,
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

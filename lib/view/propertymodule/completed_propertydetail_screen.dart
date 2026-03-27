@@ -443,7 +443,7 @@ class _CompletedPropertyDetailsScreenState
 
                                 _detailRow(
                                     context,
-                                    AppImage.timeIcon,
+                                    AppImage.calenderIcon,
                                     bookingDetails['booking_date'] ?? '',
                                     AppLanguage.checkInDateText[language],
                                     AppLanguage.changeText[language],

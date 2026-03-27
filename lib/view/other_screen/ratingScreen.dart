@@ -467,10 +467,11 @@ class _RatingScreenState extends State<RatingScreen> {
                           ),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundImage: ratingList[index]['image'] !=
+                              backgroundImage: propertyRatingList[index]
+                                          ['image'] !=
                                       null
                                   ? NetworkImage(
-                                      '${AppConfigProvider.imageURL}${ratingList[index]['image']}')
+                                      '${AppConfigProvider.imageURL}${propertyRatingList[index]['image']}')
                                   : const AssetImage(
                                           AppImage.profilePlaceholderImage)
                                       as ImageProvider,

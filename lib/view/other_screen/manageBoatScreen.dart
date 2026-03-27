@@ -624,16 +624,15 @@ class _ManageBoatScreenState extends State<ManageBoatScreen> {
                                                 20 /
                                                 100),
                                     SizedBox(
-                                      width: MediaQuery.of(context).size.width *
-                                          20 /
-                                          100,
-                                      height:
-                                          MediaQuery.of(context).size.width *
-                                              20 /
-                                              100,
-                                      child: Image.asset(
-                                        AppImage.noDataIcon,
-                                        fit: BoxFit.cover,
+                                      width: screenWidth * 70 / 100,
+                                      child: Text(
+                                        AppLanguage.noBoatText[language],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                            fontFamily: AppFont.fontFamily,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColor.primaryColor),
                                       ),
                                     ),
                                   ],

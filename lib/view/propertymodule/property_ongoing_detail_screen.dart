@@ -23,15 +23,17 @@ import '../authentication/login_screen.dart';
 import 'view_property_details_screen.dart';
 import 'dart:ui' as ui;
 
-class PropertyDetailsScreen extends StatefulWidget {
+class PropertyOngoinDetailsScreen extends StatefulWidget {
   final int propertyBookingId;
-  const PropertyDetailsScreen({super.key, required this.propertyBookingId});
+  const PropertyOngoinDetailsScreen(
+      {super.key, required this.propertyBookingId});
 
   @override
-  State<PropertyDetailsScreen> createState() => _PropertyDetailsScreenState();
+  State<PropertyOngoinDetailsScreen> createState() =>
+      _PropertyDetailsScreenState();
 }
 
-class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
+class _PropertyDetailsScreenState extends State<PropertyOngoinDetailsScreen> {
   dynamic bookingDetails = {};
   String allActivity = "";
   bool isApiCalling = true;
@@ -294,7 +296,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                           SizedBox(height: size.height * 0.01),
                           if (bookingDetails['add_status'] == 0)
                             Container(
-                              alignment: Alignment.centerRight,
+                              alignment: language == 0
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
                               width:
                                   MediaQuery.of(context).size.width * 95 / 100,
                               child: GestureDetector(
@@ -533,7 +537,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
 
                                 _detailRow(
                                     context,
-                                    AppImage.timeIcon,
+                                    AppImage.calenderIcon,
                                     bookingDetails['booking_date'] ?? '',
                                     AppLanguage.checkInDateText[language],
                                     AppLanguage.changeText[language],

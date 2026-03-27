@@ -55,10 +55,13 @@ class _ViewPropertyDetailsScreenState extends State<ViewPropertyDetailsScreen> {
                       onTap: () {
                         Navigator.pop(context);
                       },
-                      child: Image.asset(
-                        AppImage.backIcon,
-                        color: Colors.black,
-                        height: size.width * 6 / 100,
+                      child: Transform.rotate(
+                        angle: language == 1 ? 3.1416 : 0,
+                        child: Image.asset(
+                          AppImage.backIcon,
+                          color: Colors.black,
+                          height: size.width * 6 / 100,
+                        ),
                       ),
                     ),
 
