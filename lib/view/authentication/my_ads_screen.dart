@@ -415,7 +415,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
   }
 
   //---------------------SEARCH FUNCTION Trips--------------------///
-  searchResultCountry(String query) {
+  searchSeaAds(String query) {
     print(query);
 
     var results1 = searchTripList
@@ -430,6 +430,25 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
     tripList = [];
 
     tripList = results1;
+
+    setState(() {});
+  }
+
+  searchPropertyAds(String query) {
+    print(query);
+
+    var results1 = searchPropertyList
+        .where((value) => value['property_name_english']
+            .toString()
+            .toLowerCase()
+            .contains(query.toLowerCase()))
+        .toList();
+
+    print("results1 $results1");
+
+    propertyList = [];
+
+    propertyList = results1;
 
     setState(() {});
   }
@@ -545,10 +564,18 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                   maxLength: AppConstant.searchLength,
                                   onChanged: (value) {
                                     setState(() {
-                                      if (value.isNotEmpty) {
-                                        searchResultCountry(value);
+                                      if (status == 2) {
+                                        if (value.isNotEmpty) {
+                                          searchPropertyAds(value);
+                                        } else {
+                                          propertyList = searchPropertyList;
+                                        }
                                       } else {
-                                        tripList = searchTripList;
+                                        if (value.isNotEmpty) {
+                                          searchSeaAds(value);
+                                        } else {
+                                          tripList = searchTripList;
+                                        }
                                       }
                                     });
                                   },
@@ -643,6 +670,8 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                             onTap: () {
                               setState(() {
                                 status = 1;
+                                searchTextController.clear();
+                                tripList = searchTripList;
                               });
                             },
                             child: Container(
@@ -678,6 +707,8 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                             onTap: () {
                               setState(() {
                                 status = 2;
+                                searchTextController.clear();
+                                propertyList = searchPropertyList;
                               });
                             },
                             child: Container(
@@ -1814,11 +1845,11 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                       ),
                                                     ),
                                                     // Discount badge
-                                                    if (propertyList[index]
-                                                                ['discount'] !=
+                                                    if (propertyList[index][
+                                                                'discount_percentage'] !=
                                                             null &&
-                                                        propertyList[index]
-                                                                ['discount'] >
+                                                        propertyList[index][
+                                                                'discount_percentage'] >
                                                             0) ...[
                                                       Positioned(
                                                         top: language == 0
@@ -1875,7 +1906,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                                 30 /
                                                                 100,
                                                             child: Text(
-                                                              "${propertyList[index]['discount']}% ${AppLanguage.offText[language]}",
+                                                              "${propertyList[index]['discount_percentage']}% ${AppLanguage.offText[language]}",
                                                               textAlign:
                                                                   TextAlign
                                                                       .center,

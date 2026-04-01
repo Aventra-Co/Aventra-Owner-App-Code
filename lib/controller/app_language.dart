@@ -240,7 +240,7 @@ class AppLanguage {
     "إدارة عدم التوفر"
   ];
   static const allBoatsText = ["All Boats", "جميع القوارب"];
-  static const addAvailabilityText = ["Add availability", "إضافة توفر"];
+  static const addAvailabilityText = ["Add Unavailability", "إضافة عدم توفر"];
   static const unAvailabilityText = ["Unavailability", "عدم التوفر"];
   static const selectDateText = ["Select Date", "اختر التاريخ"];
   static const selectBoatText = ["Select Boat", "اختر القارب"];
