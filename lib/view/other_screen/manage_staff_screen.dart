@@ -232,7 +232,7 @@ class _ContactAdminState extends State<ManageStaffScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
+                            SizedBox(
                               width: screenWidth > 600
                                   ? MediaQuery.of(context).size.width * 4 / 100
                                   : MediaQuery.of(context).size.width * 5 / 100,
@@ -271,7 +271,7 @@ class _ContactAdminState extends State<ManageStaffScreen> {
                 ),
 
                 // Search field
-                Container(
+                SizedBox(
                   width: MediaQuery.of(context).size.width * 90 / 100,
                   height: MediaQuery.of(context).size.height * 6 / 100,
                   child: TextFormField(
@@ -396,18 +396,26 @@ class _ContactAdminState extends State<ManageStaffScreen> {
                                                     alignment: Alignment.center,
                                                     decoration: BoxDecoration(
                                                       border: Border.all(
+                                                          width: 1,
                                                           color: AppColor
-                                                              .boaderColor,
-                                                          width: 1.0,
-                                                          style: BorderStyle
-                                                              .solid),
+                                                              .boaderColor),
+                                                      boxShadow: const [
+                                                        BoxShadow(
+                                                          color: AppColor
+                                                              .textLightColor, // Shadow color
+                                                          blurRadius:
+                                                              2.0, // Blur intensity
+                                                          offset: Offset(0,
+                                                              5), // Moves shadow 5px down
+                                                        ),
+                                                      ], //BoxShadow
                                                       color: AppColor
                                                           .secondaryColor,
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                              8),
+                                                              15),
                                                     ),
-                                                    child: Container(
+                                                    child: SizedBox(
                                                       width:
                                                           MediaQuery.of(context)
                                                                   .size
@@ -417,7 +425,7 @@ class _ContactAdminState extends State<ManageStaffScreen> {
                                                       child: Row(
                                                         children: [
                                                           //image
-                                                          Container(
+                                                          SizedBox(
                                                             width: screenWidth >
                                                                     600
                                                                 ? MediaQuery.of(
@@ -461,7 +469,7 @@ class _ContactAdminState extends State<ManageStaffScreen> {
                                                           ),
 
                                                           //left side
-                                                          Container(
+                                                          SizedBox(
                                                             width: MediaQuery.of(
                                                                         context)
                                                                     .size
@@ -521,7 +529,7 @@ class _ContactAdminState extends State<ManageStaffScreen> {
                                                 20 /
                                                 100),
                                     //!text msg
-                                    Container(
+                                    SizedBox(
                                       width: screenWidth * 80 / 100,
                                       child: Text(
                                         AppLanguage.staffNodataMsg[language],

@@ -1567,19 +1567,24 @@ class AppLanguage {
     "طوال الأسبوع (الأحد-السبت)"
   ];
 
+  // static const fullWeekDaysText = [
+  //   "Full week (7 days)",
+  //   "طوال الأسبوع (7 أيام)",
+  // ];
+
   static const selectOnePriceBoxMsg = [
     "Please select at least one price option",
     "الرجاء اختيار خيار سعر واحد على الأقل"
   ];
 
-  // static const enterAllThePriceMsg = [
-  //   "Please enter all the prices of the selected price fields",
-  //   "الرجاء إدخال جميع أسعار الحقول المحددة"
-  // ];
   static const enterAllThePriceMsg = [
-    "Please enter all the prices of the price fields",
-    "الرجاء إدخال جميع أسعار حقول الأسعار",
+    "Please enter all the prices of the selected price fields",
+    "الرجاء إدخال جميع أسعار الحقول المحددة"
   ];
+  // static const enterAllThePriceMsg = [
+  //   "Please enter all the prices of the price fields",
+  //   "الرجاء إدخال جميع أسعار حقول الأسعار",
+  // ];
 
   static const priceValidMsg = [
     "Price can't be 0 or less",

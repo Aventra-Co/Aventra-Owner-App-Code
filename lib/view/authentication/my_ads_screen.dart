@@ -1540,14 +1540,14 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                                             .fontFamily),
                                                               ),
                                                             ),
-                                                            SizedBox(
-                                                              height: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .height *
-                                                                  .5 /
-                                                                  100,
-                                                            ),
+                                                            // SizedBox(
+                                                            //   height: MediaQuery.of(
+                                                            //               context)
+                                                            //           .size
+                                                            //           .height *
+                                                            //       .5 /
+                                                            //       100,
+                                                            // ),
 
                                                             //! City name
                                                             SizedBox(
@@ -1614,6 +1614,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                                 ],
                                                               ),
                                                             ),
+
                                                             //! Property Type name
                                                             SizedBox(
                                                               width: MediaQuery.of(
@@ -1680,7 +1681,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                               ),
                                                             ),
 
-                                                            // Rating, members, price
+                                                            //! Rating, members, price
                                                             SizedBox(
                                                               width: MediaQuery.of(
                                                                           context)
@@ -1696,7 +1697,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                                           null &&
                                                                       propertyList[index]['rating']
                                                                               .toString() !=
-                                                                          "0.00")
+                                                                          "0.00") ...[
                                                                     Container(
                                                                       alignment:
                                                                           Alignment
@@ -1736,13 +1737,14 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                                         ),
                                                                       ),
                                                                     ),
-                                                                  SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        2 /
-                                                                        100,
-                                                                  ),
+                                                                    SizedBox(
+                                                                      width: MediaQuery.of(context)
+                                                                              .size
+                                                                              .width *
+                                                                          2 /
+                                                                          100,
+                                                                    ),
+                                                                  ],
                                                                   Container(
                                                                     width: MediaQuery.of(context)
                                                                             .size

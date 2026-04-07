@@ -10,6 +10,7 @@ import '../../controller/app_constant.dart';
 import '../../controller/app_font.dart';
 import '../../controller/app_footer.dart';
 import '../../controller/app_header.dart';
+import '../../controller/app_image.dart';
 import '../../controller/app_language.dart';
 import '../../controller/app_loader.dart';
 import '../../controller/app_shimmers.dart';
@@ -309,43 +310,60 @@ class _ManagePropertyScreenState extends State<ManagePropertyScreen>
 
               /// ADD BUTTON
               if (userType == 3 || (userType == 2 && manageProperty == 1))
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: size.width * 0.05,
-                  ),
-                  child: Align(
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AddPropertyScreen()));
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 90 / 100,
                     alignment: Alignment.centerRight,
-                    child: GestureDetector(
-                      onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const AddPropertyScreen())),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: size.width * 0.04,
-                          vertical: size.height * 0.008,
-                        ),
-                        decoration: BoxDecoration(
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 20 / 100,
+                      decoration: BoxDecoration(
                           color: AppColor.themeColor,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.add,
-                              size: 16,
-                              color: Colors.white,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: AppColor.textLightColor, // Shadow color
+                              blurRadius: 3.0, // Blur intensity
+                              offset: Offset(0, 5), // Moves shadow 5px down
                             ),
-                            SizedBox(width: size.width * 0.01),
+                          ],
+                          borderRadius: BorderRadius.circular(5)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: screenWidth > 600
+                                  ? MediaQuery.of(context).size.width * 4 / 100
+                                  : MediaQuery.of(context).size.width * 5 / 100,
+                              height: screenWidth > 600
+                                  ? MediaQuery.of(context).size.width * 4 / 100
+                                  : MediaQuery.of(context).size.width * 5 / 100,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(100),
+                                child: Image.asset(
+                                  AppImage.addIcon,
+                                  color: AppColor.secondaryColor,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width:
+                                  MediaQuery.of(context).size.width * 1 / 100,
+                            ),
                             Text(
                               AppLanguage.addText[language],
                               style: const TextStyle(
-                                fontSize: 13,
-                                fontFamily: AppFont.fontFamily,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),
+                                  fontFamily: AppFont.fontFamily,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColor.secondaryColor),
                             ),
                           ],
                         ),
@@ -353,6 +371,51 @@ class _ManagePropertyScreenState extends State<ManagePropertyScreen>
                     ),
                   ),
                 ),
+
+              // Padding(
+              //   padding: EdgeInsets.symmetric(
+              //     horizontal: size.width * 0.05,
+              //   ),
+              //   child: Align(
+              //     alignment: Alignment.centerRight,
+              //     child: GestureDetector(
+              //       onTap: () => Navigator.push(
+              //           context,
+              //           MaterialPageRoute(
+              //               builder: (context) => const AddPropertyScreen())),
+              //       child: Container(
+              //         padding: EdgeInsets.symmetric(
+              //           horizontal: size.width * 0.04,
+              //           vertical: size.height * 0.008,
+              //         ),
+              //         decoration: BoxDecoration(
+              //           color: AppColor.themeColor,
+              //           borderRadius: BorderRadius.circular(8),
+              //         ),
+              //         child: Row(
+              //           mainAxisSize: MainAxisSize.min,
+              //           children: [
+              //             const Icon(
+              //               Icons.add,
+              //               size: 16,
+              //               color: Colors.white,
+              //             ),
+              //             SizedBox(width: size.width * 0.01),
+              //             Text(
+              //               AppLanguage.addText[language],
+              //               style: const TextStyle(
+              //                 fontSize: 13,
+              //                 fontFamily: AppFont.fontFamily,
+              //                 fontWeight: FontWeight.w500,
+              //                 color: Colors.white,
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
 
               SizedBox(height: size.height * 0.02),
 
@@ -372,79 +435,231 @@ class _ManagePropertyScreenState extends State<ManagePropertyScreen>
                               children: List.generate(
                                 propertyList.length,
                                 (index) {
-                                  return Container(
-                                    margin: EdgeInsets.only(
-                                      bottom: size.height * 0.02,
-                                    ),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: size.width * 0.04,
-                                      vertical: size.height * 0.02,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.08),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 3),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                propertyList[index][
-                                                        'property_name_english'] ??
-                                                    "",
-                                                style: const TextStyle(
-                                                  fontSize: 15,
-                                                  fontFamily:
-                                                      AppFont.fontFamily,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppColor.primaryColor,
-                                                ),
+                                  return Column(
+                                    children: [
+                                      Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              90 /
+                                              100,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                width: 1,
+                                                color: AppColor.boaderColor),
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                color: AppColor
+                                                    .textLightColor, // Shadow color
+                                                blurRadius:
+                                                    2.0, // Blur intensity
+                                                offset: Offset(0,
+                                                    5), // Moves shadow 5px down
                                               ),
-                                              SizedBox(
-                                                  height: size.height * 0.005),
-                                              Text(
-                                                propertyList[index][
-                                                        'property_type_name'] ??
-                                                    "",
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  fontFamily:
-                                                      AppFont.fontFamily,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                            ],
+                                            ], //BoxShadow
+                                            color: AppColor.secondaryColor,
+                                            borderRadius:
+                                                BorderRadius.circular(15),
                                           ),
-                                        ),
-                                        if (userType == 3 ||
-                                            (userType == 2 &&
-                                                manageProperty == 1))
-                                          GestureDetector(
-                                            onTap: () => optionsBottomSheet(
-                                                context,
-                                                screenWidth,
-                                                propertyList[index]
-                                                    ['property_id'],
-                                                propertyList[index]),
-                                            child: const Icon(
-                                              Icons.more_vert,
-                                              color: Colors.grey,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 6.0),
+                                            child: SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  80 /
+                                                  100,
+                                              child: Row(
+                                                children: [
+                                                  //left side
+                                                  SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            45 /
+                                                            100,
+                                                    child: Column(
+                                                      children: [
+                                                        SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              45 /
+                                                              100,
+                                                          child: Text(
+                                                            propertyList[index][
+                                                                    'property_name_english'] ??
+                                                                "",
+                                                            style: const TextStyle(
+                                                                fontSize: 20,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                                color: AppColor
+                                                                    .primaryColor,
+                                                                fontFamily: AppFont
+                                                                    .fontFamily),
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              45 /
+                                                              100,
+                                                          child: Text(
+                                                            propertyList[index][
+                                                                    'property_type_name'] ??
+                                                                "",
+                                                            style: const TextStyle(
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400,
+                                                                color: AppColor
+                                                                    .primaryColor,
+                                                                fontFamily: AppFont
+                                                                    .fontFamily),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+
+                                                  //right side
+                                                  Container(
+                                                    alignment:
+                                                        Alignment.centerRight,
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            35 /
+                                                            100,
+                                                    child: Row(
+                                                      children: [
+                                                        const Spacer(),
+                                                        if (userType == 3 ||
+                                                            (userType == 2 &&
+                                                                manageProperty ==
+                                                                    1))
+                                                          GestureDetector(
+                                                            onTap: () =>
+                                                                optionsBottomSheet(
+                                                                    context,
+                                                                    screenWidth,
+                                                                    propertyList[
+                                                                            index]
+                                                                        [
+                                                                        'property_id'],
+                                                                    propertyList[
+                                                                        index]),
+                                                            child: const Icon(
+                                                              Icons.more_vert,
+                                                              color:
+                                                                  Colors.black,
+                                                            ),
+                                                          ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                      ],
-                                    ),
+                                          )),
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                3 /
+                                                100,
+                                      ),
+                                    ],
                                   );
+
+                                  // Container(
+                                  //   margin: EdgeInsets.only(
+                                  //     bottom: size.height * 0.02,
+                                  //   ),
+                                  //   padding: EdgeInsets.symmetric(
+                                  //     horizontal: size.width * 0.04,
+                                  //     vertical: size.height * 0.02,
+                                  //   ),
+                                  //   alignment: Alignment.center,
+                                  //   decoration: BoxDecoration(
+                                  //     border: Border.all(
+                                  //         width: 1,
+                                  //         color: AppColor.boaderColor),
+                                  //     boxShadow: const [
+                                  //       BoxShadow(
+                                  //         color: AppColor
+                                  //             .textLightColor, // Shadow color
+                                  //         blurRadius: 2.0, // Blur intensity
+                                  //         offset: Offset(
+                                  //             0, 5), // Moves shadow 5px down
+                                  //       ),
+                                  //     ], //BoxShadow
+                                  //     color: AppColor.secondaryColor,
+                                  //     borderRadius: BorderRadius.circular(15),
+                                  //   ),
+                                  //   child: Row(
+                                  //     children: [
+                                  //       Expanded(
+                                  //         child: Column(
+                                  //           crossAxisAlignment:
+                                  //               CrossAxisAlignment.start,
+                                  //           children: [
+                                  //             Text(
+                                  //               propertyList[index][
+                                  //                       'property_name_english'] ??
+                                  //                   "",
+                                  //               style: const TextStyle(
+                                  //                 fontSize: 15,
+                                  //                 fontFamily:
+                                  //                     AppFont.fontFamily,
+                                  //                 fontWeight: FontWeight.w600,
+                                  //                 color: AppColor.primaryColor,
+                                  //               ),
+                                  //             ),
+                                  //             SizedBox(
+                                  //                 height: size.height * 0.005),
+                                  //             Text(
+                                  //               propertyList[index][
+                                  //                       'property_type_name'] ??
+                                  //                   "",
+                                  //               style: const TextStyle(
+                                  //                 fontSize: 12,
+                                  //                 fontFamily:
+                                  //                     AppFont.fontFamily,
+                                  //                 fontWeight: FontWeight.w400,
+                                  //                 color: Colors.grey,
+                                  //               ),
+                                  //             ),
+                                  //           ],
+                                  //         ),
+                                  //       ),
+                                  //       if (userType == 3 ||
+                                  //           (userType == 2 &&
+                                  //               manageProperty == 1))
+                                  //         GestureDetector(
+                                  //           onTap: () => optionsBottomSheet(
+                                  //               context,
+                                  //               screenWidth,
+                                  //               propertyList[index]
+                                  //                   ['property_id'],
+                                  //               propertyList[index]),
+                                  //           child: const Icon(
+                                  //             Icons.more_vert,
+                                  //             color: Colors.grey,
+                                  //           ),
+                                  //         ),
+                                  //     ],
+                                  //   ),
+                                  // );
                                 },
                               ),
                             ),

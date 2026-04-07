@@ -230,7 +230,7 @@ class _OTPState extends State<ForgetOTPVerification> {
     );
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light));
+        statusBarIconBrightness: Brightness.dark));
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -244,13 +244,12 @@ class _OTPState extends State<ForgetOTPVerification> {
               child: Column(
                 children: [
                   SizedBox(
-                      height: MediaQuery.of(context).size.height * 1 / 100),
+                      height: MediaQuery.of(context).size.height * 2 / 100),
                   CustomAppHeader(
                       text: "",
                       onPress: () {
                         Navigator.pop(context);
                       }),
-                  
                   SizedBox(
                       height: MediaQuery.of(context).size.height * 6 / 100),
                   Expanded(
@@ -413,7 +412,7 @@ class _OTPState extends State<ForgetOTPVerification> {
                       ]),
                     ),
                   ),
-                    const NoInternetBanner(),
+                  const NoInternetBanner(),
                 ],
               )),
         ),

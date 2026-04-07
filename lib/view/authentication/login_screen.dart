@@ -168,7 +168,6 @@ class _LoginState extends State<Login> {
           setState(() {
             isApiCalling = false;
           });
-
         }
       } else {
         setState(() {
@@ -265,12 +264,17 @@ class _LoginState extends State<Login> {
             child: Container(
                 height: MediaQuery.of(context).size.height * 100 / 100,
                 width: MediaQuery.of(context).size.width * 100 / 100,
-                decoration: const BoxDecoration(
-                    color: AppColor.primaryColor,
-                    image: DecorationImage(
-                      image: AssetImage(AppImage.hatImage),
-                      fit: BoxFit.cover,
-                    )),
+                decoration: BoxDecoration(
+                  color: AppColor.primaryColor,
+                  image: DecorationImage(
+                    image: AssetImage(AppImage.newSplash),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.4),
+                      BlendMode.darken,
+                    ),
+                  ),
+                ),
                 child: Column(
                   children: [
                     Expanded(
@@ -606,8 +610,6 @@ class _LoginState extends State<Login> {
                                   MediaQuery.of(context).size.height * 6 / 100,
                             ),
 
-                         
-
                             //Contact Admin
                             GestureDetector(
                               onTap: () {
@@ -798,7 +800,6 @@ class _LoginState extends State<Login> {
                                                                 .width *
                                                             5 /
                                                             100,
-                                                  
                                                     child: languageList[index]
                                                                 ["id"] ==
                                                             languageId

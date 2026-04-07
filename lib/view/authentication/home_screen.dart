@@ -32,7 +32,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  static const String _baseUrl = 'https://!api.open-meteo.com/v1/forecast';
+  static const String _baseUrl = 'https://api.open-meteo.com/v1/forecast';
   int toggleStatus = 1;
   int status = 1;
   List<dynamic> ongoingTripsList = <dynamic>[];
@@ -401,12 +401,14 @@ class _HomeScreenState extends State<HomeScreen> {
         'timezone=auto&'
         'apikey=${AppConstant.weatherKey}');
 
+    log("uri $uri");
+
     try {
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        //! log("weatherData: $data");
+        log("weatherData: $data");
         log("getCurrentTemperature${getCurrentWeatherData(data)}");
         temperatureData = getCurrentWeatherData(data);
         AppConstant.temperature =
@@ -637,6 +639,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await Future.delayed(const Duration(seconds: 1));
     getUserDetails();
     getPropertyDetailsApiCall(userId);
+    fetchLocation();
     return null;
   }
 

@@ -99,10 +99,10 @@ class _EditPropertyAdSecondScreenState
   List<Map<String, dynamic>> offerings = [];
   final Set<String> selectedOfferings = <String>{};
   // List<dynamic> selectedOfferings = [];
-  bool oneDay = true;
-  bool weekend = true;
-  bool weekday = true;
-  bool fullweek = true;
+  bool oneDay = false;
+  bool weekend = false;
+  bool weekday = false;
+  bool fullweek = false;
   int isToggle = 1;
 
   @override
@@ -119,18 +119,18 @@ class _EditPropertyAdSecondScreenState
     if (oneDay) {
       oneDayController.text = data['one_day_price']?.toString() ?? '';
     }
-    // weekend = data['weekend_active'] == 1;
-    weekend = true;
+    weekend = data['weekend_active'] == 1;
+    // weekend = true;
     if (weekend) {
       weekendController.text = data['weekend_price']?.toString() ?? '';
     }
-    // weekday = data['weekday_active'] == 1;
-    weekday = true;
+    weekday = data['weekday_active'] == 1;
+    // weekday = true;
     if (weekday) {
       weekDayController.text = data['weekday_price']?.toString() ?? '';
     }
-    // fullweek = data['full_week_active'] == 1;
-    fullweek = true;
+    fullweek = data['full_week_active'] == 1;
+    // fullweek = true;
     if (fullweek) {
       fullWeekController.text = data['full_week_price']?.toString() ?? '';
     }
@@ -172,13 +172,11 @@ class _EditPropertyAdSecondScreenState
       SnackBarToastMessage.showSnackBar(
           context, AppLanguage.selectOnePriceBoxMsg[language]);
       return;
-    }
-    //  else if (oneDay && oneDayController.text.trim().isEmpty) {
-    //   SnackBarToastMessage.showSnackBar(
-    //       context, AppLanguage.enterAllThePriceMsg[language]);
-    //   return;
-    // }
-    else if (weekday && weekDayController.text.trim().isEmpty) {
+    } else if (oneDay && oneDayController.text.trim().isEmpty) {
+      SnackBarToastMessage.showSnackBar(
+          context, AppLanguage.enterAllThePriceMsg[language]);
+      return;
+    } else if (weekday && weekDayController.text.trim().isEmpty) {
       SnackBarToastMessage.showSnackBar(
           context, AppLanguage.enterAllThePriceMsg[language]);
       return;
@@ -560,16 +558,17 @@ class _EditPropertyAdSecondScreenState
                         ),
                         SizedBox(height: size.height * 0.015),
 
-                        // _buildPriceRow(
-                        //   label: AppLanguage.oneDayText[language],
-                        //   // subLabel: "",
-                        //   value: oneDay,
-                        //   onChanged: (val) => setState(() => oneDay = val!),
-                        //   controller: oneDayController,
-                        //   readOnly: !oneDay,
-                        //   size: size,
-                        // ),
-                        // SizedBox(height: size.height * 0.015),
+                        _buildPriceRow(
+                          label: AppLanguage.oneDayText[language],
+                          // subLabel: "",
+                          isWeek: true,
+                          value: oneDay,
+                          onChanged: (val) => setState(() => oneDay = val!),
+                          controller: oneDayController,
+                          readOnly: !oneDay,
+                          size: size,
+                        ),
+                        SizedBox(height: size.height * 0.015),
 
                         _buildPriceRow(
                             label: AppLanguage.weekDaysText[language],
@@ -578,7 +577,7 @@ class _EditPropertyAdSecondScreenState
                             controller: weekDayController,
                             readOnly: !weekday,
                             size: size,
-                            isWeek: false),
+                            isWeek: true),
                         SizedBox(height: size.height * 0.015),
 
                         // Weekend
@@ -589,7 +588,7 @@ class _EditPropertyAdSecondScreenState
                             controller: weekendController,
                             readOnly: !weekend,
                             size: size,
-                            isWeek: false),
+                            isWeek: true),
                         SizedBox(height: size.height * 0.015),
 
                         // Saturday
@@ -977,25 +976,25 @@ class _EditPropertyAdSecondScreenState
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Transform.scale(
-            //   scale: 1,
-            //   child: SizedBox(
-            //     width: checkboxSize,
-            //     height: checkboxSize,
-            //     child: Checkbox(
-            //       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            //       value: value,
-            //       onChanged: onChanged,
-            //       activeColor: AppColor.themeColor,
-            //       side: const BorderSide(
-            //         color: AppColor.themeColor,
-            //         width: 1.5,
-            //       ),
-            //       checkColor: Colors.white,
-            //     ),
-            //   ),
-            // ),
-            // SizedBox(width: size.width * 0.02),
+            Transform.scale(
+              scale: 1,
+              child: SizedBox(
+                width: checkboxSize,
+                height: checkboxSize,
+                child: Checkbox(
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  value: value,
+                  onChanged: onChanged,
+                  activeColor: AppColor.themeColor,
+                  side: const BorderSide(
+                    color: AppColor.themeColor,
+                    width: 1.5,
+                  ),
+                  checkColor: Colors.white,
+                ),
+              ),
+            ),
+            SizedBox(width: size.width * 0.02),
             Expanded(
               child: Text(
                 label,

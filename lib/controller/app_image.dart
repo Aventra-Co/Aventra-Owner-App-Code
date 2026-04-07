@@ -139,4 +139,5 @@ class AppImage {
   static const adsActive = './assets/icons/ic_ac_ads.png';
   static const bookingsActive = './assets/icons/ic_ac_bookings.png';
   static const bookingDeactive = './assets/icons/ic_de_bookings.png';
+  static const newSplash = './assets/icons/new_splash.png';
 }

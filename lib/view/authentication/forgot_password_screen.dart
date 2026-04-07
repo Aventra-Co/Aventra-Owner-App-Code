@@ -134,11 +134,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Container(
                 height: MediaQuery.of(context).size.height * 100 / 100,
                 width: MediaQuery.of(context).size.width * 100 / 100,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                     color: AppColor.primaryColor,
                     image: DecorationImage(
-                        image: AssetImage(AppImage.loginPageImage),
-                        fit: BoxFit.cover)),
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.4),
+                        BlendMode.darken,
+                      ),
+                      image: AssetImage(AppImage.newSplash),
+                      fit: BoxFit.cover,
+                    )),
                 child: Column(
                   children: [
                     SizedBox(

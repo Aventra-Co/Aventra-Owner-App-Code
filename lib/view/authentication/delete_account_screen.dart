@@ -238,8 +238,8 @@ class _ContactAdminState extends State<DeleteAccount> {
                       AppButton(
                           text: AppLanguage.sendText[language],
                           onPress: () {
-                            Navigator.pop(context);
-                            // reasonValidation(messageTextEditingController.text);
+                            // Navigator.pop(context);
+                            reasonValidation(messageTextEditingController.text);
                           }),
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 5 / 100),

@@ -262,7 +262,7 @@ class _SplashState extends State<Splash> {
         decoration: const BoxDecoration(
           color: AppColor.primaryColor,
           image: DecorationImage(
-            image: AssetImage(AppImage.hatImage),
+            image: AssetImage(AppImage.newSplash),
             fit: BoxFit.cover,
           ),
         ),

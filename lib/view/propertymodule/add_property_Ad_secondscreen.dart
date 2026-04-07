@@ -93,10 +93,10 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
   List<Map<String, dynamic>> offerings = [];
   final Set<String> selectedOfferings = <String>{};
   // List<dynamic> selectedOfferings = [];
-  bool oneDay = true;
-  bool weekend = true;
-  bool weekday = true;
-  bool fullweek = true;
+  bool oneDay = false;
+  bool weekend = false;
+  bool weekday = false;
+  bool fullweek = false;
   int isToggle = 0;
 
   @override
@@ -133,13 +133,11 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
       SnackBarToastMessage.showSnackBar(
           context, AppLanguage.selectOnePriceBoxMsg[language]);
       return;
-    }
-    // else if (oneDay && oneDayController.text.trim().isEmpty) {
-    //   SnackBarToastMessage.showSnackBar(
-    //       context, AppLanguage.enterAllThePriceMsg[language]);
-    //   return;
-    // }
-    else if (weekday && weekDayController.text.trim().isEmpty) {
+    } else if (oneDay && oneDayController.text.trim().isEmpty) {
+      SnackBarToastMessage.showSnackBar(
+          context, AppLanguage.enterAllThePriceMsg[language]);
+      return;
+    } else if (weekday && weekDayController.text.trim().isEmpty) {
       SnackBarToastMessage.showSnackBar(
           context, AppLanguage.enterAllThePriceMsg[language]);
       return;
@@ -506,16 +504,16 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
                         ),
                         SizedBox(height: size.height * 0.015),
 
-                        // _buildPriceRow(
-                        //   label: AppLanguage.oneDayText[language],
-                        //   // subLabel: "",
-                        //   value: oneDay,
-                        //   onChanged: (val) => setState(() => oneDay = val!),
-                        //   controller: oneDayController,
-                        //   readOnly: !oneDay,
-                        //   size: size,
-                        // ),
-                        // SizedBox(height: size.height * 0.015),
+                        _buildPriceRow(
+                            label: AppLanguage.oneDayText[language],
+                            // subLabel: "",
+                            value: oneDay,
+                            onChanged: (val) => setState(() => oneDay = val!),
+                            controller: oneDayController,
+                            readOnly: !oneDay,
+                            size: size,
+                            isWeek: true),
+                        SizedBox(height: size.height * 0.015),
 
                         _buildPriceRow(
                             label: AppLanguage.weekDaysText[language],
@@ -524,7 +522,7 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
                             controller: weekDayController,
                             readOnly: !weekday,
                             size: size,
-                            isWeek: false),
+                            isWeek: true),
                         SizedBox(height: size.height * 0.015),
 
                         // Weekend
@@ -535,7 +533,7 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
                             controller: weekendController,
                             readOnly: !weekend,
                             size: size,
-                            isWeek: false),
+                            isWeek: true),
                         SizedBox(height: size.height * 0.015),
 
                         // Saturday
@@ -923,25 +921,25 @@ class _AddPropertyAdSecondScreenState extends State<AddPropertyAdSecondScreen> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Transform.scale(
-            //   scale: 1,
-            //   child: SizedBox(
-            //     width: checkboxSize,
-            //     height: checkboxSize,
-            //     child: Checkbox(
-            //       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            //       value: value,
-            //       onChanged: onChanged,
-            //       activeColor: AppColor.themeColor,
-            //       side: const BorderSide(
-            //         color: AppColor.themeColor,
-            //         width: 1.5,
-            //       ),
-            //       checkColor: Colors.white,
-            //     ),
-            //   ),
-            // ),
-            // SizedBox(width: size.width * 0.02),
+            Transform.scale(
+              scale: 1,
+              child: SizedBox(
+                width: checkboxSize,
+                height: checkboxSize,
+                child: Checkbox(
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  value: value,
+                  onChanged: onChanged,
+                  activeColor: AppColor.themeColor,
+                  side: const BorderSide(
+                    color: AppColor.themeColor,
+                    width: 1.5,
+                  ),
+                  checkColor: Colors.white,
+                ),
+              ),
+            ),
+            SizedBox(width: size.width * 0.02),
             Expanded(
               child: Text(
                 label,
