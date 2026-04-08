@@ -1637,4 +1637,5 @@ class AppLanguage {
     "No property found",
     "لم يتم العثور على عقار",
   ];
+  static const seaReportText = ["Sea Report", "تقرير البحر"];
 }

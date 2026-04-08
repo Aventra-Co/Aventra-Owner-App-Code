@@ -390,9 +390,8 @@ class _PropertyAdvertisementScreenState
                                 _detailRow(
                                     "${AppLanguage.guardText[language]}:",
                                     adDetails['guard_name_english']),
-                                // _detailRow(AppLanguage.oneDayText[language],
-                                //     "${adDetails['one_day_active'] == 1 ? adDetails['one_day_price']?.toString() : "NA"} ${adDetails['one_day_active'] == 1 ? "KWD" : ""}"),
-
+                                _detailRow(AppLanguage.oneDayText[language],
+                                    "${adDetails['one_day_active'] == 1 ? adDetails['one_day_price']?.toString() : "NA"} ${adDetails['one_day_active'] == 1 ? "KWD" : ""}"),
                                 _detailRow(AppLanguage.weekdayText[language],
                                     "${adDetails['weekday_active'] == 1 ? adDetails['weekday_price']?.toString() : "NA"} ${adDetails['weekday_active'] == 1 ? "KWD" : ""}"),
                                 _detailRow(AppLanguage.weekendText[language],

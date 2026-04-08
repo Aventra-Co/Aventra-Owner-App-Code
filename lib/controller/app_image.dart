@@ -140,4 +140,14 @@ class AppImage {
   static const bookingsActive = './assets/icons/ic_ac_bookings.png';
   static const bookingDeactive = './assets/icons/ic_de_bookings.png';
   static const newSplash = './assets/icons/new_splash.png';
+  static const humidityImage = './assets/icons/humidity_image.png';
+  static const seaReportImage = './assets/icons/sea_report_image.png';
+  static const temperatureImage = './assets/icons/temperature_image.png';
+  static const tideImage = './assets/icons/tide_image.png';
+  static const waveHeightImage = './assets/icons/wave_height_image.png';
+  static const waveImage = './assets/icons/waveImage.png';
+  static const windDirectionImage = './assets/icons/wind_direction_image.png';
+  static const locationImage = './assets/icons/location_image.png';
+  static const dateImage = './assets/icons/date_image.png';
+    static const weatherBg = './assets/icons/weather_bg_image.png';
 }

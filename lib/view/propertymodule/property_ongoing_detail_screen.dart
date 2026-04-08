@@ -707,7 +707,7 @@ class _PropertyDetailsScreenState extends State<PropertyOngoinDetailsScreen> {
                                     ),
                                   if (bookingDetails['coupon_code'] != null &&
                                       bookingDetails['coupon_code'] != "NA" &&
-                                      bookingDetails['coupon_code'] != "NA")
+                                      bookingDetails['coupon_code'].isNotEmpty)
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [

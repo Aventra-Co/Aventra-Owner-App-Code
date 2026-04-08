@@ -12,6 +12,7 @@ import '../../controller/app_language.dart';
 import '../../controller/app_loader.dart';
 import '../../controller/app_snack_bar_toast_message.dart';
 import 'dart:ui' as ui;
+import '../../controller/app_image.dart';
 
 class WeatherScreen extends StatefulWidget {
   static String routeName = './WeatherScreen';
@@ -350,163 +351,279 @@ class WeatherScreenState extends State<WeatherScreen> {
     return GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-          backgroundColor: AppColor.secondaryColor,
-          body: SafeArea(
-            child: Directionality(
-              textDirection:
-                  language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
-              child: Container(
-                height: screenHeight,
-                width: screenWidth,
-                color: AppColor.secondaryColor,
-                child: Column(children: [
-                  CustomAppHeader(
-                      text: AppLanguage.weatherReportText[language],
-                      onPress: () {
-                        Navigator.pop(context);
-                      }),
+          backgroundColor: Colors.transparent,
+          body: Directionality(
+            textDirection:
+                language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+            child: SizedBox(
+              height: screenHeight,
+              width: screenWidth,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Image.asset(
+                      AppImage.weatherBg,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 4 / 100,
+                        ),
 
-                  SizedBox(height: screenHeight * 2 / 100),
+                        CustomAppHeader(
+                            text: "",
+                            onPress: () {
+                              Navigator.pop(context);
+                            }),
+                        // SizedBox(height: screenHeight * 2 / 100),
 
-                  // *** ADD: Error state ***
-                  if (!isApiCalling && _errorMessage != null)
-                    Expanded(
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.cloud_off,
-                                  size: 60, color: AppColor.primaryColor),
-                              const SizedBox(height: 16),
-                              Text(
-                                _errorMessage!,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontFamily: AppFont.fontFamily,
-                                  fontSize: 14,
-                                  color: AppColor.primaryColor,
+                        // *** ADD: Error state ***
+                        if (!isApiCalling && _errorMessage != null)
+                          Expanded(
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.cloud_off,
+                                        size: 60, color: AppColor.primaryColor),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      _errorMessage!,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontFamily: AppFont.fontFamily,
+                                        fontSize: 14,
+                                        color: AppColor.primaryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          isApiCalling = true;
+                                          _errorMessage = null;
+                                        });
+                                        fetchLocation();
+                                      },
+                                      child: const Text('Retry'),
+                                    )
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 24),
-                              ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    isApiCalling = true;
-                                    _errorMessage = null;
-                                  });
-                                  fetchLocation();
-                                },
-                                child: const Text('Retry'),
-                              )
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
 
-                  if (!isApiCalling &&
-                      _errorMessage == null &&
-                      weatherData != null)
-                    Expanded(
-                      flex: 1,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              width: screenWidth * 90 / 100,
-                              child: Row(
+                        if (!isApiCalling &&
+                            _errorMessage == null &&
+                            weatherData != null)
+                          Expanded(
+                            flex: 1,
+                            child: SingleChildScrollView(
+                              child: Column(
                                 children: [
-                                  // Labels column
-                                  Container(
-                                    width: screenWidth * 30 / 100,
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                        top: BorderSide(width: 1),
-                                        left: BorderSide(width: 1),
-                                        right: BorderSide(width: 1),
-                                        bottom: BorderSide(width: 1),
+                                  // Sea Report Header
+                                  Center(
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          90 /
+                                          100,
+                                      decoration: BoxDecoration(
+                                          borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(10),
+                                              topRight: Radius.circular(10)),
+                                          color: Colors.white.withOpacity(.6)),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  15 /
+                                                  100,
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  15 /
+                                                  100,
+                                              child: Image.asset(
+                                                  AppImage.seaReportImage)),
+                                          // const SizedBox(width: 5),
+                                          Text(
+                                            AppLanguage.seaReportText[language],
+                                            style: const TextStyle(
+                                                fontFamily: AppFont.fontFamily,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColor.primaryColor),
+                                          ),
+                                        ],
                                       ),
-                                      color: AppColor.secondaryColor,
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        _labelCell(screenWidth, screenHeight,
-                                            AppLanguage.dateText[language]),
-                                        _labelCell(screenWidth, screenHeight,
-                                            AppLanguage.locationText[language]),
-                                        _labelCell(
-                                            screenWidth,
-                                            screenHeight,
-                                            AppLanguage
-                                                .windSpeedText[language]),
-                                        _labelCell(
-                                            screenWidth,
-                                            screenHeight,
-                                            AppLanguage
-                                                .windDirectionText[language]),
-                                        _labelCell(
-                                            screenWidth,
-                                            screenHeight,
-                                            AppLanguage
-                                                .waveHeightText[language]),
-                                        _labelCell(screenWidth, screenHeight,
-                                            "${AppLanguage.temperatureText[language]} (\u1d52C)"),
-                                        _labelCell(screenWidth, screenHeight,
-                                            "${AppLanguage.humidityText[language]} (%)"),
-                                        _labelCell(
-                                            screenWidth,
-                                            screenHeight,
-                                            AppLanguage
-                                                .tideHeightText[language],
-                                            isLast: true),
-                                      ],
                                     ),
                                   ),
+                                  Center(
+                                    child: SizedBox(
+                                      width: screenWidth * 90 / 100,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          // Labels column
+                                          Container(
+                                            width: screenWidth * 30 / 100,
+                                            decoration: BoxDecoration(
+                                              border: const Border(
+                                                top: BorderSide(width: 1),
+                                                left: BorderSide(width: 1),
+                                                right: BorderSide(width: 1),
+                                                bottom: BorderSide(width: 1),
+                                              ),
+                                              color: AppColor.secondaryColor
+                                                  .withOpacity(.6),
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                _labelCell(
+                                                  screenWidth,
+                                                  screenHeight,
+                                                  AppLanguage
+                                                      .dateText[language],
+                                                  AppImage.dateImage,
+                                                ),
+                                                _labelCell(
+                                                  screenWidth,
+                                                  screenHeight,
+                                                  AppLanguage
+                                                      .locationText[language],
+                                                  AppImage.locationImage,
+                                                ),
+                                                _labelCell(
+                                                  screenWidth,
+                                                  screenHeight,
+                                                  AppLanguage
+                                                      .windSpeedText[language],
+                                                  AppImage.waveImage,
+                                                ),
+                                                _labelCell(
+                                                  screenWidth,
+                                                  screenHeight,
+                                                  AppLanguage.windDirectionText[
+                                                      language],
+                                                  AppImage.windDirectionImage,
+                                                ),
+                                                _labelCell(
+                                                  screenWidth,
+                                                  screenHeight,
+                                                  AppLanguage
+                                                      .waveHeightText[language],
+                                                  AppImage.waveHeightImage,
+                                                ),
+                                                _labelCell(
+                                                  screenWidth,
+                                                  screenHeight,
+                                                  "${AppLanguage.temperatureText[language]} (\u1d52C)",
+                                                  AppImage.temperatureImage,
+                                                ),
+                                                _labelCell(
+                                                  screenWidth,
+                                                  screenHeight,
+                                                  "${AppLanguage.humidityText[language]} (%)",
+                                                  AppImage.humidityImage,
+                                                ),
+                                                _labelCell(
+                                                  screenWidth,
+                                                  screenHeight,
+                                                  AppLanguage
+                                                      .tideHeightText[language],
+                                                  AppImage.tideImage,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
 
-                                  // Today
-                                  _dayColumn(screenWidth, screenHeight,
-                                      weatherData['today']),
-                                  // Tomorrow
-                                  _dayColumn(screenWidth, screenHeight,
-                                      weatherData['tomorrow']),
-                                  // Day After Tomorrow
-                                  _dayColumn(screenWidth, screenHeight,
-                                      weatherData['dayAfterTomorrow']),
+                                          // Today
+                                          _dayColumn(screenWidth, screenHeight,
+                                              weatherData['today']),
+                                          // Tomorrow
+                                          _dayColumn(screenWidth, screenHeight,
+                                              weatherData['tomorrow']),
+                                          // Day After Tomorrow
+                                          _dayColumn(screenWidth, screenHeight,
+                                              weatherData['dayAfterTomorrow']),
+                                        ],
+                                      ),
+                                    ),
+                                  )
                                 ],
                               ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                ]),
+                            ),
+                          ),
+                      ]),
+                ],
               ),
             ),
           ),
         ));
   }
 
-  Widget _labelCell(double screenWidth, double screenHeight, String text,
+  Widget _labelCell(
+      double screenWidth, double screenHeight, String text, String image,
       {bool isLast = false}) {
     return Container(
       alignment: language == 0 ? Alignment.centerLeft : Alignment.centerRight,
-      width: screenWidth * 30 / 100,
+      width: screenWidth * 40 / 100,
       height: screenHeight * 9 / 100,
       decoration: BoxDecoration(
         border: isLast ? null : const Border(bottom: BorderSide(width: 1)),
-        color: AppColor.secondaryColor,
+        color: AppColor.secondaryColor.withOpacity(.6),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Text(
-          text,
-          style: const TextStyle(
-              fontFamily: AppFont.fontFamily,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: AppColor.primaryColor),
+        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+        child: Row(
+          mainAxisAlignment:
+              language == 0 ? MainAxisAlignment.start : MainAxisAlignment.end,
+          children: language == 0
+              ? [
+                  if (image.isNotEmpty) ...[
+                    SizedBox(
+                        width: MediaQuery.of(context).size.width * 10 / 100,
+                        height: MediaQuery.of(context).size.width * 10 / 100,
+                        child: Image.asset(image)),
+                    // const SizedBox(width: 6),
+                  ],
+                  Flexible(
+                    child: Text(
+                      text,
+                      style: const TextStyle(
+                          fontFamily: AppFont.fontFamily,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColor.primaryColor),
+                    ),
+                  ),
+                ]
+              : [
+                  Flexible(
+                    child: Text(
+                      text,
+                      style: const TextStyle(
+                          fontFamily: AppFont.fontFamily,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColor.primaryColor),
+                    ),
+                  ),
+                  // if (icon != null) ...[
+                  //   const SizedBox(width: 6),
+                  //   Icon(icon, size: 16, color: AppColor.primaryColor),
+                  // ],
+                ],
         ),
       ),
     );
@@ -517,12 +634,12 @@ class WeatherScreenState extends State<WeatherScreen> {
     if (dayData == null) {
       return Container(
         width: screenWidth * 20 / 100,
-        decoration: const BoxDecoration(
-          border: Border(
+        decoration: BoxDecoration(
+          border: const Border(
               top: BorderSide(width: 1),
               right: BorderSide(width: 1),
               bottom: BorderSide(width: 1)),
-          color: AppColor.secondaryColor,
+          color: AppColor.secondaryColor.withOpacity(.6),
         ),
         child: const Center(child: Text('N/A')),
       );
@@ -530,12 +647,12 @@ class WeatherScreenState extends State<WeatherScreen> {
 
     return Container(
       width: screenWidth * 20 / 100,
-      decoration: const BoxDecoration(
-        border: Border(
+      decoration: BoxDecoration(
+        border: const Border(
             top: BorderSide(width: 1),
             right: BorderSide(width: 1),
             bottom: BorderSide(width: 1)),
-        color: AppColor.secondaryColor,
+        color: AppColor.secondaryColor.withOpacity(.6),
       ),
       child: Column(
         children: [
@@ -547,10 +664,14 @@ class WeatherScreenState extends State<WeatherScreen> {
           _dataCell(screenWidth, screenHeight,
               "${dayData['wind_direction_degree'] ?? ''}\u1d52"),
           _dataCell(
-              screenWidth, screenHeight, "${dayData['wave_height'] ?? 'N/A'}"),
+              screenWidth,
+              screenHeight,
+              dayData['wave_height'] == "N/A"
+                  ? "N/A"
+                  : "${dayData['wave_height']}m"),
           _dataCell(screenWidth, screenHeight,
               "${dayData['temperature'] ?? ''}\u1d52C"),
-          _dataCell(screenWidth, screenHeight, "${dayData['humidity'] ?? ''}"),
+          _dataCell(screenWidth, screenHeight, "${dayData['humidity'] ?? ''}%"),
           _dataCell(screenWidth, screenHeight,
               dayData['tide'] == 'N/A' ? 'N/A' : "${dayData['tide']}m",
               isLast: true),
@@ -566,7 +687,7 @@ class WeatherScreenState extends State<WeatherScreen> {
       height: screenHeight * 9 / 100,
       decoration: BoxDecoration(
         border: isLast ? null : const Border(bottom: BorderSide(width: 1)),
-        color: AppColor.secondaryColor,
+        color: AppColor.secondaryColor.withOpacity(.6),
       ),
       alignment: Alignment.center,
       child: Padding(

@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../chat/chat_screen.dart';
 // import '../../controller/app_button.dart';
+import '../../controller/app_button.dart';
 import '../../controller/app_color.dart';
 import '../../controller/app_config_provider.dart';
 import '../../controller/app_constant.dart';
@@ -732,15 +733,17 @@ class _PropertyUpcomingDetailsState extends State<PropertyUpcomingDetails> {
 
                           SizedBox(height: size.height * 0.03),
 
-                          //chat button
-                          // Center(
-                          //   child: AppButton(
-                          //       text: AppLanguage.chatText[language],
-                          //       onPress: () {
-                          //         navigateToChatScreen(
-                          //             bookingDetails['user_id'].toString());
-                          //       }),
-                          // ),
+                          // chat button
+                          Center(
+                            child: AppButton(
+                                text: AppLanguage.chatText[language],
+                                onPress: () {
+                                  navigateToChatScreen(
+                                      bookingDetails['user_id'].toString());
+                                }),
+                          ),
+
+                          SizedBox(height: size.height * 0.05),
 
                           // SizedBox(height: size.height * 0.05),
                           // Cancel Booking
