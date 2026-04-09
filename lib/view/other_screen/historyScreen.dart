@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -383,328 +383,399 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ],
                 ),
               ),
-
-              if (status == 2 && propBookingHistoryList.isNotEmpty) ...[
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 5 / 100,
-                ),
-                Wrap(
-                  children: [
-                    ...List.generate(propBookingHistoryList.length, (index) {
-                      return Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              if (propBookingHistoryList[index]
-                                      ['booking_status'] ==
-                                  2) {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            CompletedPropertyDetailsScreen(
-                                              propertyBookingId:
-                                                  propBookingHistoryList[index]
-                                                      ['property_booking_id'],
-                                              isCompleted: true,
-                                            )));
-                              }
-                              if (propBookingHistoryList[index]
-                                      ['booking_status'] ==
-                                  3) {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            CompletedPropertyDetailsScreen(
-                                              propertyBookingId:
-                                                  propBookingHistoryList[index]
-                                                      ['property_booking_id'],
-                                              isCompleted: false,
-                                            )));
-                              }
-                            },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        3 /
-                                        100),
-                                Container(
-                                  width: MediaQuery.of(context).size.width *
-                                      90 /
-                                      100,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 5),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Colors.white, width: 7.0),
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: AppColor.textLightColor,
-                                        blurRadius: 9.0,
-                                        offset: Offset(1, 0),
-                                      ),
-                                    ],
-                                    color: AppColor.secondaryColor,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        80 /
-                                        100,
-                                    child: Row(
-                                      children: [
-                                        /// IMAGE
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              17 /
-                                              100,
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              17 /
-                                              100,
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            child: propBookingHistoryList[index]
-                                                        ['cover_image'] !=
-                                                    null
-                                                ? Image.network(
-                                                    '${AppConfigProvider.imageURL}${propBookingHistoryList[index]['cover_image']}',
-                                                    fit: BoxFit.cover,
-                                                    loadingBuilder: (BuildContext
-                                                            context,
-                                                        Widget child,
-                                                        ImageChunkEvent?
-                                                            loadingProgress) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      } else {
-                                                        return Shimmer
-                                                            .fromColors(
-                                                          baseColor: Colors
-                                                              .grey.shade300,
-                                                          highlightColor: Colors
-                                                              .grey.shade100,
-                                                          child: Container(
-                                                            color: Colors
-                                                                .grey.shade300,
-                                                          ),
-                                                        );
-                                                      }
-                                                    },
-                                                  )
-                                                : Image.asset(
-                                                    AppImage.imageFrame,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                          ),
-                                        ),
-
-                                        SizedBox(
+              if (status == 2)
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 5 / 100,
+                        ),
+                        if (propBookingHistoryList.isNotEmpty)
+                          Wrap(
+                            children: [
+                              ...List.generate(propBookingHistoryList.length,
+                                  (index) {
+                                return Column(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        if (propBookingHistoryList[index]
+                                                ['booking_status'] ==
+                                            2) {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      CompletedPropertyDetailsScreen(
+                                                        propertyBookingId:
+                                                            propBookingHistoryList[
+                                                                    index][
+                                                                'property_booking_id'],
+                                                        isCompleted: true,
+                                                      )));
+                                        }
+                                        if (propBookingHistoryList[index]
+                                                ['booking_status'] ==
+                                            3) {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      CompletedPropertyDetailsScreen(
+                                                        propertyBookingId:
+                                                            propBookingHistoryList[
+                                                                    index][
+                                                                'property_booking_id'],
+                                                        isCompleted: false,
+                                                      )));
+                                        }
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  3 /
+                                                  100),
+                                          Container(
                                             width: MediaQuery.of(context)
                                                     .size
                                                     .width *
-                                                2 /
-                                                100),
-
-                                        /// LEFT SIDE
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              42 /
-                                              100,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                propBookingHistoryList[index][
-                                                        'property_name_english'] ??
-                                                    '',
-                                                style: const TextStyle(
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w500,
-                                                    color:
-                                                        AppColor.primaryColor,
-                                                    fontFamily:
-                                                        AppFont.fontFamily),
-                                              ),
-                                              Text(
-                                                propBookingHistoryList[index][
-                                                            'property_type_name']
-                                                        [language] ??
-                                                    '',
-                                                style: const TextStyle(
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: AppColor.textColor,
-                                                    fontFamily:
-                                                        AppFont.fontFamily),
-                                              ),
-                                              SizedBox(
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .height *
-                                                      .5 /
-                                                      100),
-                                              Text(
-                                                "#${propBookingHistoryList[index]['booking_random_id']?.toString() ?? ''}",
-                                                style: const TextStyle(
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w500,
-                                                    color:
-                                                        AppColor.primaryColor,
-                                                    fontFamily:
-                                                        AppFont.fontFamily),
-                                              ),
-                                              SizedBox(
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .height *
-                                                      .5 /
-                                                      100),
-                                              Text(
-                                                propBookingHistoryList[index]
-                                                        ['checkin_date'] ??
-                                                    "",
-                                                style: const TextStyle(
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: AppColor.textColor,
-                                                    fontFamily:
-                                                        AppFont.fontFamily),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-
-                                        const Spacer(),
-
-                                        /// RIGHT SIDE
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              23 /
-                                              100,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              // const Text(
-                                              //   "KWD",
-                                              //   style: TextStyle(
-                                              //       fontSize: 14,
-                                              //       fontWeight: FontWeight.w500,
-                                              //       color: AppColor.cyan,
-                                              //       fontFamily:
-                                              //           AppFont.fontFamily),
-                                              // ),
-                                              Text(
-                                                "KWD ${propBookingHistoryList[index]['total_amount']}",
-                                                style: const TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: AppColor.cyan,
-                                                    fontFamily:
-                                                        AppFont.fontFamily),
-                                              ),
-                                              SizedBox(
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .height *
-                                                      1 /
-                                                      100),
-                                              Container(
-                                                alignment: Alignment.center,
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    23 /
-                                                    100,
-                                                decoration: BoxDecoration(
-                                                  color: propBookingHistoryList[
-                                                                  index][
-                                                              'booking_status'] ==
-                                                          2
-                                                      ? AppColor.themeColor
-                                                      : Colors.red,
-                                                  borderRadius:
-                                                      BorderRadius.circular(25),
+                                                90 /
+                                                100,
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 5),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Colors.white,
+                                                  width: 7.0),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color:
+                                                      AppColor.textLightColor,
+                                                  blurRadius: 9.0,
+                                                  offset: Offset(1, 0),
                                                 ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(vertical: 4),
-                                                  child: Text(
-                                                    propBookingHistoryList[
-                                                                    index][
-                                                                'booking_status'] ==
-                                                            2
-                                                        ? AppLanguage
-                                                                .completedText[
-                                                            language]
-                                                        : AppLanguage
-                                                                .cancelledText[
-                                                            language],
-                                                    style: const TextStyle(
-                                                        fontSize: 10,
-                                                        color: AppColor
-                                                            .secondaryColor,
-                                                        fontFamily:
-                                                            AppFont.fontFamily,
-                                                        fontWeight:
-                                                            FontWeight.w600),
+                                              ],
+                                              color: AppColor.secondaryColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  80 /
+                                                  100,
+                                              child: Row(
+                                                children: [
+                                                  /// IMAGE
+                                                  SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            17 /
+                                                            100,
+                                                    height:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            17 /
+                                                            100,
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                      child: propBookingHistoryList[
+                                                                      index][
+                                                                  'cover_image'] !=
+                                                              null
+                                                          ? Image.network(
+                                                              '${AppConfigProvider.imageURL}${propBookingHistoryList[index]['cover_image']}',
+                                                              fit: BoxFit.cover,
+                                                              loadingBuilder:
+                                                                  (BuildContext
+                                                                          context,
+                                                                      Widget
+                                                                          child,
+                                                                      ImageChunkEvent?
+                                                                          loadingProgress) {
+                                                                if (loadingProgress ==
+                                                                    null) {
+                                                                  return child;
+                                                                } else {
+                                                                  return Shimmer
+                                                                      .fromColors(
+                                                                    baseColor: Colors
+                                                                        .grey
+                                                                        .shade300,
+                                                                    highlightColor:
+                                                                        Colors
+                                                                            .grey
+                                                                            .shade100,
+                                                                    child:
+                                                                        Container(
+                                                                      color: Colors
+                                                                          .grey
+                                                                          .shade300,
+                                                                    ),
+                                                                  );
+                                                                }
+                                                              },
+                                                            )
+                                                          : Image.asset(
+                                                              AppImage
+                                                                  .imageFrame,
+                                                              fit: BoxFit.cover,
+                                                            ),
+                                                    ),
                                                   ),
-                                                ),
-                                              )
-                                            ],
+
+                                                  SizedBox(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              2 /
+                                                              100),
+
+                                                  /// LEFT SIDE
+                                                  SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            42 /
+                                                            100,
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          propBookingHistoryList[
+                                                                      index][
+                                                                  'property_name_english'] ??
+                                                              '',
+                                                          style: const TextStyle(
+                                                              fontSize: 13,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: AppColor
+                                                                  .primaryColor,
+                                                              fontFamily: AppFont
+                                                                  .fontFamily),
+                                                        ),
+                                                        Text(
+                                                          propBookingHistoryList[
+                                                                          index]
+                                                                      [
+                                                                      'property_type_name']
+                                                                  [language] ??
+                                                              '',
+                                                          style: const TextStyle(
+                                                              fontSize: 10,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: AppColor
+                                                                  .textColor,
+                                                              fontFamily: AppFont
+                                                                  .fontFamily),
+                                                        ),
+                                                        SizedBox(
+                                                            height: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .height *
+                                                                .5 /
+                                                                100),
+                                                        Text(
+                                                          "#${propBookingHistoryList[index]['booking_random_id']?.toString() ?? ''}",
+                                                          style: const TextStyle(
+                                                              fontSize: 10,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: AppColor
+                                                                  .primaryColor,
+                                                              fontFamily: AppFont
+                                                                  .fontFamily),
+                                                        ),
+                                                        SizedBox(
+                                                            height: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .height *
+                                                                .5 /
+                                                                100),
+                                                        Text(
+                                                          propBookingHistoryList[
+                                                                      index][
+                                                                  'checkin_date'] ??
+                                                              "",
+                                                          style: const TextStyle(
+                                                              fontSize: 10,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: AppColor
+                                                                  .textColor,
+                                                              fontFamily: AppFont
+                                                                  .fontFamily),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+
+                                                  const Spacer(),
+
+                                                  /// RIGHT SIDE
+                                                  SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            23 /
+                                                            100,
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .end,
+                                                      children: [
+                                                        Text(
+                                                          "KWD ${propBookingHistoryList[index]['total_amount']}",
+                                                          style: const TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color:
+                                                                  AppColor.cyan,
+                                                              fontFamily: AppFont
+                                                                  .fontFamily),
+                                                        ),
+                                                        SizedBox(
+                                                            height: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .height *
+                                                                1 /
+                                                                100),
+                                                        Container(
+                                                          alignment:
+                                                              Alignment.center,
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              23 /
+                                                              100,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: propBookingHistoryList[
+                                                                            index]
+                                                                        [
+                                                                        'booking_status'] ==
+                                                                    2
+                                                                ? AppColor
+                                                                    .themeColor
+                                                                : Colors.red,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        25),
+                                                          ),
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical:
+                                                                        4),
+                                                            child: Text(
+                                                              propBookingHistoryList[
+                                                                              index]
+                                                                          [
+                                                                          'booking_status'] ==
+                                                                      2
+                                                                  ? AppLanguage
+                                                                          .completedText[
+                                                                      language]
+                                                                  : AppLanguage
+                                                                          .cancelledText[
+                                                                      language],
+                                                              style: const TextStyle(
+                                                                  fontSize: 10,
+                                                                  color: AppColor
+                                                                      .secondaryColor,
+                                                                  fontFamily:
+                                                                      AppFont
+                                                                          .fontFamily,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600),
+                                                            ),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                          SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  3 /
+                                                  100),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        3 /
-                                        100),
-                              ],
-                            ),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              3 /
+                                              100,
+                                    )
+                                  ],
+                                );
+                              })
+                            ],
                           ),
-                          SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height * 3 / 100,
-                          )
-                        ],
-                      );
-                    })
-                  ],
-                ),
-              ] else if (status == 2 && propBookingHistoryList.isEmpty) ...[
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 25 / 100,
-                ),
-                SizedBox(
-                  width: screenWidth * 70 / 100,
-                  child: Text(
-                    AppLanguage.hidtoryNodataMsg[language],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontFamily: AppFont.fontFamily,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColor.primaryColor),
+                        if (propBookingHistoryList.isEmpty)
+                          Column(
+                            children: [
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height *
+                                    20 /
+                                    100,
+                              ),
+                              SizedBox(
+                                width: screenWidth * 70 / 100,
+                                child: Text(
+                                  AppLanguage.hidtoryNodataMsg[language],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                      fontFamily: AppFont.fontFamily,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColor.primaryColor),
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ],
 
               if (status == 1)
                 isLoading
