@@ -517,7 +517,7 @@ class _RatingScreenState extends State<RatingScreen> {
                               ],
                             ),
                             subtitle: Text(
-                              propertyRatingList[index]['review'],
+                              propertyRatingList[index]['review'] ?? "",
                               style: const TextStyle(
                                   fontWeight: FontWeight.w400,
                                   fontFamily: AppFont.fontFamily,

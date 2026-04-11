@@ -49,6 +49,8 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
   int viewHistory = 0;
   int viewBoat = 0;
   int manageBoat = 0;
+  int viewProperty = 0;
+  int manageProperty = 0;
   int userType = 0;
   dynamic permissions = {};
   String balance = "";
@@ -121,10 +123,14 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
           var item = res['user_arr'];
           permissions = (item != "NA") ? item : {};
 
+          log("permissions $permissions");
+
           viewWallet = permissions['view_my_wallet'] ?? 0;
           viewHistory = permissions['view_history'] ?? 0;
           viewBoat = permissions['view_boat'] ?? 0;
           manageBoat = permissions['manage_boat'] ?? 0;
+          viewProperty = permissions['view_property'] ?? 0;
+          manageProperty = permissions['manage_property'] ?? 0;
         } else {
           setState(() {
             isApiCalling = false;
@@ -235,7 +241,7 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
             child: Column(
               children: [
                 //image header
-                Container(
+                SizedBox(
                   // color: Colors.red,
                   width: MediaQuery.of(context).size.width * 100 / 100,
                   height: screenWidth > 600
@@ -458,7 +464,7 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
                         ),
 
                         //MY WALLET REVIEW
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -698,36 +704,79 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
                             ],
                           ),
 
-                        Column(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ManagePropertyScreen()));
-                              },
-                              child: Container(
-                                width: MediaQuery.of(context).size.width *
-                                    90 /
-                                    100,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                        width: 1, color: AppColor.boaderColor)),
+                        if (userType == 3 ||
+                            (userType == 2 && viewProperty == 1) ||
+                            (userType == 2 && manageProperty == 1))
+                          Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const ManagePropertyScreen()));
+                                },
                                 child: Container(
                                   width: MediaQuery.of(context).size.width *
-                                      80 /
+                                      90 /
                                       100,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 13.0),
-                                    child: Row(
-                                      children: [
-                                        //setting icon
-                                        GestureDetector(
-                                          child: Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          width: 1,
+                                          color: AppColor.boaderColor)),
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width *
+                                        80 /
+                                        100,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 13.0),
+                                      child: Row(
+                                        children: [
+                                          //setting icon
+                                          GestureDetector(
+                                            child: Container(
+                                              alignment: language == 1
+                                                  ? Alignment.centerLeft
+                                                  : Alignment.centerRight,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  10 /
+                                                  100,
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  5 /
+                                                  100,
+                                              child: Image.asset(
+                                                  AppImage.homeIcons),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                3 /
+                                                100,
+                                          ),
+
+                                          //text
+                                          Text(
+                                            AppLanguage
+                                                .managePropertyText[language],
+                                            style: const TextStyle(
+                                                color: AppColor.primaryColor,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w700,
+                                                fontFamily: AppFont.fontFamily),
+                                          ),
+                                          const Spacer(),
+
+                                          //next
+                                          Container(
                                             alignment: language == 1
                                                 ? Alignment.centerLeft
                                                 : Alignment.centerRight,
@@ -741,67 +790,29 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
                                                     .width *
                                                 5 /
                                                 100,
-                                            child:
-                                                Image.asset(AppImage.homeIcons),
+                                            child: Image.asset(
+                                                AppImage.semiCircleArrowIcon),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              3 /
-                                              100,
-                                        ),
-
-                                        //text
-                                        Text(
-                                          AppLanguage
-                                              .managePropertyText[language],
-                                          style: const TextStyle(
-                                              color: AppColor.primaryColor,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w700,
-                                              fontFamily: AppFont.fontFamily),
-                                        ),
-                                        const Spacer(),
-
-                                        //next
-                                        Container(
-                                          alignment: language == 1
-                                              ? Alignment.centerLeft
-                                              : Alignment.centerRight,
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              10 /
-                                              100,
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              5 /
-                                              100,
-                                          child: Image.asset(
-                                              AppImage.semiCircleArrowIcon),
-                                        ),
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              3 /
-                                              100,
-                                        ),
-                                      ],
+                                          SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                3 /
+                                                100,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                            SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 2 / 100,
-                            ),
-                          ],
-                        ),
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height *
+                                    2 /
+                                    100,
+                              ),
+                            ],
+                          ),
 
                         //manage staff
                         if (userType == 3)

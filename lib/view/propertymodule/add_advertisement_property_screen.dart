@@ -794,7 +794,7 @@ class _AddAdvertisementPropertyScreenState
   //!=============================GET Property DETAILS===================================//
   Future<void> getPropertyApi(userId) async {
     Uri url = Uri.parse(
-        "${AppConfigProvider.apiUrl}get_all_owner_properties?user_id=$userId&type=3");
+        "${AppConfigProvider.apiUrl}get_all_owner_properties?user_id=$userId&type=$userType");
     print("url $url");
 
     String token = AppConstant.token;

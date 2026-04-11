@@ -31,6 +31,7 @@ class StaffDetailsScreen extends StatefulWidget {
 }
 
 class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
+  TextEditingController userNameTextEditingController = TextEditingController();
   TextEditingController nameTextEditingController = TextEditingController();
   TextEditingController roleTextEditingController = TextEditingController();
   TextEditingController emailTextEditingController = TextEditingController();
@@ -164,7 +165,7 @@ class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
         if (res['success'] == true) {
           var item = res['user_arr'];
           userDetails = (item != "NA") ? item : [];
-
+          log("userDetails:==== $userDetails");
           fillDetails();
 
           setState(() {
@@ -357,6 +358,7 @@ class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
   }
 
   fillDetails() {
+    userNameTextEditingController.text = userDetails['f_name'] ?? "";
     nameTextEditingController.text = userDetails['l_name'] ?? "";
     roleTextEditingController.text = userDetails['role_name'][language] ?? "";
     emailTextEditingController.text = userDetails['email'] ?? "";
@@ -572,6 +574,51 @@ class _StaffDetailsScreenState extends State<StaffDetailsScreen> {
                         SizedBox(
                             height:
                                 MediaQuery.of(context).size.height * 2 / 100),
+
+                        //! Username
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height *
+                                    2 /
+                                    100,
+                                width:
+                                    MediaQuery.of(context).size.width * 4 / 100,
+                                child: Image.asset(
+                                  AppImage.userprofileIcon,
+                                ),
+                              ),
+                              SizedBox(
+                                  width: MediaQuery.of(context).size.width *
+                                      2 /
+                                      100),
+                              Text(
+                                AppLanguage.usernameText[language],
+                                style: const TextStyle(
+                                    color: AppColor.primaryColor,
+                                    fontFamily: AppFont.fontFamily,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        //!=== Name ====
+                        TextField(
+                          controller: userNameTextEditingController,
+                          hintText: AppLanguage.enterUserNameText[language],
+                          keyboardtype: TextInputType.name,
+                          maxLength: 50,
+                          fillColorStatus: 0,
+                          readOnly: true,
+                          width: MediaQuery.of(context).size.width * 90 / 100,
+                        ),
+                        SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 1 / 100),
 
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 90 / 100,

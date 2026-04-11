@@ -122,6 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
               (userType == 2 && manageHome == 1) ||
               (userType == 2 && viewHome == 1)) {
             homePageApiCall(userId);
+            getPropertyDetailsApiCall(userId);
           } else {
             setState(() {
               isApiCalling = false;
@@ -638,7 +639,6 @@ class _HomeScreenState extends State<HomeScreen> {
     refreshKey.currentState?.show(atTop: false);
     await Future.delayed(const Duration(seconds: 1));
     getUserDetails();
-    getPropertyDetailsApiCall(userId);
     fetchLocation();
     return null;
   }
@@ -868,7 +868,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   setState(() {
                                     status = 2;
                                   });
-                                  getPropertyDetailsApiCall(userId);
+                                  if (userType == 3 ||
+                                      (userType == 2 && manageHome == 1) ||
+                                      (userType == 2 && viewHome == 1)) {
+                                    getPropertyDetailsApiCall(userId);
+                                  }
                                 },
                                 child: Container(
                                   alignment: Alignment.center,
