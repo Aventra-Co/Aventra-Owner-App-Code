@@ -89,6 +89,9 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
     getWalletApi(userId);
     isApiCalling = false;
     profileApiCall(userId);
+    if (userType == 2) {
+      staffDetailApiCall(userId);
+    }
     setState(() {});
   }
 
@@ -131,6 +134,60 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
           manageBoat = permissions['manage_boat'] ?? 0;
           viewProperty = permissions['view_property'] ?? 0;
           manageProperty = permissions['manage_property'] ?? 0;
+        } else {
+          setState(() {
+            isApiCalling = false;
+          });
+          // ignore: use_build_context_synchronously
+          SnackBarToastMessage.showSnackBar(context, res['msg'][language]);
+          if (res['active_status'] == 0) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const Login()));
+          }
+        }
+      } else {
+        setState(() {
+          isApiCalling = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isApiCalling = false;
+      });
+    }
+  }
+
+  //------------------------View Profile API CALL--------------------------------//
+  Future<void> staffDetailApiCall(userId) async {
+    Uri url = Uri.parse(
+        "${AppConfigProvider.apiUrl}get_staff_owner_details?user_id=$userId");
+    print("url $url");
+
+    String token = AppConstant.token;
+
+    if (token.isEmpty) {
+      print("Token is missing!");
+      // return;
+    }
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token', // Use 'Bearer' if required
+    };
+
+    print("headers $headers");
+
+    try {
+      final response = await http.get(url, headers: headers);
+      print("response $response");
+
+      if (response.statusCode == 200) {
+        dynamic res = jsonDecode(response.body);
+        print("res $res");
+
+        if (res['success'] == true) {
+          var item = res['data'];
+          businessName = item["company_name"] ?? "";
+          rating = item["total_rating"].toDouble();
         } else {
           setState(() {
             isApiCalling = false;
