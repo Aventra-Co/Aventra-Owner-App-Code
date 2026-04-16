@@ -79,11 +79,13 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
       fullName = userDataArr['fullname'] ?? "";
       username = userDataArr['username'] ?? "";
       profileImage = userDataArr["image"] ?? "NA";
-      businessName = userDataArr["company_name"] ?? "";
-      merchantId = userDataArr["merchant_id"] ?? "";
-      rating = userDataArr["total_rating"].toDouble();
-      log("rating80${rating.toStringAsFixed(0)}");
       userType = userDataArr["user_type"] ?? 0;
+      merchantId = userDataArr["merchant_id"] ?? "";
+      if (userType == 3) {
+        businessName = userDataArr["company_name"] ?? "";
+        rating = userDataArr["total_rating"].toDouble();
+      }
+      log("rating80${rating.toStringAsFixed(0)}");
     }
 
     getWalletApi(userId);
@@ -462,18 +464,19 @@ class _ProfileScreenScreenState extends State<ProfileScreen> {
                     child: Column(
                       children: [
                         //name
-                        Container(
-                          alignment: Alignment.center,
-                          width: MediaQuery.of(context).size.width * 90 / 100,
-                          child: Text(
-                            businessName,
-                            style: const TextStyle(
-                                color: AppColor.primaryColor,
-                                fontSize: 24,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: AppFont.fontFamily),
+                        if (businessName.isNotEmpty)
+                          Container(
+                            alignment: Alignment.center,
+                            width: MediaQuery.of(context).size.width * 90 / 100,
+                            child: Text(
+                              businessName,
+                              style: const TextStyle(
+                                  color: AppColor.primaryColor,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: AppFont.fontFamily),
+                            ),
                           ),
-                        ),
 
                         //name
                         Container(

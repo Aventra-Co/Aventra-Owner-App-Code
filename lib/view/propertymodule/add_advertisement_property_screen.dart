@@ -322,7 +322,7 @@ class _AddAdvertisementPropertyScreenState
   }
 
   searchResultCity(String query) {
-    citySearchList
+    var results1 = citySearchList
         .where((value) => value['city_name'][language]
             .toString()
             .toLowerCase()
@@ -331,7 +331,7 @@ class _AddAdvertisementPropertyScreenState
 
     cityList = [];
 
-    // cityList = results1;
+    cityList = results1;
 
     setState(() {});
   }

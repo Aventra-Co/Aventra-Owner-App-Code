@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../controller/app_footer.dart';
@@ -10,11 +8,7 @@ import '../../controller/app_color.dart';
 import '../../controller/app_constant.dart';
 import '../../controller/app_font.dart';
 import '../../controller/app_header.dart';
-import '../../controller/app_image.dart';
 import '../../controller/app_language.dart';
-import '../../controller/app_loader.dart';
-import '../../controller/app_snack_bar_toast_message.dart';
-import '../other_screen/selectDate.dart';
 import 'dart:ui' as ui;
 
 class BookingDates extends StatefulWidget {
@@ -94,7 +88,6 @@ class _CalenderScreenScreenState extends State<BookingDates> {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 2 / 100,
                 ),
-
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(

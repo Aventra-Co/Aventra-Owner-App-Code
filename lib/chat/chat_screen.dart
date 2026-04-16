@@ -758,6 +758,7 @@ class _ChatScreenState extends State<ChatScreen> {
         if (res['success'] == true) {
           setState(() {
             selectedImagePath = res['image_path'];
+            log("selectedImagePath $selectedImagePath");
             isApiCalling = false;
           });
           if (_list.isEmpty) {
