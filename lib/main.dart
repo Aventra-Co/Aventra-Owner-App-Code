@@ -1,9 +1,14 @@
 import 'dart:async';
+import 'dart:ui';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:the_boat_ownerside/firebase_options.dart';
 import 'controller/app_color.dart';
 import 'controller/app_connectivity.dart';
 import 'controller/app_constant.dart';
@@ -15,68 +20,73 @@ import 'view/authentication/splash_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
+Future<void> initFirebaseAuth() async {
+  try {
+    if (FirebaseAuth.instance.currentUser == null) {
+      await FirebaseAuth.instance.signInAnonymously();
+      debugPrint('✅ Firebase Auth: signed in anonymously');
+    }
+    else {
+      debugPrint('✅ Firebase Auth: already signed in');
+    }
+  }
+  catch (e) {
+    debugPrint('❌ Firebase Auth failed: $e');
+  }
+}
+
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
+
+    FlutterError.onError =
+        FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+
+    await FirebaseCrashlytics.instance
+        .setCrashlyticsCollectionEnabled(!kDebugMode);
+
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: AppColor.secondaryColor,
       statusBarIconBrightness: Brightness.dark,
       statusBarBrightness: Brightness.light,
-    ),
-  );
+    ));
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.edgeToEdge,
-  );
-  // Initialize OneSignal
-  await initOneSignal(AppConstant.oneSignalAppId);
-  await OneSignalService.initOneSignal();
-
-  runApp(const MyApp());
-
-// Initialize Firebase first
-  await Firebase.initializeApp(
-      options: FirebaseOptions(
-          apiKey: AppConstant.apiKey,
-          appId: AppConstant.appId,
-          messagingSenderId: AppConstant.messagingSenderId,
-          projectId: AppConstant.projectId));
+    await initFirebaseAuth();
+    await initOneSignal();
+    await OneSignalService.initOneSignal();
+    runApp(const MyApp());
+  }, (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+  });
 }
 
-Future<void> initOneSignal(oneSignalAppId) async {
+Future<void> initOneSignal() async {
   print("initOneSignal ------ ");
-  if (AppConstant.deviceType == "android") {
-  } else {}
-  await OneSignal.shared.setAppId(AppConstant.oneSignalAppId);
+  OneSignal.initialize(AppConstant.oneSignalAppId);
 
   print("Prompting for Permission");
-  OneSignal.shared.promptUserForPushNotificationPermission().then((accepted) {
-    print("Accepted permission: $accepted");
-  });
+  await OneSignal.Notifications.requestPermission(true);
 
-  final status = await OneSignal.shared.getDeviceState();
-  if (status != null) {
-    print("main dart line 41");
-    var tokenId = status.userId;
-    if (tokenId != null) {
-      print("player Id $tokenId");
-      print(tokenId);
-      AppConstant.playerID = tokenId;
-      print("playerID : ${AppConstant.playerID}");
-    }
+  final String? tokenId = OneSignal.User.pushSubscription.id;
+  if (tokenId != null) {
+    AppConstant.playerID = tokenId;
+    print("playerID : ${AppConstant.playerID}");
   }
 
-  Timer.periodic(const Duration(seconds: 1), (timer) async {
-    final status = await OneSignal.shared.getDeviceState();
-    if (status != null) {
-      print("status $status");
-      final tokenId = status.userId;
-
-      if (tokenId != null) {
-        timer.cancel();
-        AppConstant.playerID = tokenId;
-        print('Interval stopped');
-      }
+  OneSignal.User.pushSubscription.addObserver((state) {
+    final String? id = state.current.id;
+    if (id != null) {
+      AppConstant.playerID = id;
+      print("playerID updated: ${AppConstant.playerID}");
     }
   });
 }

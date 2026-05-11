@@ -67,7 +67,6 @@ class _InboxScreenState extends State<InboxScreen> {
   @override
   void initState() {
     super.initState();
-    print("APIs.user_id${APIs.user_id}");
     getUserDetails();
     APIs.getSelfInfo();
     _searchController.addListener(_onSearchChanged);
@@ -275,51 +274,46 @@ class _InboxScreenState extends State<InboxScreen> {
   }
 
   Stream<List<ChatUser>> getChatUsersSorted() {
-    return APIs.firestore
-        .collection("users")
-        .snapshots()
-        .asyncMap((snapshot) async {
-      final currentUserId = APIs.user_id;
-
-      // Get all users except current user
-      final users = snapshot.docs
-          .map((doc) => ChatUser.fromJson(doc.data()))
-          .where((user) => user.id != currentUserId)
-          .toList();
-
-      final List<MapEntry<ChatUser, DateTime>> userLastMessageTimes = [];
-
-      for (final user in users) {
-        try {
-          DateTime lastMessageTime = DateTime(0);
-          final messageQuery = await APIs.getLastMessage(user).first;
-
-          if (messageQuery.docs.isNotEmpty) {
-            final latestMessage = messageQuery.docs
-                .map((doc) => Message.fromJson(doc.data()))
-                .reduce((a, b) {
-              final aTime = _parseMessageTime(a.sent);
-              final bTime = _parseMessageTime(b.sent);
-              return aTime.isAfter(bTime) ? a : b;
-            });
-
-            lastMessageTime = _parseMessageTime(latestMessage.sent);
-          }
-
-          userLastMessageTimes.add(MapEntry(user, lastMessageTime));
-
-          // Debug print to verify timestamps
-          debugPrint('User: ${user.name}, Last message: $lastMessageTime');
-        } catch (e) {
-          debugPrint('Error for user ${user.id}: $e');
-          userLastMessageTimes.add(MapEntry(user, DateTime(0)));
+    return APIs.getMyUsersId().asyncExpand((myUsersSnapshot) {
+      return Stream.fromFuture(() async {
+        var userIds = myUsersSnapshot.docs.map((e) => e.id).toList();
+        if (userIds.isEmpty) {
+          final partnerIds =
+              await APIs.getChatPartnerIdsFromChatsCollection(limit: 500);
+          userIds = partnerIds.toList();
         }
-      }
 
-      // Sort by last message time (newest first)
-      userLastMessageTimes.sort((a, b) => b.value.compareTo(a.value));
+        if (userIds.isEmpty) return <ChatUser>[];
 
-      return userLastMessageTimes.map((entry) => entry.key).toList();
+        final users = (await APIs.getUsersByIdsOnce(userIds))
+            .where((u) => u.id != APIs.user_id)
+            .toList();
+
+        final List<MapEntry<ChatUser, DateTime>> userLastMessageTimes = [];
+
+        for (final user in users) {
+          try {
+            DateTime lastMessageTime = DateTime(0);
+            final String conversationId =
+                await APIs.resolveConversationId(user.id);
+            final messageQuery =
+                await APIs.getLastMessageByConversationId(conversationId).first;
+
+            if (messageQuery.docs.isNotEmpty) {
+              final latestMessage =
+                  Message.fromJson(messageQuery.docs.first.data());
+              lastMessageTime = _parseMessageTime(latestMessage.sent);
+            }
+
+            userLastMessageTimes.add(MapEntry(user, lastMessageTime));
+          } catch (_) {
+            userLastMessageTimes.add(MapEntry(user, DateTime(0)));
+          }
+        }
+
+        userLastMessageTimes.sort((a, b) => b.value.compareTo(a.value));
+        return userLastMessageTimes.map((entry) => entry.key).toList();
+      }());
     });
   }
 

@@ -73,9 +73,9 @@ class AppConstant {
 
 class ContentClass {
   final String header;
-  final String contenttype;
+  final String contentType;
 
-  ContentClass({required this.header, required this.contenttype});
+  ContentClass({required this.header, required this.contentType});
 }
 
 class ResetPasswordIdClass {

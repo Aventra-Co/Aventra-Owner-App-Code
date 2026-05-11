@@ -20,11 +20,11 @@ class APIs {
 
   // for storing self information
   static ChatUser me = ChatUser(
-      id: user_id.toString(),
-      name: userArry['name'] != null ? userArry['name'].toString() : "",
-      email: userArry['email'] != null ? userArry['email'].toString() : "",
+      id: '',
+      name: '',
+      email: '',
       about: "Hey, I'm using We Chat!",
-      image: userArry['image'] != null ? userArry['imege'].toString() : "",
+      image: '',
       createdAt: '',
       isOnline: false,
       lastActive: '',
@@ -72,7 +72,7 @@ class APIs {
         ], // Send notification to this player ID
         'contents': {
           'en':
-              '${userArry['name'] != null ? userArry['name'] : "Unknown"} sent a $msg.'
+              '${(userArry is Map && userArry['name'] != null && userArry['name'].toString().trim().isNotEmpty) ? userArry['name'].toString() : (me.name.trim().isNotEmpty ? me.name : "Unknown")} sent a $msg.'
         },
         'data': {
           "action_json": {
@@ -154,6 +154,60 @@ class APIs {
   }
 
   static String user_id = "12345678";
+  static final Map<String, String> _conversationIdCache = {};
+
+  static String _stableConversationId(String otherId) {
+    final String a = user_id;
+    final String b = otherId;
+
+    final int? aInt = int.tryParse(a);
+    final int? bInt = int.tryParse(b);
+
+    if (aInt != null && bInt != null) {
+      return aInt <= bInt ? '${aInt}_$bInt' : '${bInt}_$aInt';
+    }
+
+    return a.compareTo(b) <= 0 ? '${a}_$b' : '${b}_$a';
+  }
+
+  static List<String> _conversationIdCandidates(String otherId) {
+    final String a = user_id;
+    final String b = otherId;
+    final String stable = _stableConversationId(otherId);
+    final String direct1 = '${a}_$b';
+    final String direct2 = '${b}_$a';
+    final set = <String>{stable, direct1, direct2};
+    return set.toList();
+  }
+
+  static Future<String> resolveConversationId(String otherId) async {
+    final cached = _conversationIdCache[otherId];
+    if (cached != null && cached.isNotEmpty) return cached;
+
+    final candidates = _conversationIdCandidates(otherId);
+    for (final id in candidates) {
+      try {
+        final snap = await firestore
+            .collection('chats/$id/messages/')
+            .limit(1)
+            .get();
+        if (snap.docs.isNotEmpty) {
+          _conversationIdCache[otherId] = id;
+          return id;
+        }
+      } catch (_) {}
+    }
+
+    final fallback = _stableConversationId(otherId);
+    _conversationIdCache[otherId] = fallback;
+    return fallback;
+  }
+
+  static Future<String> _resolveConversationIdFromMessage(Message message) {
+    final String otherId =
+        message.fromId == user_id ? message.toId : message.fromId;
+    return resolveConversationId(otherId);
+  }
 
   // for creating a new user
   static Future<void> createUser() async {
@@ -204,15 +258,79 @@ class APIs {
         .snapshots();
   }
 
+  static Future<List<ChatUser>> getUsersByIdsOnce(List<String> userIds) async {
+    final ids = userIds.where((e) => e.isNotEmpty).toSet().toList();
+    if (ids.isEmpty) return <ChatUser>[];
+
+    const int chunkSize = 10;
+    final List<ChatUser> result = [];
+
+    for (int i = 0; i < ids.length; i += chunkSize) {
+      final chunk = ids.sublist(
+        i,
+        (i + chunkSize) > ids.length ? ids.length : (i + chunkSize),
+      );
+      final snap = await firestore
+          .collection('users')
+          .where('id', whereIn: chunk)
+          .get();
+      result.addAll(snap.docs.map((d) => ChatUser.fromJson(d.data())));
+    }
+
+    return result;
+  }
+
   // for adding an user to my user when first message is send
   static Future<void> sendFirstMessage(
-      ChatUser chatUser, String msg, Type type, bool isActive) async {
+      ChatUser chatUser, String msg, TypeEnum type, bool isActive) async {
+    await _ensureMutualChatLink(chatUser.id);
+    await sendMessage(chatUser, msg, type, isActive);
+  }
+
+  static Future<void> _ensureMutualChatLink(String otherUserId) async {
     await firestore
         .collection('users')
-        .doc(chatUser.id)
+        .doc(user_id)
+        .collection('my_users')
+        .doc(otherUserId)
+        .set({}, SetOptions(merge: true));
+
+    await firestore
+        .collection('users')
+        .doc(otherUserId)
         .collection('my_users')
         .doc(user_id)
-        .set({}).then((value) => sendMessage(chatUser, msg, type, isActive));
+        .set({}, SetOptions(merge: true));
+  }
+
+  static Future<Set<String>> getChatPartnerIdsFromChatsCollection(
+      {int limit = 500}) async {
+    try {
+      final String myId = user_id;
+      if (myId.isEmpty) return <String>{};
+
+      final snap = await firestore.collection('chats').limit(limit).get();
+
+      final Set<String> otherIds = {};
+      for (final doc in snap.docs) {
+        final id = doc.id;
+        final parts = id.split('_');
+        if (parts.length != 2) continue;
+
+        final a = parts[0];
+        final b = parts[1];
+
+        if (a == myId && b.isNotEmpty) {
+          otherIds.add(b);
+        } else if (b == myId && a.isNotEmpty) {
+          otherIds.add(a);
+        }
+      }
+
+      return otherIds;
+    } catch (_) {
+      return <String>{};
+    }
   }
 
   // for updating user information
@@ -268,21 +386,67 @@ class APIs {
   ///************** Chat Screen Related APIs **************
 
   // useful for getting conversation id
-  static String getConversationID(String id) =>
-      user_id.hashCode <= id.hashCode ? '${user_id}_$id' : '${id}_${user_id}';
+  static String getConversationID(String id) => _stableConversationId(id);
+
+  static Query<Map<String, dynamic>> _messagesQueryByConversationId(
+      String conversationId) {
+    return firestore
+        .collection('chats/$conversationId/messages/')
+        .orderBy('sent', descending: true);
+  }
 
   // for getting all messages of a specific conversation from firestore database
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
       ChatUser user) {
-    return firestore
-        .collection('chats/${getConversationID(user.id)}/messages/')
-        .orderBy('sent', descending: true)
-        .snapshots();
+    return _messagesQueryByConversationId(getConversationID(user.id)).snapshots();
+  }
+
+  static Query<Map<String, dynamic>> _messagesQuery(ChatUser user) {
+    return _messagesQueryByConversationId(getConversationID(user.id));
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getLatestMessages(
+      ChatUser user,
+      {int limit = 25}) {
+    return _messagesQuery(user).limit(limit).snapshots();
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getLatestMessagesByConversationId(
+      String conversationId,
+      {int limit = 25}) {
+    return _messagesQueryByConversationId(conversationId).limit(limit).snapshots();
+  }
+
+  static Future<QuerySnapshot<Map<String, dynamic>>> getMessagesPage(
+      ChatUser user,
+      {required int limit,
+      DocumentSnapshot<Map<String, dynamic>>? startAfter}) {
+    Query<Map<String, dynamic>> query = _messagesQuery(user).limit(limit);
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+    return query.get();
+  }
+
+  static Future<QuerySnapshot<Map<String, dynamic>>> getMessagesPageByConversationId(
+      String conversationId,
+      {required int limit,
+      DocumentSnapshot<Map<String, dynamic>>? startAfter}) {
+    Query<Map<String, dynamic>> query =
+        _messagesQueryByConversationId(conversationId).limit(limit);
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+    return query.get();
   }
 
   // for sending message
   static Future<void> sendMessage(
-      ChatUser chatUser, String msg, Type type, bool isActive) async {
+      ChatUser chatUser, String msg, TypeEnum type, bool isActive) async {
+    try {
+      await _ensureMutualChatLink(chatUser.id);
+    } catch (_) {}
+
     //message sending time (also used as id)
     final time = DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -295,27 +459,34 @@ class APIs {
         fromId: user_id,
         sent: time);
 
-    final ref = firestore
-        .collection('chats/${getConversationID(chatUser.id)}/messages/');
+    final String conversationId = await resolveConversationId(chatUser.id);
+    final ref = firestore.collection('chats/$conversationId/messages/');
     await ref.doc(time).set(message.toJson()).then((value) =>
         sendPushNotification(
-            chatUser, type == Type.text ? msg : 'image', isActive));
+            chatUser, type == TypeEnum.text ? msg : 'image', isActive));
   }
 
   //update read status of message
   static Future<void> updateMessageReadStatus(Message message) async {
-    firestore
-        .collection('chats/${getConversationID(message.fromId)}/messages/')
-        .doc(message.sent)
-        .update({'read': DateTime.now().millisecondsSinceEpoch.toString()});
+    final String conversationId = await _resolveConversationIdFromMessage(message);
+    firestore.collection('chats/$conversationId/messages/').doc(message.sent).update(
+        {'read': DateTime.now().millisecondsSinceEpoch.toString()});
   }
 
   //get only last message of a specific chat
   static Stream<QuerySnapshot<Map<String, dynamic>>> getLastMessage(
       ChatUser user) {
-    print("user$user");
     return firestore
         .collection('chats/${getConversationID(user.id)}/messages/')
+        .orderBy('sent', descending: true)
+        .limit(1)
+        .snapshots();
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getLastMessageByConversationId(
+      String conversationId) {
+    return firestore
+        .collection('chats/$conversationId/messages/')
         .orderBy('sent', descending: true)
         .limit(1)
         .snapshots();
@@ -328,8 +499,9 @@ class APIs {
     final ext = file.path.split('.').last;
 
     //storage file ref with path
+    final String conversationId = await resolveConversationId(chatUser.id);
     final ref = storage.ref().child(
-        'images/${getConversationID(chatUser.id)}/${DateTime.now().millisecondsSinceEpoch}.$ext');
+        'images/$conversationId/${DateTime.now().millisecondsSinceEpoch}.$ext');
 
     //uploading image
     await ref
@@ -340,25 +512,27 @@ class APIs {
 
     //updating image in firestore database
     final imageUrl = await ref.getDownloadURL();
-    await sendMessage(chatUser, imageUrl, Type.image, isActive);
+    await sendMessage(chatUser, imageUrl, TypeEnum.image, isActive);
   }
 
   //delete message
   static Future<void> deleteMessage(Message message) async {
+    final String conversationId = await _resolveConversationIdFromMessage(message);
     await firestore
-        .collection('chats/${getConversationID(message.toId)}/messages/')
+        .collection('chats/$conversationId/messages/')
         .doc(message.sent)
         .delete();
 
-    if (message.type == Type.image) {
+    if (message.type == TypeEnum.image) {
       await storage.refFromURL(message.msg).delete();
     }
   }
 
   //update message
   static Future<void> updateMessage(Message message, String updatedMsg) async {
+    final String conversationId = await _resolveConversationIdFromMessage(message);
     await firestore
-        .collection('chats/${getConversationID(message.toId)}/messages/')
+        .collection('chats/$conversationId/messages/')
         .doc(message.sent)
         .update({'msg': updatedMsg});
   }

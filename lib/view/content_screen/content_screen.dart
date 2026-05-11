@@ -8,6 +8,7 @@ import '../../controller/app_header.dart';
 
 class Content extends StatelessWidget {
   static String routeName = './Content';
+
   const Content({super.key});
 
   @override
@@ -17,7 +18,7 @@ class Content extends StatelessWidget {
     return Scaffold(
       body: ContentScreen(
         header: object.header,
-        contenttype: object.contenttype,
+        contentType: object.contentType,
       ),
     );
   }
@@ -25,19 +26,22 @@ class Content extends StatelessWidget {
 
 class ContentScreen extends StatefulWidget {
   final String header;
-  final String contenttype;
+  final String contentType;
 
-  const ContentScreen(
-      {super.key, required this.header, required this.contenttype});
+  const ContentScreen({
+    super.key,
+    required this.header,
+    required this.contentType,
+  });
 
   @override
   State<ContentScreen> createState() => _ContentScreenState();
 }
 
-class _ContentScreenState extends State<ContentScreen>
-    with SingleTickerProviderStateMixin {
+class _ContentScreenState extends State<ContentScreen> with SingleTickerProviderStateMixin {
   bool isApiCalling = true;
   late AnimationController _animationController;
+  late final WebViewController _webViewController;
 
   @override
   void initState() {
@@ -46,6 +50,25 @@ class _ContentScreenState extends State<ContentScreen>
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat();
+
+    _webViewController = WebViewController()
+      ..setBackgroundColor(AppColor.secondaryColor)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) => print("WebView is loading (progress : $progress%)"),
+          onPageStarted: (String url) {
+            print('Page started loading: $url');
+            if (mounted) setState(() => isApiCalling = true);
+          },
+          onPageFinished: (String url) {
+            print('Page finished loading: $url');
+            Future.delayed(const Duration(milliseconds: 800), () {
+              if (mounted) setState(() => isApiCalling = false);
+            });
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(widget.contentType));
   }
 
   @override
@@ -56,35 +79,36 @@ class _ContentScreenState extends State<ContentScreen>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: AppColor.secondaryColor,
       appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(0),
-          child: AppBar(
-              backgroundColor: AppColor.secondaryColor,
-              systemOverlayStyle: const SystemUiOverlayStyle(
-                  systemNavigationBarColor: AppColor.secondaryColor,
-                  systemNavigationBarIconBrightness: Brightness.dark,
-                  statusBarColor: AppColor.secondaryColor,
-                  statusBarIconBrightness: Brightness.dark))),
+        preferredSize: const Size.fromHeight(0),
+        child: AppBar(
+          backgroundColor: AppColor.secondaryColor,
+          systemOverlayStyle: const SystemUiOverlayStyle(
+            systemNavigationBarColor: AppColor.secondaryColor,
+            systemNavigationBarIconBrightness: Brightness.dark,
+            statusBarColor: AppColor.secondaryColor,
+            statusBarIconBrightness: Brightness.dark,
+          ),
+        ),
+      ),
       body: SafeArea(
-          child: Container(
-        height: screenHeight,
-        width: screenWidth,
-        color: AppColor.secondaryColor,
-        child: Column(
-          children: [
-            const NoInternetBanner(),
-            CustomAppHeader(
-              text: widget.header,
-              onPress: () {
-                Navigator.pop(context);
-              },
-            ),
-            Expanded(
+        child: Container(
+          height: screenHeight,
+          width: screenWidth,
+          color: AppColor.secondaryColor,
+          child: Column(
+            children: [
+              const NoInternetBanner(),
+              CustomAppHeader(
+                text: widget.header,
+                onPress: () => Navigator.pop(context),
+              ),
+              Expanded(
                 flex: 1,
                 child: Container(
                   height: screenHeight,
@@ -96,70 +120,42 @@ class _ContentScreenState extends State<ContentScreen>
                       AnimatedOpacity(
                         opacity: isApiCalling ? 0.0 : 1.0,
                         duration: const Duration(milliseconds: 300),
-                        child: WebView(
-                          initialUrl: widget.contenttype,
-                          backgroundColor: AppColor.secondaryColor,
-                          onWebViewCreated:
-                              (WebViewController webViewController) {},
-                          onProgress: (int progress) {
-                            print("WebView is loading (progress : $progress%)");
-                          },
-                          onPageStarted: (String url) {
-                            print('Page started loading: $url');
-                            if (mounted) {
-                              setState(() {
-                                isApiCalling = true;
-                              });
-                            }
-                          },
-                          onPageFinished: (String url) {
-                            print('Page finished loading: $url');
-                            Future.delayed(const Duration(milliseconds: 800),
-                                () {
-                              if (mounted) {
-                                setState(() {
-                                  isApiCalling = false;
-                                });
-                              }
-                            });
-                          },
+                        child: WebViewWidget(
+                          controller: _webViewController,
                         ),
                       ),
 
                       // Loading Overlay - Responsive Design
-                      if (isApiCalling)
-                        Container(
-                          color: AppColor.secondaryColor,
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: screenWidth * 0.08,
-                                  height: screenWidth * 0.08,
-                                  child: RotationTransition(
-                                    turns: _animationController,
-                                    child: CircularProgressIndicator(
-                                      valueColor:
-                                          const AlwaysStoppedAnimation<Color>(
-                                        AppColor.themeColor,
-                                      ),
-                                      strokeWidth: 2.5,
-                                      backgroundColor:
-                                          Colors.grey.withOpacity(0.2),
-                                    ),
+                      if (isApiCalling) Container(
+                        color: AppColor.secondaryColor,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: screenWidth * 0.08,
+                                height: screenWidth * 0.08,
+                                child: RotationTransition(
+                                  turns: _animationController,
+                                  child: CircularProgressIndicator(
+                                    valueColor: const AlwaysStoppedAnimation<Color>(AppColor.themeColor),
+                                    strokeWidth: 2.5,
+                                    backgroundColor: Colors.grey.withValues(alpha: 0.2),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
+                      ),
                     ],
                   ),
-                )),
-          ],
+                ),
+              ),
+            ],
+          ),
         ),
-      )),
+      ),
     );
   }
 }

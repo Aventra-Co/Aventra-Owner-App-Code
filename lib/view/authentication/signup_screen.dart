@@ -704,7 +704,7 @@ class _SignupState extends State<Signup> {
                                                       header: AppLanguage
                                                               .termsConditionText[
                                                           language],
-                                                      contenttype: ""));
+                                                      contentType: ""));
                                             }),
                                       TextSpan(
                                           text: AppLanguage.andText[language],
@@ -733,7 +733,7 @@ class _SignupState extends State<Signup> {
                                                       header: AppLanguage
                                                               .privacyPolicyText[
                                                           language],
-                                                      contenttype: ""));
+                                                      contentType: ""));
                                             }),
                                     ],
                                   ),

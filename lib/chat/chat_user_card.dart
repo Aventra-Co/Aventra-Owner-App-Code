@@ -22,6 +22,13 @@ class ChatUserCard extends StatefulWidget {
 
 class _ChatUserCardState extends State<ChatUserCard> {
   Message? _message;
+  late final Future<String> _conversationIdFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _conversationIdFuture = APIs.resolveConversationId(widget.user.id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,69 +41,82 @@ class _ChatUserCardState extends State<ChatUserCard> {
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(15)),
           onTap: () {
-
-            print(widget.user);
             Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (_) => ChatScreen(user: widget.user)));
           },
-          child: StreamBuilder(
-            stream: APIs.getLastMessage(widget.user),
-            builder: (context, snapshot) {
-              final data = snapshot.data?.docs;
-              final list =
-                  data?.map((e) => Message.fromJson(e.data())).toList() ?? [];
-
-              if (list.isNotEmpty) {
-                _message = list[0];
-              } else {
-                return SizedBox(); // Hide user if there's no last message
+          child: FutureBuilder<String>(
+            future: _conversationIdFuture,
+            builder: (context, conversationSnapshot) {
+              final conversationId = conversationSnapshot.data;
+              if (conversationId == null || conversationId.isEmpty) {
+                return const SizedBox();
               }
 
-              return ListTile(
-                // User profile picture
-                tileColor: AppColor.secondaryColor,
-                leading: InkWell(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => ProfileDialog(user: widget.user),
-                    );
-                  },
-                  child: ProfileImage(size: 40, url: widget.user.image),
-                ),
+              return StreamBuilder(
+                stream: APIs.getLastMessageByConversationId(conversationId),
+                builder: (context, snapshot) {
+                  final data = snapshot.data?.docs;
+                  final list = data
+                          ?.map((e) => Message.fromJson(e.data()))
+                          .toList() ??
+                      [];
 
-                // User name
-                title: Text(widget.user.name),
+                  _message = list.isNotEmpty ? list[0] : null;
 
-                // Last message
-                subtitle: Text(
-                  _message!.type == Type.image ? 'Image' : _message!.msg,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-
-                // Last message time or unread indicator
-                trailing: _message!.read.isEmpty &&
-                        _message!.fromId != APIs.user_id
-                    ? const SizedBox(
-                        width: 15,
-                        height: 15,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 0, 230, 119),
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                      )
-                    : Text(
-                        MyDateUtil.getLastMessageTime(
+                  return ListTile(
+                    // User profile picture
+                    tileColor: AppColor.secondaryColor,
+                    leading: InkWell(
+                      onTap: () {
+                        showDialog(
                           context: context,
-                          time: _message!.sent,
-                        ),
-                        style: const TextStyle(color: Colors.black54),
-                      ),
+                          builder: (_) => ProfileDialog(user: widget.user),
+                        );
+                      },
+                      child: ProfileImage(size: 40, url: widget.user.image),
+                    ),
+
+                    // User name
+                    title: Text(widget.user.name),
+
+                    // Last message
+                    subtitle: Text(
+                      _message == null
+                          ? ''
+                          : (_message!.type == TypeEnum.image
+                              ? 'Image'
+                              : _message!.msg),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    // Last message time or unread indicator
+                    trailing: _message == null
+                        ? const SizedBox.shrink()
+                        : (_message!.read.isEmpty &&
+                                _message!.fromId != APIs.user_id
+                            ? const SizedBox(
+                                width: 15,
+                                height: 15,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: Color.fromARGB(255, 0, 230, 119),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
+                                  ),
+                                ),
+                              )
+                            : Text(
+                                MyDateUtil.getLastMessageTime(
+                                  context: context,
+                                  time: _message!.sent,
+                                ),
+                                style: const TextStyle(color: Colors.black54),
+                              )),
+                  );
+                },
               );
             },
           ),

@@ -17,54 +17,41 @@ class OneSignalService {
   static Future<void> initOneSignal() async {
     print("Initializing OneSignal");
 
-    String oneSignalAppId = AppConstant.oneSignalAppId;
-    await OneSignal.shared.setAppId(oneSignalAppId);
+    OneSignal.initialize(AppConstant.oneSignalAppId);
 
-    var settings;
-    if (AppConstant.deviceType == "android") {
-      settings = {
-        OSiOSSettings.autoPrompt: true,
-        OSiOSSettings.inAppLaunchUrl: true
-      };
-    } else {
-      settings = {
-        OSiOSSettings.autoPrompt: true,
-        OSiOSSettings.inAppLaunchUrl: true
-      };
+    await OneSignal.Notifications.requestPermission(true);
+
+    final String? tokenId = OneSignal.User.pushSubscription.id;
+    if (tokenId != null) {
+      AppConstant.playerID = tokenId;
+      print("playerID : ${AppConstant.playerID}");
     }
 
-    final status = await OneSignal.shared.getDeviceState();
-    if (status != null) {
-      var tokenId = status.userId;
-      if (tokenId != null) {
-        AppConstant.playerID = tokenId;
-        print("playerID : ${AppConstant.playerID}");
-
-        // Set up notification opened handler
-        OneSignal.shared.setNotificationOpenedHandler(
-            (OSNotificationOpenedResult result) async {
-          print("Result: ${result.toString()}");
-          print(
-              'result.notification.additionalData ---? ${result.notification.additionalData}');
-
-          var additionalData = result.notification.additionalData;
-          print("line 47 $additionalData");
-
-          if (additionalData != null) {
-            // Store the notification data for later processing
-            _pendingNotificationData = additionalData;
-
-            // Try to handle notification immediately if app is initialized
-            if (_isAppInitialized) {
-              _handleNotificationNavigation(additionalData);
-            } else {
-              // App not ready, store for later processing
-              _storePendingNotification(additionalData);
-            }
-          }
-        });
+    OneSignal.User.pushSubscription.addObserver((state) {
+      final String? id = state.current.id;
+      if (id != null) {
+        AppConstant.playerID = id;
+        print("playerID updated: ${AppConstant.playerID}");
       }
-    }
+    });
+
+    OneSignal.Notifications.addClickListener((OSNotificationClickEvent event) async {
+      print("Result: ${event.toString()}");
+      print('additionalData ---? ${event.notification.additionalData}');
+
+      Map<String, dynamic>? additionalData = event.notification.additionalData;
+      print("line 47 $additionalData");
+
+      if (additionalData != null) {
+        _pendingNotificationData = additionalData;
+
+        if (_isAppInitialized) {
+          _handleNotificationNavigation(additionalData);
+        } else {
+          _storePendingNotification(additionalData);
+        }
+      }
+    });
   }
 
   // Store pending notification and set flags

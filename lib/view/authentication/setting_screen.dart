@@ -297,17 +297,17 @@ class SettingScreenScreenState extends State<SettingScreen> with RouteAware {
         Navigator.pushNamed(context, Content.routeName,
             arguments: ContentClass(
                 header: AppLanguage.termsConditionText[language],
-                contenttype: termsandconditionstype));
+                contentType: termsandconditionstype));
       } else if (id == 5) {
         Navigator.pushNamed(context, Content.routeName,
             arguments: ContentClass(
                 header: AppLanguage.privacyPolicyText[language],
-                contenttype: privacypolicytype));
+                contentType: privacypolicytype));
       } else if (id == 6) {
         Navigator.pushNamed(context, Content.routeName,
             arguments: ContentClass(
                 header: AppLanguage.aboutUsText[language],
-                contenttype: aboutustype));
+                contentType: aboutustype));
       } else if (id == 7) {
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const ContactUs()));
