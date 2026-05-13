@@ -60,10 +60,9 @@ Future<void> main() async {
     ));
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-    await initFirebaseAuth();
-    await initOneSignal();
-    await OneSignalService.initOneSignal();
     runApp(const MyApp());
+    unawaited(initFirebaseAuth());
+    unawaited(OneSignalService.initOneSignal());
   }, (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
   });
@@ -96,6 +95,32 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData appTheme = ThemeData(
+      useMaterial3: false,
+      brightness: Brightness.light,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColor.themeColor,
+        brightness: Brightness.light,
+      ),
+      fontFamily: AppFont.fontFamily,
+      dialogTheme: const DialogThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+      ),
+      datePickerTheme: const DatePickerThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+      ),
+      timePickerTheme: const TimePickerThemeData(
+        backgroundColor: Colors.white,
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColor.themeColor,
+        ),
+      ),
+    );
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -106,10 +131,8 @@ class MyApp extends StatelessWidget {
         title: 'Aventra Owner',
         debugShowCheckedModeBanner: false,
         navigatorKey: navigatorKey,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: AppColor.themeColor),
-          fontFamily: AppFont.fontFamily,
-        ),
+        theme: appTheme,
+        darkTheme: appTheme,
         routes: routes,
         home: const AppInitializer(),
       ),
