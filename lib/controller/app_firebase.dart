@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app_constant.dart';
+import 'one_signal_service.dart';
 
 class FirebaseProvider {
   String name = '';
@@ -23,6 +24,7 @@ class FirebaseProvider {
 
     if (userDetails != null) {
       dynamic userDetail = await jsonDecode(userDetails);
+      final String playerId = await OneSignalService.getPlayerId();
 
       Map<String, dynamic> user = {
         'chat_room_id': 'no',
@@ -32,7 +34,7 @@ class FirebaseProvider {
         // 'image':"NA",
         'notification_stauts': 1,
         'online_status': isOnline ? 'true' : 'false',
-        'player_id': AppConstant.playerID,
+        'player_id': playerId,
         'user_id': userDetail['user_id'],
         'user_type': 1,
         'login_type': 'app',
@@ -240,6 +242,10 @@ class FirebaseProvider {
     print("otherUserName256$userId");
     var body = {
       'app_id': '60e0937d-d285-4bdd-b86e-23b960793f2e',
+      'ios_badgeType': 'Increase',
+      'ios_badgeCount': 1,
+      'android_badgeType': 'Increase',
+      'android_badgeCount': 1,
       // 'include_player_ids': [AppConstant.playerID],
       'contents': {'en': '$otherUserName sent you a new message.'},
       'data': {

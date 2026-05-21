@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -6,6 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../controller/app_config_provider.dart';
+import '../controller/app_constant.dart';
 import '../model/chat_user.dart';
 import '../model/message.dart';
 
@@ -69,7 +73,8 @@ class APIs {
   // for sending push notification (Updated Codes)
 
   static Future<void> sendPushNotification(
-      ChatUser chatUser, String msg, bool isActive) async {
+      ChatUser chatUser, String msg, bool isActive,
+      {String? imageUrl}) async {
     if (isActive == false) {
       print("Sending notification to: ${chatUser.name}");
 
@@ -81,6 +86,25 @@ class APIs {
             "os_v2_app_4vpfngttujaj3p5dw6inr3defvrlfupplwmuxqfp3dmbv3txaez2l3s3ugxbpxtkflbtz5slpjgcsyzucf2gv26lk6povmkyuzk6b2i",
       };
 
+      String? normalizeRemoteUrl(String? raw) {
+        final String v = (raw ?? '').trim();
+        if (v.isEmpty || v == 'NA') return null;
+        if (v.startsWith('http://') || v.startsWith('https://')) return v;
+        final String path = v.startsWith('/') ? v.substring(1) : v;
+        return '${AppConfigProvider.imageURL}$path';
+      }
+
+      final String? normalizedLargeIconUrl = normalizeRemoteUrl(
+          me.image.isNotEmpty && me.image != 'NA' ? me.image : null);
+      final String? normalizedBigPictureUrl = normalizeRemoteUrl(imageUrl);
+
+      final bool hasLargeIconUrl = normalizedLargeIconUrl != null;
+      final bool hasBigPictureUrl = normalizedBigPictureUrl != null;
+
+      final String? iosAttachmentUrl =
+          normalizedBigPictureUrl ?? normalizedLargeIconUrl;
+      final bool hasIosAttachmentUrl = iosAttachmentUrl != null;
+
       var body = {
         'app_id': "e55e569a-73a2-409d-bfa3-b790d8ec642d",
         'include_player_ids': [
@@ -90,6 +114,15 @@ class APIs {
           'en':
               '${(userArry is Map && userArry['name'] != null && userArry['name'].toString().trim().isNotEmpty) ? userArry['name'].toString() : (me.name.trim().isNotEmpty ? me.name : "Unknown")} sent a $msg.'
         },
+        'ios_badgeType': 'Increase',
+        'ios_badgeCount': 1,
+        'android_badgeType': 'Increase',
+        'android_badgeCount': 1,
+        if (hasLargeIconUrl) 'large_icon': normalizedLargeIconUrl,
+        if (hasBigPictureUrl) 'big_picture': normalizedBigPictureUrl,
+        if (hasBigPictureUrl) 'chrome_big_picture': normalizedBigPictureUrl,
+        if (hasIosAttachmentUrl) 'ios_attachments': {'id1': iosAttachmentUrl},
+        if (hasIosAttachmentUrl) 'mutable_content': true,
         'data': {
           "action_json": {
             'action': 'FLUTTER_NOTIFICATION_CLICK',
@@ -257,6 +290,165 @@ class APIs {
         .doc(user_id)
         .collection('my_users')
         .snapshots();
+  }
+
+  static Stream<int> getUnreadMessagesCount() {
+    final String uid = user_id.toString().trim();
+    if (uid.isEmpty || uid == "12345678") {
+      return Stream<int>.value(0);
+    }
+
+    final int? uidInt = int.tryParse(uid);
+
+    int countUnreadMessages(QuerySnapshot<Map<String, dynamic>> snap) {
+      int count = 0;
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final fromId = data['fromId']?.toString();
+
+        final readValue = data['read'];
+        final String readString = readValue == null ? "" : readValue.toString();
+        final bool isUnread = readString.trim().isEmpty;
+
+        if (!isUnread) continue;
+
+        if (fromId == uid) continue;
+        if (uidInt != null && fromId == uidInt.toString()) continue;
+
+        count++;
+      }
+      return count;
+    }
+
+    late StreamController<int> controller;
+    StreamSubscription? subString;
+    StreamSubscription? subInt;
+
+    int latestString = 0;
+    int latestInt = 0;
+
+    void emit() {
+      if (!controller.isClosed) {
+        controller.add(latestString + latestInt);
+      }
+    }
+
+    controller = StreamController<int>.broadcast(
+      onListen: () {
+        subString = firestore
+            .collectionGroup('messages')
+            .where('toId', isEqualTo: uid)
+            .snapshots()
+            .listen(
+          (snap) {
+            latestString = countUnreadMessages(snap);
+            emit();
+          },
+          onError: (_) {
+            emit();
+          },
+        );
+
+        if (uidInt != null) {
+          subInt = firestore
+              .collectionGroup('messages')
+              .where('toId', isEqualTo: uidInt)
+              .snapshots()
+              .listen(
+            (snap) {
+              latestInt = countUnreadMessages(snap);
+              emit();
+            },
+            onError: (_) {
+              emit();
+            },
+          );
+        } else {
+          latestInt = 0;
+          emit();
+        }
+      },
+      onCancel: () async {
+        await subString?.cancel();
+        await subInt?.cancel();
+        await controller.close();
+      },
+    );
+
+    return controller.stream;
+  }
+
+  static Stream<int> getPendingBookingsCount() {
+    late final StreamController<int> controller;
+    Timer? timer;
+    bool inFlight = false;
+    int last = 0;
+
+    Future<int> fetch() async {
+      if (inFlight) return last;
+      inFlight = true;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final String rawUser = (prefs.getString("userDetails") ?? "").trim();
+        if (rawUser.isEmpty) return last;
+
+        final dynamic decoded = jsonDecode(rawUser);
+        final dynamic userIdRaw =
+            decoded is Map ? decoded["user_id"] : null;
+        final int userId = userIdRaw is int
+            ? userIdRaw
+            : int.tryParse(userIdRaw?.toString() ?? "") ?? 0;
+        if (userId == 0) return last;
+
+        String token = AppConstant.token.toString().trim();
+        if (token.isEmpty) {
+          token = (prefs.getString("token") ?? "").toString().trim();
+        }
+        if (token.isEmpty) return last;
+
+        final Uri url =
+            Uri.parse("${AppConfigProvider.apiUrl}home_page_api?user_id=$userId");
+        final res = await http.get(url, headers: {'Authorization': 'Bearer $token'});
+        if (res.statusCode != 200) return last;
+
+        final dynamic body = jsonDecode(res.body);
+        if (body is! Map || body["success"] != true) return last;
+
+        int pending = 0;
+        final dynamic upcomingTrip = body["upcoming_trip"];
+        if (upcomingTrip is List) pending += upcomingTrip.length;
+
+        final dynamic pendingTrip = body["pending_trip"];
+        if (pendingTrip is List) pending += pendingTrip.length;
+
+        final dynamic pendingProperty = body["pending_property_booking"];
+        if (pendingProperty is List) pending += pendingProperty.length;
+
+        last = pending;
+        return last;
+      } catch (_) {
+        return last;
+      } finally {
+        inFlight = false;
+      }
+    }
+
+    controller = StreamController<int>.broadcast(
+      onListen: () async {
+        final v = await fetch();
+        if (!controller.isClosed) controller.add(v);
+        timer = Timer.periodic(const Duration(seconds: 30), (_) async {
+          final vv = await fetch();
+          if (!controller.isClosed) controller.add(vv);
+        });
+      },
+      onCancel: () async {
+        timer?.cancel();
+        await controller.close();
+      },
+    );
+
+    return controller.stream;
   }
 
   // for getting all users from firestore database
@@ -479,7 +671,8 @@ class APIs {
     final ref = firestore.collection('chats/$conversationId/messages/');
     await ref.doc(time).set(message.toJson()).then((value) =>
         sendPushNotification(
-            chatUser, type == TypeEnum.text ? msg : 'image', isActive));
+            chatUser, type == TypeEnum.text ? msg : 'image', isActive,
+            imageUrl: type == TypeEnum.image ? msg : null));
   }
 
   //update read status of message

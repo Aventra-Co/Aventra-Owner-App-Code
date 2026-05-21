@@ -19,6 +19,7 @@ import '../../controller/app_font.dart';
 import '../../controller/app_image.dart';
 import '../../controller/app_language.dart';
 import '../../controller/app_loader.dart';
+import '../../controller/one_signal_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
 
@@ -105,7 +106,7 @@ class _LoginState extends State<Login> {
     });
 
     try {
-      String playeID = AppConstant.playerID.toString();
+      final String playeID = await OneSignalService.getPlayerId();
       print("playeID line number 101 $playeID");
       http.MultipartRequest formData = http.MultipartRequest('POST', url);
       formData.fields['username'] = username.toString();

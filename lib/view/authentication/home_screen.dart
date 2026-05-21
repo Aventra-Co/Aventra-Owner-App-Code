@@ -14,6 +14,7 @@ import '../other_screen/weather_screen.dart';
 import '/view/other_screen/upcoming_details.dart';
 import '../other_screen/notification.dart';
 import '../../controller/app_constant.dart';
+import '../../controller/one_signal_service.dart';
 import '../../controller/app_language.dart';
 import '/view/other_screen/details_screen.dart';
 import '../../controller/app_color.dart';
@@ -205,7 +206,11 @@ class _HomeScreenState extends State<HomeScreen> {
           upcomingTripsList = (item != "NA") ? item : [];
           item = res['ongoing_trip'];
           ongoingTripsList = (item != "NA") ? item : [];
-          notificationCount = res['notificationCount'];
+          final dynamic rawCount = res['notificationCount'];
+          notificationCount = rawCount is int
+              ? rawCount
+              : int.tryParse(rawCount?.toString() ?? "") ?? 0;
+          OneSignalService.setNotificationBadgeCount(notificationCount);
 
           setState(() {
             isApiCalling = false;
@@ -756,6 +761,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   setState(() {
                                     notificationCount = 0;
                                   });
+                                  OneSignalService.setNotificationBadgeCount(0);
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -776,29 +782,37 @@ class _HomeScreenState extends State<HomeScreen> {
                                       child: Image.asset(
                                           AppImage.deactiveNotificationIcon),
                                     ),
-                                    if (notificationCount != 0)
-                                      Positioned(
-                                        right: 0,
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          width: screenWidth * 5 / 100,
-                                          height: screenWidth * 5 / 100,
-                                          decoration: BoxDecoration(
-                                              color: AppColor.redcolor,
-                                              borderRadius:
-                                                  BorderRadius.circular(100)),
-                                          child: Text(
-                                            notificationCount > 9
-                                                ? "9+"
-                                                : "$notificationCount",
-                                            style: const TextStyle(
-                                                fontFamily: AppFont.fontFamily,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w500,
-                                                color: AppColor.secondaryColor),
+                                    ValueListenableBuilder<int>(
+                                      valueListenable:
+                                          OneSignalService.notificationBadgeCount,
+                                      builder: (context, count, _) {
+                                        if (count == 0) {
+                                          return const SizedBox.shrink();
+                                        }
+                                        return Positioned(
+                                          right: 0,
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            width: screenWidth * 5 / 100,
+                                            height: screenWidth * 5 / 100,
+                                            decoration: BoxDecoration(
+                                                color: AppColor.redcolor,
+                                                borderRadius:
+                                                    BorderRadius.circular(100)),
+                                            child: Text(
+                                              count > 9 ? "9+" : "$count",
+                                              style: const TextStyle(
+                                                  fontFamily:
+                                                      AppFont.fontFamily,
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w500,
+                                                  color:
+                                                      AppColor.secondaryColor),
+                                            ),
                                           ),
-                                        ),
-                                      )
+                                        );
+                                      },
+                                    )
                                   ],
                                 ),
                               ),

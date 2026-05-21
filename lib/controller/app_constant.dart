@@ -20,7 +20,7 @@ class AppConstant {
   static const int describeLength = 500;
   static bool isLoggedOut = false;
   static int selectFooterIndex = 0;
-  static String playerID = "123456";
+  static String playerID = "";
     static String temperature = '28';
   static String unit = '°C';
   static String weatherDesc = AppLanguage.clearSkyText[language];

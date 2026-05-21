@@ -130,7 +130,7 @@ class _SplashState extends State<Splash> {
     print("Url $url");
 
     try {
-      String playeID = AppConstant.playerID.toString();
+      final String playeID = await OneSignalService.getPlayerId();
       print("playeID line number 101 $playeID");
       http.MultipartRequest formData = http.MultipartRequest('POST', url);
 

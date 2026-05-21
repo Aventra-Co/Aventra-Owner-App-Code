@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '/view/authentication/calender_screen.dart';
 import '/view/authentication/inbox_screen.dart';
 import '/view/authentication/my_ads_screen.dart';
 import '/view/authentication/profile_screen.dart';
 import '../view/authentication/home_screen.dart';
+import '../helper/apis.dart';
 import 'app_color.dart';
 import 'app_constant.dart';
 import 'app_font.dart';
@@ -23,6 +25,31 @@ class MyFooterPage extends StatefulWidget {
 class _MyFooterPageState extends State<MyFooterPage> {
   int _selectedIndex = 0;
   PageController _pageController = PageController(initialPage: 0);
+  late final Stream<int> _unreadCountStream;
+  late final Stream<int> _pendingBookingsCountStream;
+
+  Widget buildUnreadBadge(int count) {
+    if (count <= 0) return const SizedBox.shrink();
+    final String text = count > 99 ? "99+" : count.toString();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+      decoration: BoxDecoration(
+        color: Colors.red,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          height: 1.1,
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -30,10 +57,18 @@ class _MyFooterPageState extends State<MyFooterPage> {
 
     // _pageController = PageController(initialPage: AppConstant.selectFooterIndex);
     _pageController = PageController(initialPage: widget.indexOfPage);
+    _unreadCountStream = APIs.getUnreadMessagesCount().distinct();
+    _pendingBookingsCountStream = APIs.getPendingBookingsCount().distinct();
     setState(() {
       _selectedIndex = widget.indexOfPage;
       // _selectedIndex = AppConstant.selectFooterIndex;
     });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _onItemTapped(int index) {
@@ -79,19 +114,38 @@ class _MyFooterPageState extends State<MyFooterPage> {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 1 / 100,
                   ),
-                  Container(
-                    height: screenWidth > 600
-                        ? MediaQuery.of(context).size.width * 5 / 100
-                        : MediaQuery.of(context).size.width * 7 / 100,
-                    width: screenWidth > 600
-                        ? MediaQuery.of(context).size.width * 5 / 100
-                        : MediaQuery.of(context).size.width * 7 / 100,
-                    //  color: Colors.amber,
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage(_selectedIndex == 0
-                                ? AppImage.bookingsActive
-                                : AppImage.bookingDeactive))),
+                  StreamBuilder<int>(
+                    stream: _pendingBookingsCountStream,
+                    builder: (context, snapshot) {
+                      final int pending = snapshot.data ?? 0;
+                      final double iconSize = screenWidth > 600
+                          ? MediaQuery.of(context).size.width * 5 / 100
+                          : MediaQuery.of(context).size.width * 7 / 100;
+                      return SizedBox(
+                        width: iconSize + 14,
+                        height: iconSize + 14,
+                        child: Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.center,
+                              child: Container(
+                                height: iconSize,
+                                width: iconSize,
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: AssetImage(_selectedIndex == 0
+                                            ? AppImage.bookingsActive
+                                            : AppImage.bookingDeactive))),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: buildUnreadBadge(pending),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.5 / 100,
@@ -166,18 +220,38 @@ class _MyFooterPageState extends State<MyFooterPage> {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 1 / 100,
                   ),
-                  Container(
-                    height: screenWidth > 600
-                        ? MediaQuery.of(context).size.width * 5 / 100
-                        : MediaQuery.of(context).size.width * 7 / 100,
-                    width: screenWidth > 600
-                        ? MediaQuery.of(context).size.width * 5 / 100
-                        : MediaQuery.of(context).size.width * 7 / 100,
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage(_selectedIndex == 2
-                                ? AppImage.inboxActiveIcon
-                                : AppImage.inboxDeactiveIcon))),
+                  StreamBuilder<int>(
+                    stream: _unreadCountStream,
+                    builder: (context, snapshot) {
+                      final int unread = snapshot.data ?? 0;
+                      final double iconSize = screenWidth > 600
+                          ? MediaQuery.of(context).size.width * 5 / 100
+                          : MediaQuery.of(context).size.width * 7 / 100;
+                      return SizedBox(
+                        width: iconSize + 14,
+                        height: iconSize + 14,
+                        child: Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.center,
+                              child: Container(
+                                height: iconSize,
+                                width: iconSize,
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: AssetImage(_selectedIndex == 2
+                                            ? AppImage.inboxActiveIcon
+                                            : AppImage.inboxDeactiveIcon))),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: buildUnreadBadge(unread),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.5 / 100,
