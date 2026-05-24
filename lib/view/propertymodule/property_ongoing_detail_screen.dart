@@ -957,43 +957,49 @@ class _PropertyDetailsScreenState extends State<PropertyOngoinDetailsScreen> {
       context: context,
       barrierDismissible: true,
       builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.symmetric(
-            horizontal: size.width * 0.05,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white, //
-              borderRadius: BorderRadius.circular(16),
+        return Directionality(
+          textDirection: language == 1 ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.symmetric(
+              horizontal: size.width * 0.05,
             ),
-            padding: EdgeInsets.all(size.width * 0.04),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLanguage.cancellationPolicyText[language],
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: AppFont.fontFamily,
-                    color: AppColor.themeColor,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              padding: EdgeInsets.all(size.width * 0.04),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLanguage.cancellationPolicyText[language],
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: AppFont.fontFamily,
+                      color: AppColor.themeColor,
+                    ),
                   ),
-                ),
-                SizedBox(height: size.height * 0.015),
-                const Text(
-                  'Cancellations made more than 5 days before the check-in date will receive a full refund of the total booking amount. Cancellations made between 2 to 5 days before the check-in date will receive a 50% refund. No refunds will be issued for cancellations made within 2 days of the check-in date.',
-                  style: TextStyle(
-                    fontSize: 13.8,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: AppFont.fontFamily,
-                    color: Colors.black87,
-                    height: 1.5,
+                  SizedBox(height: size.height * 0.015),
+                  Text(
+                    AppLanguage.cancellationPolicyDetails(
+                      language,
+                      AppLanguage.parseFreeCancellationDays(bookingDetails),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 13.8,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: AppFont.fontFamily,
+                      color: Colors.black87,
+                      height: 1.5,
+                    ),
                   ),
-                ),
-                SizedBox(height: size.height * 0.02),
-              ],
+                  SizedBox(height: size.height * 0.02),
+                ],
+              ),
             ),
           ),
         );
