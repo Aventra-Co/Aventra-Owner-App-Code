@@ -1,7 +1,7 @@
 class AppConfigProvider {
   // ================ApiUrl==================//
-  static const String apiUrl = "https://aventra-co.com/staging/server/ownerAPI/";
+  static const String apiUrl = "https://aventra-co.com/app/server/ownerAPI/";
 
   //=================imageURL===============//
-  static const String imageURL = "https://aventra-co.com/staging/server/uploads/";
+  static const String imageURL = "https://aventra-co.com/app/server/uploads/";
 }
