@@ -9,9 +9,9 @@
 	<key>CFBundleDisplayName</key>
 	<string>Aventra Owner</string>
 	<key>CFBundleShortVersionString</key>
-    <string>3.0.3</string>
+    <string>3.0.4</string>
     <key>CFBundleVersion</key>
-    <string>6</string>
+    <string>7</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
