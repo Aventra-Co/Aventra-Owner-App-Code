@@ -95,6 +95,7 @@ class _EditPropertyAdSecondScreenState
   final TextEditingController weekendController = TextEditingController();
   final TextEditingController fullWeekController = TextEditingController();
   final TextEditingController cancelDaysController = TextEditingController();
+  final TextEditingController minLeadDaysController = TextEditingController();
 
   List<Map<String, dynamic>> offerings = [];
   final Set<String> selectedOfferings = <String>{};
@@ -142,6 +143,7 @@ class _EditPropertyAdSecondScreenState
     }
     isToggle = data['pet_friendly'] ?? 0;
     cancelDaysController.text = data["free_cancel_days"].toString();
+    minLeadDaysController.text = (data["min_lead_days"] ?? 0).toString();
     setState(() {});
   }
 
@@ -259,6 +261,9 @@ class _EditPropertyAdSecondScreenState
       formData.fields['pet_friendly'] = isToggle.toString();
       formData.fields['amenity_arr'] = jsonEncode(selectedOfferings.toList());
       formData.fields['free_cancel_days'] = cancelDaysController.text;
+      formData.fields['min_lead_days'] = minLeadDaysController.text.isEmpty
+          ? "0"
+          : minLeadDaysController.text;
       formData.fields['delete_image_id'] = widget.deleteIds;
 
       if (widget.coverImage != null) {
@@ -906,6 +911,64 @@ class _EditPropertyAdSecondScreenState
                                 fontFamily: AppFont.fontFamily,
                                 fontWeight: FontWeight.w400,
                                 color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: size.height * 0.02),
+
+                        // Minimum lead days (optional, 0 = no limit)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                AppLanguage.minLeadDaysText[language],
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: AppFont.fontFamily,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: size.width * 0.02),
+                            SizedBox(
+                              width: size.width * 0.15,
+                              height: size.height * 0.05,
+                              child: TextFormField(
+                                controller: minLeadDaysController,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.center,
+                                maxLength: 2,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: AppFont.fontFamily,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black,
+                                ),
+                                decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.zero,
+                                  counterText: '',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(0),
+                                    borderSide:
+                                        BorderSide(color: Colors.grey.shade400),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(0),
+                                    borderSide:
+                                        BorderSide(color: Colors.grey.shade400),
+                                  ),
+                                  focusedBorder: const OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(0)),
+                                    borderSide:
+                                        BorderSide(color: AppColor.themeColor),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                ),
                               ),
                             ),
                           ],

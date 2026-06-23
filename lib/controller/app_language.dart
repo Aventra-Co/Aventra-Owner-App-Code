@@ -314,6 +314,10 @@ class AppLanguage {
   static const slotPriceText = ["Slot Price", "سعر الفتحة"];
   static const minimumHoursText = ["Minimum Hours", "الحد الأدنى للساعات"];
   static const idleHoursText = ["Idle Hours", "ساعات الخمول"];
+  static const minLeadDaysText = [
+    "Minimum Lead Days (0 = no limit)",
+    "الحد الأدنى لأيام الحجز المسبق (0 = بدون حد)"
+  ];
   static const alldaysText = ["All days", "كل الأيام"];
   static const choosedatesText = ["Choose dates", "اختر التواريخ"];
   static const weekendFridaySaturdayText = [

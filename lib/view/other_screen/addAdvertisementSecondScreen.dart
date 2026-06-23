@@ -88,6 +88,8 @@ class _AddAdvertisementSecondScreenState
       TextEditingController();
   TextEditingController reetocancelbeforeTextEditingController =
       TextEditingController();
+  TextEditingController minLeadDaysTextEditingController =
+      TextEditingController();
   TextEditingController _timeController = TextEditingController();
   TimeOfDay? selectedStartTime;
   TimeOfDay? selectedEndTime;
@@ -321,6 +323,10 @@ class _AddAdvertisementSecondScreenState
       formData.fields['entertainment_arr'] = jsonEncode(selectedAddOns);
       formData.fields['free_to_cancel'] =
           reetocancelbeforeTextEditingController.text;
+      formData.fields['min_lead_days'] =
+          minLeadDaysTextEditingController.text.isEmpty
+              ? "0"
+              : minLeadDaysTextEditingController.text;
 
       if (widget.coverImage != null) {
         XFile image1 = widget.coverImage!;
@@ -932,6 +938,17 @@ class _AddAdvertisementSecondScreenState
                       CustomTextFormFieldBlackWidth(
                         controller: idleHoursTextEditingController,
                         hintText: "${AppLanguage.idleHoursText[language]}*",
+                        keyboardtype: TextInputType.number,
+                        maxLength: 2,
+                        fillColorStatus: 0,
+                        readOnly: false,
+                        width: MediaQuery.of(context).size.width * 90 / 100,
+                      ),
+
+                      //! Text Field Minimum Lead Days (optional, 0 = no limit)
+                      CustomTextFormFieldBlackWidth(
+                        controller: minLeadDaysTextEditingController,
+                        hintText: AppLanguage.minLeadDaysText[language],
                         keyboardtype: TextInputType.number,
                         maxLength: 2,
                         fillColorStatus: 0,
