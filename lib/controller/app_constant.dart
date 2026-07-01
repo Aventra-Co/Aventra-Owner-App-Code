@@ -27,7 +27,7 @@ class AppConstant {
   static String weatherIcon = '☀️';
   static var deviceType = Platform.isAndroid ? 'android' : 'ios';
   static String token = "";
-  static String mapkey = "AIzaSyCY1_Ncz7dVOoaddm4ZXGqoAdG7cd8_exE";
+  static String mapkey = "AIzaSyAqdD0whRmRrC5YtKvRBPDaaq_63dluCII";
     static String weatherKey = "iw1HuqjddUHzaFmb";
   static String oneSignalAppId = "3103e952-a0df-4841-a79a-6f221c8be76a";
 

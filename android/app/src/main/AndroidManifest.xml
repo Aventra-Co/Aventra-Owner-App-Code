@@ -47,7 +47,7 @@
         android:icon="@mipmap/ic_launcher">
           <meta-data
                   android:name="com.google.android.geo.API_KEY"
-                  android:value="AIzaSyCY1_Ncz7dVOoaddm4ZXGqoAdG7cd8_exE"/>
+                  android:value="AIzaSyAqdD0whRmRrC5YtKvRBPDaaq_63dluCII"/>
           <meta-data
                   android:name="com.onesignal.messaging.default_notification_icon"
                   android:resource="@drawable/ic_notificationlogo" />

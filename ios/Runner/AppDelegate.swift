@@ -8,8 +8,8 @@ import GoogleMaps
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    GMSServices.provideAPIKey("AIzaSyAqdD0whRmRrC5YtKvRBPDaaq_63dluCII")
     GeneratedPluginRegistrant.register(with: self)
-    GMSServices.provideAPIKey("AIzaSyCY1_Ncz7dVOoaddm4ZXGqoAdG7cd8_exE")
 
     if let controller = window?.rootViewController as? FlutterViewController {
       let badgeChannel = FlutterMethodChannel(
