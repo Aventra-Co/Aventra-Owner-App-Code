@@ -4543,13 +4543,14 @@ class _AddAdvertisementPropertyScreenState
                                         ),
                                       ),
                                       onChanged: (value) {
-                                        fetchPlaceSuggestionsWithCallback(
-                                            value, modalSetState);
                                         if (_debounce?.isActive ?? false)
                                           _debounce!.cancel();
                                         _debounce = Timer(
-                                          const Duration(milliseconds: 300),
-                                          () {},
+                                          const Duration(milliseconds: 400),
+                                          () {
+                                            fetchPlaceSuggestionsWithCallback(
+                                                value, modalSetState);
+                                          },
                                         );
                                       },
                                     ),
@@ -4591,23 +4592,34 @@ class _AddAdvertisementPropertyScreenState
                                           final placeId =
                                               suggestion['place_id'];
                                           final apiKey = AppConstant.mapkey;
-
-                                          final detailsUrl =
-                                              'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey';
-                                          final response = await http
-                                              .get(Uri.parse(detailsUrl));
+                                          final resourceName = placeId
+                                                  .toString()
+                                                  .startsWith('places/')
+                                              ? placeId.toString()
+                                              : 'places/$placeId';
+                                          final detailsUrl = Uri.parse(
+                                              'https://places.googleapis.com/v1/$resourceName');
+                                          final response = await http.get(
+                                            detailsUrl,
+                                            headers: {
+                                              'X-Goog-Api-Key': apiKey,
+                                              'X-Goog-FieldMask':
+                                                  'location,formattedAddress,displayName',
+                                            },
+                                          );
 
                                           if (response.statusCode == 200) {
                                             final data =
                                                 json.decode(response.body);
-                                            final location = data['result']
-                                                ['geometry']['location'];
+                                            final location = data['location'];
                                             FocusManager.instance.primaryFocus
                                                 ?.unfocus();
 
                                             modalSetState(() {
-                                              latitudex = location['lat'];
-                                              longtitudex = location['lng'];
+                                              latitudex =
+                                                  location['latitude'];
+                                              longtitudex =
+                                                  location['longitude'];
                                               initialPosition = LatLng(
                                                   latitudex, longtitudex);
                                               predictions.clear();
@@ -4621,6 +4633,9 @@ class _AddAdvertisementPropertyScreenState
                                                 ),
                                               ),
                                             );
+                                          } else {
+                                            print(
+                                                'Place details error: ${response.statusCode} ${response.body}');
                                           }
                                         },
                                       );
@@ -4730,25 +4745,47 @@ class _AddAdvertisementPropertyScreenState
 
   Future<void> fetchPlaceSuggestionsWithCallback(
       String input, Function modalSetState) async {
-    if (input.isEmpty) {
+    if (input.trim().isEmpty) {
       modalSetState(() => predictions = []);
       return;
     }
 
     final apiKey = AppConstant.mapkey;
     final url =
-        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey';
+        Uri.parse('https://places.googleapis.com/v1/places:autocomplete');
 
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': apiKey,
+        },
+        body: json.encode({'input': input.trim()}),
+      );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        final suggestions = (data['suggestions'] as List?) ?? [];
         modalSetState(() {
-          predictions = data['predictions'];
+          predictions = suggestions.map((s) {
+            final placePrediction = s['placePrediction'] ?? {};
+            final text = placePrediction['text']?['text'] ?? '';
+            final placeId = placePrediction['placeId'] ?? '';
+            return {
+              'description': text,
+              'place_id': placeId,
+            };
+          }).toList();
         });
+      } else {
+        print(
+            'Places autocomplete error: ${response.statusCode} ${response.body}');
+        modalSetState(() => predictions = []);
       }
     } catch (e) {
-      print("Error: $e");
+      print("Places autocomplete Error: $e");
+      modalSetState(() => predictions = []);
     }
   }
 

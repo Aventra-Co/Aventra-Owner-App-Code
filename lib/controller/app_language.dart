@@ -119,6 +119,27 @@ class AppLanguage {
     "Description in Arabic",
     "الوصف باللغة العربية"
   ];
+  static const titleText = ["Title", "العنوان"];
+  static const tripNameEnglishText = [
+    "Trip Name in English",
+    "اسم الرحلة بالإنجليزية"
+  ];
+  static const tripNameArabicText = [
+    "Trip Name in Arabic",
+    "اسم الرحلة بالعربية"
+  ];
+  static const enterTripNameEnglishText = [
+    "Enter trip name in English",
+    "أدخل اسم الرحلة بالإنجليزية"
+  ];
+  static const enterTripNameArabicText = [
+    "Enter trip name in Arabic",
+    "أدخل اسم الرحلة بالعربية"
+  ];
+  static const tripNameEngMsg = [
+    "Please enter trip name in English",
+    "الرجاء إدخال اسم الرحلة بالإنجليزية"
+  ];
   static const sendText = ["Send", "إرسال"];
   static const nameText = ["Name", "الاسم"];
   static const submitText = ["Submit", "إرسال"];

@@ -1,7 +1,7 @@
 name: the_boat_ownerside
 description: "A new Flutter project."
 publish_to: 'none'
-version: 4.0.5+9
+version: 4.0.6+10
 
 environment:
   sdk: 3.12.1

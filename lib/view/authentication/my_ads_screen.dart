@@ -415,14 +415,29 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
   }
 
   //---------------------SEARCH FUNCTION Trips--------------------///
+  String _tripDisplayName(dynamic trip) {
+    final en = trip['trip_name_english']?.toString().trim() ?? '';
+    final ar = trip['trip_name_arabic']?.toString().trim() ?? '';
+    if (language == 1 && ar.isNotEmpty && ar != 'NA') return ar;
+    if (en.isNotEmpty && en != 'NA') return en;
+    if (ar.isNotEmpty && ar != 'NA') return ar;
+    return trip['boat_name_english']?.toString() ?? '';
+  }
+
   searchSeaAds(String query) {
     print(query);
 
     var results1 = searchTripList
-        .where((value) => value['boat_name_english']
-            .toString()
-            .toLowerCase()
-            .contains(query.toLowerCase()))
+        .where((value) {
+          final en =
+              value['trip_name_english']?.toString().toLowerCase() ?? '';
+          final ar =
+              value['trip_name_arabic']?.toString().toLowerCase() ?? '';
+          final boatName =
+              value['boat_name_english']?.toString().toLowerCase() ?? '';
+          final q = query.toLowerCase();
+          return en.contains(q) || ar.contains(q) || boatName.contains(q);
+        })
         .toList();
 
     print("results1 $results1");
@@ -909,7 +924,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                                       100,
                                                             ),
 
-                                                            // Boat name
+                                                            // Trip title
                                                             SizedBox(
                                                               width: MediaQuery.of(
                                                                           context)
@@ -918,8 +933,9 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                                   80 /
                                                                   100,
                                                               child: Text(
-                                                                tripList[index][
-                                                                    'boat_name_english'],
+                                                                _tripDisplayName(
+                                                                    tripList[
+                                                                        index]),
                                                                 style: const TextStyle(
                                                                     fontSize:
                                                                         18,

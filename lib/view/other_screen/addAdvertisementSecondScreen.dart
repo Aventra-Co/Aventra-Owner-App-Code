@@ -39,6 +39,8 @@ class AddAdvertisementSecondScreen extends StatefulWidget {
   final String long;
   final String cityId;
   final String members;
+  final String tripNameEng;
+  final String tripNameArab;
   final String descEng;
   final String descArab;
   final String isPrivate;
@@ -60,6 +62,8 @@ class AddAdvertisementSecondScreen extends StatefulWidget {
       required this.pickup,
       required this.cityId,
       required this.members,
+      required this.tripNameEng,
+      required this.tripNameArab,
       required this.descEng,
       required this.descArab,
       required this.discount,
@@ -301,6 +305,8 @@ class _AddAdvertisementSecondScreenState
       formData.fields['longitude'] = widget.long;
       formData.fields['city_id'] = widget.cityId;
       formData.fields['max_people'] = widget.members;
+      formData.fields['trip_name_english'] = widget.tripNameEng;
+      formData.fields['trip_name_arabic'] = widget.tripNameArab;
       formData.fields['description_english'] = widget.descEng;
       formData.fields['description_arabic'] = widget.descArab;
       formData.fields['coupon_code'] = widget.couponCode.toUpperCase();

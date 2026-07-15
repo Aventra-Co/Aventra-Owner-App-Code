@@ -318,6 +318,9 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
                         Column(
                           children: [
                             textTile(
+                                AppLanguage.titleText[language],
+                                _tripDisplayName(adDetails)),
+                            textTile(
                                 AppLanguage.advertisementTypeText[language],
                                 adDetails['advertisement_type'] == 0
                                     ? AppLanguage.privateText[language]
@@ -390,6 +393,15 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
         ),
       ),
     );
+  }
+
+  String _tripDisplayName(dynamic trip) {
+    final en = trip['trip_name_english']?.toString().trim() ?? '';
+    final ar = trip['trip_name_arabic']?.toString().trim() ?? '';
+    if (language == 1 && ar.isNotEmpty && ar != 'NA') return ar;
+    if (en.isNotEmpty && en != 'NA') return en;
+    if (ar.isNotEmpty && ar != 'NA') return ar;
+    return trip['boat_name_english']?.toString() ?? '';
   }
 
   textTile(leftText, rightText) {

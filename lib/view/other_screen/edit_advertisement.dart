@@ -51,6 +51,9 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
   TextEditingController pickUpTextEditingController = TextEditingController();
   TextEditingController cityTextEditingController = TextEditingController();
   TextEditingController maxNumberTextController = TextEditingController();
+  TextEditingController tripNameEnglishTextController =
+      TextEditingController();
+  TextEditingController tripNameArabicTextController = TextEditingController();
   TextEditingController messageTextEditingController = TextEditingController();
   TextEditingController messageArabicTextEditingController =
       TextEditingController();
@@ -246,6 +249,16 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
 
     pickUpTextEditingController.text = tripDetails["pickup_point"];
     maxNumberTextController.text = tripDetails["max_people"].toString();
+    tripNameEnglishTextController.text =
+        tripDetails["trip_name_english"] == null ||
+                tripDetails["trip_name_english"] == "NA"
+            ? ""
+            : tripDetails["trip_name_english"].toString();
+    tripNameArabicTextController.text =
+        tripDetails["trip_name_arabic"] == null ||
+                tripDetails["trip_name_arabic"] == "NA"
+            ? ""
+            : tripDetails["trip_name_arabic"].toString();
     messageTextEditingController.text = tripDetails["description_english"];
     messageArabicTextEditingController.text = tripDetails["description_arabic"];
     discountTextEditingController.text =
@@ -858,6 +871,8 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       String pickUpPoint,
       String city,
       String numOfPeople,
+      String tripNameEnglish,
+      String tripNameArabic,
       String descEnglish,
       String descArabic,
       String couponCode,
@@ -878,6 +893,7 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       pickUpPoint: pickUpPoint,
       city: city,
       numOfPeople: numOfPeople,
+      tripNameEnglish: tripNameEnglish,
       couponCode: couponCode,
       startDate: startDate,
       endDate: endDate,
@@ -903,6 +919,8 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       couponCode,
       startDate,
       endDate,
+      tripNameEnglish,
+      tripNameArabic,
     );
   }
 
@@ -919,6 +937,7 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
     required String pickUpPoint,
     required String city,
     required String numOfPeople,
+    required String tripNameEnglish,
     required String couponCode,
     required String startDate,
     required String endDate,
@@ -976,6 +995,10 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
 
     if (numOfPeople.isEmpty) {
       return AppLanguage.maxPeopleMsg[language];
+    }
+
+    if (tripNameEnglish.trim().isEmpty) {
+      return AppLanguage.tripNameEngMsg[language];
     }
 
     // Number of people validations
@@ -1069,7 +1092,9 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
       String discount,
       String couponCode,
       String startDate,
-      String endDate) {
+      String endDate,
+      String tripNameEnglish,
+      String tripNameArabic) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -1092,6 +1117,8 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
           long: long.toString(),
           cityId: isSelectedCity.toString(),
           members: maxNumberTextController.text,
+          tripNameEng: tripNameEnglish,
+          tripNameArab: tripNameArabic,
           descEng: messageTextEditingController.text,
           descArab: messageArabicTextEditingController.text,
           isPrivate: isToggle.toString(),
@@ -2613,6 +2640,36 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                               height:
                                   MediaQuery.of(context).size.height * 2 / 100),
 
+                          //!================enter trip name english
+                          CustomTextFormFieldBlackWidth(
+                              controller: tripNameEnglishTextController,
+                              hintText:
+                                  "${AppLanguage.enterTripNameEnglishText[language]}*",
+                              keyboardtype: TextInputType.text,
+                              maxLength: AppConstant.fullnameLength,
+                              fillColorStatus: 0,
+                              width:
+                                  MediaQuery.of(context).size.width * 90 / 100,
+                              readOnly: false),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
+                          //!================enter trip name arabic
+                          CustomTextFormFieldBlackWidth(
+                              controller: tripNameArabicTextController,
+                              hintText:
+                                  AppLanguage.enterTripNameArabicText[language],
+                              keyboardtype: TextInputType.text,
+                              maxLength: AppConstant.fullnameLength,
+                              fillColorStatus: 0,
+                              width:
+                                  MediaQuery.of(context).size.width * 90 / 100,
+                              readOnly: false),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 2 / 100),
+
                           //!==============description in english==========
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 90 / 100,
@@ -3082,6 +3139,8 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                   pickUpTextEditingController.text,
                                   cityTextEditingController.text,
                                   maxNumberTextController.text,
+                                  tripNameEnglishTextController.text,
+                                  tripNameArabicTextController.text,
                                   messageTextEditingController.text,
                                   messageArabicTextEditingController.text,
                                   couponCodeTextEditingController.text,
@@ -4894,13 +4953,14 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                         ),
                                       ),
                                       onChanged: (value) {
-                                        fetchPlaceSuggestionsWithCallback(
-                                            value, modalSetState);
                                         if (_debounce?.isActive ?? false)
                                           _debounce!.cancel();
                                         _debounce = Timer(
-                                          const Duration(milliseconds: 300),
-                                          () {},
+                                          const Duration(milliseconds: 400),
+                                          () {
+                                            fetchPlaceSuggestionsWithCallback(
+                                                value, modalSetState);
+                                          },
                                         );
                                       },
                                     ),
@@ -4942,23 +5002,34 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                           final placeId =
                                               suggestion['place_id'];
                                           final apiKey = AppConstant.mapkey;
-
-                                          final detailsUrl =
-                                              'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey';
-                                          final response = await http
-                                              .get(Uri.parse(detailsUrl));
+                                          final resourceName = placeId
+                                                  .toString()
+                                                  .startsWith('places/')
+                                              ? placeId.toString()
+                                              : 'places/$placeId';
+                                          final detailsUrl = Uri.parse(
+                                              'https://places.googleapis.com/v1/$resourceName');
+                                          final response = await http.get(
+                                            detailsUrl,
+                                            headers: {
+                                              'X-Goog-Api-Key': apiKey,
+                                              'X-Goog-FieldMask':
+                                                  'location,formattedAddress,displayName',
+                                            },
+                                          );
 
                                           if (response.statusCode == 200) {
                                             final data =
                                                 json.decode(response.body);
-                                            final location = data['result']
-                                                ['geometry']['location'];
+                                            final location = data['location'];
                                             FocusManager.instance.primaryFocus
                                                 ?.unfocus();
 
                                             modalSetState(() {
-                                              latitudex = location['lat'];
-                                              longtitudex = location['lng'];
+                                              latitudex =
+                                                  location['latitude'];
+                                              longtitudex =
+                                                  location['longitude'];
                                               initialPosition = LatLng(
                                                   latitudex, longtitudex);
                                               predictions.clear();
@@ -4972,6 +5043,9 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
                                                 ),
                                               ),
                                             );
+                                          } else {
+                                            print(
+                                                'Place details error: ${response.statusCode} ${response.body}');
                                           }
                                         },
                                       );
@@ -5080,24 +5154,47 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
 
   Future<void> fetchPlaceSuggestionsWithCallback(
       String input, Function modalSetState) async {
-    if (input.isEmpty) {
+    if (input.trim().isEmpty) {
       modalSetState(() => predictions = []);
       return;
     }
 
     final apiKey = AppConstant.mapkey;
     final url =
-        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey';
+        Uri.parse('https://places.googleapis.com/v1/places:autocomplete');
 
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': apiKey,
+        },
+        body: json.encode({'input': input.trim()}),
+      );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        final suggestions = (data['suggestions'] as List?) ?? [];
         modalSetState(() {
-          predictions = data['predictions'];
+          predictions = suggestions.map((s) {
+            final placePrediction = s['placePrediction'] ?? {};
+            final text = placePrediction['text']?['text'] ?? '';
+            final placeId = placePrediction['placeId'] ?? '';
+            return {
+              'description': text,
+              'place_id': placeId,
+            };
+          }).toList();
         });
+      } else {
+        print(
+            'Places autocomplete error: ${response.statusCode} ${response.body}');
+        modalSetState(() => predictions = []);
       }
     } catch (e) {
+      print("Places autocomplete Error: $e");
+      modalSetState(() => predictions = []);
     }
   }
 
