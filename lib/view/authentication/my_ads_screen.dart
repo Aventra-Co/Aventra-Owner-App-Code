@@ -22,6 +22,7 @@ import '../../controller/app_image.dart';
 import '../../controller/app_language.dart';
 import 'dart:ui' as ui;
 import 'login_screen.dart';
+import '../../widgets/trip_ad_card.dart';
 
 class MyAdsScreen extends StatefulWidget {
   final int status;
@@ -203,8 +204,13 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
 
         if (res['success'] == true) {
           var item = res['trip_arr'];
-          tripList = (item != "NA") ? item : [];
-          searchTripList = (item != "NA") ? item : [];
+          tripList = (item != "NA")
+              ? List<dynamic>.from(
+                  (item as List).map((e) => Map<String, dynamic>.from(e as Map)))
+              : [];
+          // List endpoint often omits title/time fields that exist on view_trip_details
+          await _enrichSeaTripsFromDetails(tripList);
+          searchTripList = List<dynamic>.from(tripList);
 
           setState(() {
             isApiCalling = false;
@@ -237,6 +243,112 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
         isLoading = false;
       });
     }
+  }
+
+  /// get_all_trips / get_trip_details may omit titles; view_trip_details has
+  /// trip_name_english / trip_name_arabic (+ from_time / to_time).
+  Future<void> _enrichSeaTripsFromDetails(List<dynamic> trips) async {
+    if (trips.isEmpty) return;
+
+    await Future.wait(trips.map((raw) async {
+      if (raw is! Map) return;
+      final trip = raw;
+
+      bool hasText(dynamic v) {
+        if (v == null || v == 'NA') return false;
+        final text = v.toString().trim();
+        return text.isNotEmpty && text != 'null';
+      }
+
+      final hasTitle = hasText(trip['title_name_en']) ||
+          hasText(trip['title_name_ar']) ||
+          hasText(trip['trip_name_english']) ||
+          hasText(trip['trip_name_arabic']);
+      final hasFromTo =
+          hasText(trip['from_time']) || hasText(trip['to_time']);
+      final tripTime = trip['trip_time'];
+      final hasDisplayTime = tripTime is String &&
+          tripTime.trim().isNotEmpty &&
+          tripTime.trim() != '0' &&
+          tripTime.trim() != '1' &&
+          (tripTime.contains('-') ||
+              tripTime.toUpperCase().contains('AM') ||
+              tripTime.toUpperCase().contains('PM'));
+
+      if (hasTitle && (hasFromTo || hasDisplayTime)) return;
+
+      final tripId = trip['trip_id'];
+      if (tripId == null) return;
+
+      try {
+        final detailsUrl = Uri.parse(
+            "${AppConfigProvider.apiUrl}view_trip_details?trip_id=$tripId");
+        final token = AppConstant.token;
+        final detailsRes = token.isEmpty
+            ? await http.get(detailsUrl)
+            : await http.get(detailsUrl,
+                headers: {'Authorization': 'Bearer $token'});
+        if (detailsRes.statusCode != 200) return;
+        final detailsJson = jsonDecode(detailsRes.body);
+        if (detailsJson['success'] != true) return;
+
+        // API returns trip_arr as a List with one object (not a Map)
+        dynamic details = detailsJson['trip_arr'];
+        if (details is List && details.isNotEmpty) {
+          details = details.first;
+        }
+        if (details is! Map) return;
+        final detailsMap = Map<String, dynamic>.from(details as Map);
+
+        if (!hasTitle) {
+          final en =
+              detailsMap['title_name_en'] ?? detailsMap['trip_name_english'];
+          final ar =
+              detailsMap['title_name_ar'] ?? detailsMap['trip_name_arabic'];
+          if (hasText(en)) {
+            trip['title_name_en'] = en;
+            trip['trip_name_english'] = en;
+          }
+          if (hasText(ar)) {
+            trip['title_name_ar'] = ar;
+            trip['trip_name_arabic'] = ar;
+          }
+        }
+
+        if (!hasFromTo) {
+          if (hasText(detailsMap['from_time'])) {
+            trip['from_time'] = detailsMap['from_time'];
+          }
+          if (hasText(detailsMap['to_time'])) {
+            trip['to_time'] = detailsMap['to_time'];
+          }
+          if (detailsMap['fixed_time'] != null) {
+            trip['fixed_time'] = detailsMap['fixed_time'];
+          }
+          // Prefer numeric open/fixed flag from details when list had a string
+          if (detailsMap['trip_time'] is int ||
+              detailsMap['trip_time']?.toString() == '0' ||
+              detailsMap['trip_time']?.toString() == '1') {
+            trip['trip_time'] = detailsMap['trip_time'];
+          }
+        }
+
+        // Activity / type for landscape label
+        if (trip['activity'] == null ||
+            (trip['activity'] is Map && (trip['activity'] as Map).isEmpty) ||
+            (trip['activity'] is List && (trip['activity'] as List).isEmpty)) {
+          if (detailsMap['activity'] != null) {
+            trip['activity'] = detailsMap['activity'];
+          }
+        }
+        if (!hasText(trip['trip_type_name']) &&
+            hasText(detailsMap['trip_type_name'])) {
+          trip['trip_type_name'] = detailsMap['trip_type_name'];
+        }
+      } catch (e) {
+        log('enrich trip $tripId failed: $e');
+      }
+    }));
   }
 
   //=============================GET Boat DETAILS===================================//
@@ -415,24 +527,19 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
   }
 
   //---------------------SEARCH FUNCTION Trips--------------------///
-  String _tripDisplayName(dynamic trip) {
-    final en = trip['trip_name_english']?.toString().trim() ?? '';
-    final ar = trip['trip_name_arabic']?.toString().trim() ?? '';
-    if (language == 1 && ar.isNotEmpty && ar != 'NA') return ar;
-    if (en.isNotEmpty && en != 'NA') return en;
-    if (ar.isNotEmpty && ar != 'NA') return ar;
-    return trip['boat_name_english']?.toString() ?? '';
-  }
-
   searchSeaAds(String query) {
     print(query);
 
     var results1 = searchTripList
         .where((value) {
-          final en =
-              value['trip_name_english']?.toString().toLowerCase() ?? '';
-          final ar =
-              value['trip_name_arabic']?.toString().toLowerCase() ?? '';
+          final en = (value['title_name_en'] ?? value['trip_name_english'])
+                  ?.toString()
+                  .toLowerCase() ??
+              '';
+          final ar = (value['title_name_ar'] ?? value['trip_name_arabic'])
+                  ?.toString()
+                  .toLowerCase() ??
+              '';
           final boatName =
               value['boat_name_english']?.toString().toLowerCase() ?? '';
           final q = query.toLowerCase();
@@ -773,478 +880,90 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                         children: [
                                           ...List.generate(tripList.length,
                                               (index) {
+                                            final trip = tripList[index];
+                                            final size =
+                                                MediaQuery.of(context).size;
+                                            final canManage = userType == 3 ||
+                                                (userType == 2 &&
+                                                    manageMyAd == 1);
                                             return Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.center,
                                               children: [
                                                 Stack(
                                                   children: [
-                                                    GestureDetector(
+                                                    TripAdCard(
+                                                      trip: trip,
+                                                      layout: TripAdCardLayout
+                                                          .landscape,
+                                                      width: size.width * 0.9,
+                                                      height: size.height * 0.24,
+                                                      showFavorite: false,
+                                                      showShare: false,
+                                                      showImageCount: false,
+                                                      topTrailing: canManage
+                                                          ? GestureDetector(
+                                                              onTap: () {
+                                                                optionsBottomSheet(
+                                                                    context,
+                                                                    screenWidth,
+                                                                    trip[
+                                                                        'trip_id'],
+                                                                    1);
+                                                              },
+                                                              child: Container(
+                                                                width: screenWidth >
+                                                                        600
+                                                                    ? size.width *
+                                                                        5 /
+                                                                        100
+                                                                    : size.width *
+                                                                        6 /
+                                                                        100,
+                                                                height: screenWidth >
+                                                                        600
+                                                                    ? size.width *
+                                                                        5 /
+                                                                        100
+                                                                    : size.width *
+                                                                        6 /
+                                                                        100,
+                                                                decoration:
+                                                                    const BoxDecoration(
+                                                                        color: AppColor
+                                                                            .secondaryColor,
+                                                                        shape: BoxShape
+                                                                            .circle),
+                                                                child:
+                                                                    Image.asset(
+                                                                  AppImage
+                                                                      .menuCircle,
+                                                                  color: AppColor
+                                                                      .themeColor,
+                                                                  fit: BoxFit
+                                                                      .contain,
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : null,
                                                       onTap: () {
                                                         Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
                                                             builder: (context) =>
                                                                 AdvertisementScreen(
-                                                              tripId: tripList[
-                                                                          index]
-                                                                      [
+                                                              tripId: trip[
                                                                       'trip_id']
                                                                   .toString(),
                                                             ),
                                                           ),
                                                         );
                                                       },
-                                                      child: Container(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            90 /
-                                                            100,
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                          vertical: 5,
-                                                        ),
-                                                        alignment:
-                                                            Alignment.center,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(30),
-                                                          image:
-                                                              DecorationImage(
-                                                            image: tripList[index]
-                                                                        [
-                                                                        'trip_image'] !=
-                                                                    null
-                                                                ? NetworkImage(
-                                                                    "${AppConfigProvider.imageURL}${tripList[index]['trip_image']}")
-                                                                : const AssetImage(
-                                                                        AppImage
-                                                                            .imageFrame)
-                                                                    as ImageProvider,
-                                                            fit: BoxFit.cover,
-                                                            colorFilter:
-                                                                ColorFilter
-                                                                    .mode(
-                                                              Colors.black
-                                                                  .withOpacity(
-                                                                      0.3),
-                                                              BlendMode.darken,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        child: Column(
-                                                          children: [
-                                                            SizedBox(
-                                                              height: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .height *
-                                                                  1 /
-                                                                  100,
-                                                            ),
-
-                                                            // 3 options (edit/delete)
-                                                            (userType == 3 ||
-                                                                    (userType ==
-                                                                            2 &&
-                                                                        manageMyAd ==
-                                                                            1))
-                                                                ? SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        80 /
-                                                                        100,
-                                                                    child: Row(
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .end,
-                                                                      children: [
-                                                                        GestureDetector(
-                                                                          onTap:
-                                                                              () {
-                                                                            optionsBottomSheet(
-                                                                                context,
-                                                                                screenWidth,
-                                                                                tripList[index]['trip_id'],
-                                                                                1);
-                                                                          },
-                                                                          child:
-                                                                              Container(
-                                                                            width: screenWidth > 600
-                                                                                ? MediaQuery.of(context).size.width * 5 / 100
-                                                                                : MediaQuery.of(context).size.width * 6 / 100,
-                                                                            height: screenWidth > 600
-                                                                                ? MediaQuery.of(context).size.width * 5 / 100
-                                                                                : MediaQuery.of(context).size.width * 6 / 100,
-                                                                            decoration:
-                                                                                const BoxDecoration(color: AppColor.secondaryColor, shape: BoxShape.circle),
-                                                                            child:
-                                                                                Image.asset(
-                                                                              AppImage.menuCircle,
-                                                                              color: AppColor.themeColor,
-                                                                              fit: BoxFit.contain,
-                                                                            ),
-                                                                          ),
-                                                                        )
-                                                                      ],
-                                                                    ),
-                                                                  )
-                                                                : SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        80 /
-                                                                        100,
-                                                                    height: MediaQuery.of(context)
-                                                                            .size
-                                                                            .height *
-                                                                        3 /
-                                                                        100,
-                                                                  ),
-                                                            SizedBox(
-                                                              height: screenWidth >
-                                                                      600
-                                                                  ? MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .height *
-                                                                      9 /
-                                                                      100
-                                                                  : MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .height *
-                                                                      2 /
-                                                                      100,
-                                                            ),
-
-                                                            // Trip title
-                                                            SizedBox(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  80 /
-                                                                  100,
-                                                              child: Text(
-                                                                _tripDisplayName(
-                                                                    tripList[
-                                                                        index]),
-                                                                style: const TextStyle(
-                                                                    fontSize:
-                                                                        18,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w600,
-                                                                    color: AppColor
-                                                                        .secondaryColor,
-                                                                    fontFamily:
-                                                                        AppFont
-                                                                            .fontFamily),
-                                                              ),
-                                                            ),
-
-                                                            // City name
-                                                            SizedBox(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  80 /
-                                                                  100,
-                                                              child: Row(
-                                                                children: [
-                                                                  Text(
-                                                                    AppLanguage
-                                                                            .pickUpText[
-                                                                        language],
-                                                                    style: const TextStyle(
-                                                                        fontSize:
-                                                                            12,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w500,
-                                                                        color: AppColor
-                                                                            .secondaryColor,
-                                                                        fontFamily:
-                                                                            AppFont.fontFamily),
-                                                                  ),
-                                                                  const Text(
-                                                                    " \u2022 ",
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            18,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w500,
-                                                                        color: AppColor
-                                                                            .secondaryColor,
-                                                                        fontFamily:
-                                                                            AppFont.fontFamily),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        63 /
-                                                                        100,
-                                                                    child: Text(
-                                                                      "${tripList[index]['city_name'][language] ?? ""}",
-                                                                      maxLines:
-                                                                          1,
-                                                                      overflow:
-                                                                          TextOverflow
-                                                                              .ellipsis,
-                                                                      style: const TextStyle(
-                                                                          fontSize:
-                                                                              12,
-                                                                          fontWeight: FontWeight
-                                                                              .w500,
-                                                                          color: AppColor
-                                                                              .secondaryColor,
-                                                                          fontFamily:
-                                                                              AppFont.fontFamily),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-
-                                                            // Advertisement type
-                                                            SizedBox(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  80 /
-                                                                  100,
-                                                              child: Row(
-                                                                children: [
-                                                                  Text(
-                                                                    AppLanguage
-                                                                            .advTypeText[
-                                                                        language],
-                                                                    style: const TextStyle(
-                                                                        fontSize:
-                                                                            12,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w500,
-                                                                        color: AppColor
-                                                                            .secondaryColor,
-                                                                        fontFamily:
-                                                                            AppFont.fontFamily),
-                                                                  ),
-                                                                  const Text(
-                                                                    " \u2022 ",
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            18,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w500,
-                                                                        color: AppColor
-                                                                            .secondaryColor,
-                                                                        fontFamily:
-                                                                            AppFont.fontFamily),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    // width: MediaQuery.of(context)
-                                                                    //         .size
-                                                                    //         .width *
-                                                                    //     6 /
-                                                                    //     100,
-                                                                    child: Text(
-                                                                      tripList[index]['advertisement_type'] ==
-                                                                              0
-                                                                          ? AppLanguage.privateText[
-                                                                              language]
-                                                                          : AppLanguage
-                                                                              .publicText[language],
-                                                                      maxLines:
-                                                                          1,
-                                                                      overflow:
-                                                                          TextOverflow
-                                                                              .ellipsis,
-                                                                      style: const TextStyle(
-                                                                          fontSize:
-                                                                              12,
-                                                                          fontWeight: FontWeight
-                                                                              .w500,
-                                                                          color: AppColor
-                                                                              .secondaryColor,
-                                                                          fontFamily:
-                                                                              AppFont.fontFamily),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-
-                                                            // Rating, members, price
-                                                            SizedBox(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  80 /
-                                                                  100,
-                                                              child: Row(
-                                                                children: [
-                                                                  if (tripList[index]
-                                                                              [
-                                                                              'rating'] !=
-                                                                          null &&
-                                                                      tripList[index]['rating']
-                                                                              .toString() !=
-                                                                          "0.00")
-                                                                    Container(
-                                                                      alignment:
-                                                                          Alignment
-                                                                              .center,
-                                                                      decoration: BoxDecoration(
-                                                                          color: AppColor.secondaryColor.withOpacity(
-                                                                              .4),
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(20)),
-                                                                      child:
-                                                                          Padding(
-                                                                        padding: const EdgeInsets
-                                                                            .symmetric(
-                                                                            horizontal:
-                                                                                8.0,
-                                                                            vertical:
-                                                                                2),
-                                                                        child:
-                                                                            Row(
-                                                                          mainAxisAlignment:
-                                                                              MainAxisAlignment.center,
-                                                                          children: [
-                                                                            SizedBox(
-                                                                              width: screenWidth > 600 ? MediaQuery.of(context).size.width * 2 / 100 : MediaQuery.of(context).size.width * 3 / 100,
-                                                                              height: screenWidth > 600 ? MediaQuery.of(context).size.width * 2 / 100 : MediaQuery.of(context).size.width * 3 / 100,
-                                                                              child: Image.asset(AppImage.starIcon),
-                                                                            ),
-                                                                            SizedBox(
-                                                                              width: MediaQuery.of(context).size.width * 1 / 100,
-                                                                            ),
-                                                                            Text(
-                                                                              tripList[index]['rating']?.toString() ?? "",
-                                                                              textAlign: TextAlign.center,
-                                                                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColor.secondaryColor, fontFamily: AppFont.fontFamily),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        2 /
-                                                                        100,
-                                                                  ),
-                                                                  Container(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        23 /
-                                                                        100,
-                                                                    alignment:
-                                                                        Alignment
-                                                                            .center,
-                                                                    decoration: BoxDecoration(
-                                                                        color: AppColor
-                                                                            .secondaryColor
-                                                                            .withOpacity(
-                                                                                .4),
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(20)),
-                                                                    child:
-                                                                        Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .symmetric(
-                                                                          horizontal:
-                                                                              8.0,
-                                                                          vertical:
-                                                                              2),
-                                                                      child:
-                                                                          Text(
-                                                                        "${tripList[index]['max_people']}  ${AppLanguage.membersText[language]}",
-                                                                        textAlign:
-                                                                            TextAlign.center,
-                                                                        style: const TextStyle(
-                                                                            fontSize:
-                                                                                10,
-                                                                            fontWeight:
-                                                                                FontWeight.w600,
-                                                                            color: AppColor.secondaryColor,
-                                                                            fontFamily: AppFont.fontFamily),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        2 /
-                                                                        100,
-                                                                  ),
-                                                                  const Spacer(),
-                                                                  Container(
-                                                                    decoration: BoxDecoration(
-                                                                        color: AppColor
-                                                                            .themeColor,
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(5)),
-                                                                    child:
-                                                                        Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .symmetric(
-                                                                          horizontal:
-                                                                              8.0,
-                                                                          vertical:
-                                                                              4),
-                                                                      child:
-                                                                          Text(
-                                                                        "${tripList[index]['price_per_hour']} KWD",
-                                                                        style: const TextStyle(
-                                                                            fontSize:
-                                                                                15,
-                                                                            fontWeight:
-                                                                                FontWeight.w600,
-                                                                            color: AppColor.secondaryColor,
-                                                                            fontFamily: AppFont.fontFamily),
-                                                                      ),
-                                                                    ),
-                                                                  )
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            SizedBox(
-                                                              height: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .height *
-                                                                  1 /
-                                                                  100,
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
                                                     ),
                                                     // Discount badge
-                                                    if (tripList[index]
-                                                                ['discount'] !=
+                                                    if (trip['discount'] !=
                                                             null &&
-                                                        tripList[index]
-                                                                ['discount'] >
+                                                        trip['discount'] >
                                                             0) ...[
                                                       Positioned(
                                                         top: language == 0
@@ -1301,7 +1020,7 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
                                                                 30 /
                                                                 100,
                                                             child: Text(
-                                                              "${tripList[index]['discount']}% ${AppLanguage.offText[language]}",
+                                                              "${trip['discount']}% ${AppLanguage.offText[language]}",
                                                               textAlign:
                                                                   TextAlign
                                                                       .center,

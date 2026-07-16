@@ -249,16 +249,18 @@ class _EditProfileScreenScreenState extends State<EditAdvertisementScreen> {
 
     pickUpTextEditingController.text = tripDetails["pickup_point"];
     maxNumberTextController.text = tripDetails["max_people"].toString();
-    tripNameEnglishTextController.text =
-        tripDetails["trip_name_english"] == null ||
-                tripDetails["trip_name_english"] == "NA"
-            ? ""
-            : tripDetails["trip_name_english"].toString();
-    tripNameArabicTextController.text =
-        tripDetails["trip_name_arabic"] == null ||
-                tripDetails["trip_name_arabic"] == "NA"
-            ? ""
-            : tripDetails["trip_name_arabic"].toString();
+    tripNameEnglishTextController.text = () {
+      final v = tripDetails["title_name_en"] ??
+          tripDetails["trip_name_english"];
+      if (v == null || v == "NA") return "";
+      return v.toString();
+    }();
+    tripNameArabicTextController.text = () {
+      final v = tripDetails["title_name_ar"] ??
+          tripDetails["trip_name_arabic"];
+      if (v == null || v == "NA") return "";
+      return v.toString();
+    }();
     messageTextEditingController.text = tripDetails["description_english"];
     messageArabicTextEditingController.text = tripDetails["description_arabic"];
     discountTextEditingController.text =

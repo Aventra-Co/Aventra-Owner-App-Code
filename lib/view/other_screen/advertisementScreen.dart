@@ -95,7 +95,8 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
 
         if (res['success'] == true) {
           var item = res['trip_arr'];
-          adDetails = (item != "NA") ? item : [];
+          adDetails = (item != "NA") ? Map<String, dynamic>.from(item as Map) : {};
+          await _mergeTitleFromViewDetails(adDetails);
           String coverImage = adDetails['trip_image'];
           tripImages.add({"trip_image_id": 0, "image": coverImage});
           if (adDetails['tripImages'] != "NA") {
@@ -395,13 +396,74 @@ class _AdvertisementScreenState extends State<AdvertisementScreen> {
     );
   }
 
+  /// get_trip_details omits titles; view_trip_details has trip_name_english/arabic.
+  Future<void> _mergeTitleFromViewDetails(Map details) async {
+    bool hasText(dynamic v) {
+      if (v == null || v == 'NA') return false;
+      final text = v.toString().trim();
+      return text.isNotEmpty && text != 'null';
+    }
+
+    if (hasText(details['title_name_en']) ||
+        hasText(details['title_name_ar']) ||
+        hasText(details['trip_name_english']) ||
+        hasText(details['trip_name_arabic'])) {
+      return;
+    }
+
+    try {
+      final url = Uri.parse(
+          "${AppConfigProvider.apiUrl}view_trip_details?trip_id=${widget.tripId}");
+      final token = AppConstant.token;
+      final response = token.isEmpty
+          ? await http.get(url)
+          : await http.get(url, headers: {'Authorization': 'Bearer $token'});
+      if (response.statusCode != 200) return;
+      final res = jsonDecode(response.body);
+      if (res['success'] != true) return;
+
+      dynamic full = res['trip_arr'];
+      if (full is List && full.isNotEmpty) {
+        full = full.first;
+      }
+      if (full is! Map) return;
+
+      final en = full['title_name_en'] ?? full['trip_name_english'];
+      final ar = full['title_name_ar'] ?? full['trip_name_arabic'];
+      if (hasText(en)) {
+        details['title_name_en'] = en;
+        details['trip_name_english'] = en;
+      }
+      if (hasText(ar)) {
+        details['title_name_ar'] = ar;
+        details['trip_name_arabic'] = ar;
+      }
+    } catch (_) {}
+  }
+
   String _tripDisplayName(dynamic trip) {
-    final en = trip['trip_name_english']?.toString().trim() ?? '';
-    final ar = trip['trip_name_arabic']?.toString().trim() ?? '';
+    final en = (trip['title_name_en'] ?? trip['trip_name_english'])
+            ?.toString()
+            .trim() ??
+        '';
+    final ar = (trip['title_name_ar'] ?? trip['trip_name_arabic'])
+            ?.toString()
+            .trim() ??
+        '';
     if (language == 1 && ar.isNotEmpty && ar != 'NA') return ar;
     if (en.isNotEmpty && en != 'NA') return en;
     if (ar.isNotEmpty && ar != 'NA') return ar;
-    return trip['boat_name_english']?.toString() ?? '';
+    final boat = trip['boat_name_english'] ?? trip['boat_name'];
+    if (boat is List) {
+      for (final index in [language, 0]) {
+        if (index < boat.length) {
+          final text = boat[index]?.toString().trim() ?? '';
+          if (text.isNotEmpty && text != 'null') return text;
+        }
+      }
+      return '';
+    }
+    return boat?.toString() ?? '';
   }
 
   textTile(leftText, rightText) {

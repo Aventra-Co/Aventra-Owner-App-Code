@@ -305,8 +305,8 @@ class _AddAdvertisementSecondScreenState
       formData.fields['longitude'] = widget.long;
       formData.fields['city_id'] = widget.cityId;
       formData.fields['max_people'] = widget.members;
-      formData.fields['trip_name_english'] = widget.tripNameEng;
-      formData.fields['trip_name_arabic'] = widget.tripNameArab;
+      formData.fields['title_name_en'] = widget.tripNameEng;
+      formData.fields['title_name_ar'] = widget.tripNameArab;
       formData.fields['description_english'] = widget.descEng;
       formData.fields['description_arabic'] = widget.descArab;
       formData.fields['coupon_code'] = widget.couponCode.toUpperCase();
