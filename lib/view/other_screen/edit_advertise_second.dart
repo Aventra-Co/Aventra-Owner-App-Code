@@ -357,6 +357,10 @@ class _AddAdvertisementSecondScreenState
       formData.fields['longitude'] = widget.long;
       formData.fields['city_id'] = widget.cityId;
       formData.fields['max_people'] = widget.members;
+      // The legacy owner API persists these exact trip_name_* keys. Keep the
+      // title_name_* aliases for compatibility with newer API responses.
+      formData.fields['trip_name_english'] = widget.tripNameEng;
+      formData.fields['trip_name_arabic'] = widget.tripNameArab;
       formData.fields['title_name_en'] = widget.tripNameEng;
       formData.fields['title_name_ar'] = widget.tripNameArab;
       formData.fields['description_english'] = widget.descEng;

@@ -333,6 +333,13 @@ class _MyAdsScreenScreenState extends State<MyAdsScreen> {
           }
         }
 
+        // Open-time cards display the configured duration, not the operating
+        // window. The list endpoint omits it, so retain the details value.
+        if (!hasText(trip['minimum_hours']) &&
+            hasText(detailsMap['minimum_hours'])) {
+          trip['minimum_hours'] = detailsMap['minimum_hours'];
+        }
+
         // Activity / type for landscape label
         if (trip['activity'] == null ||
             (trip['activity'] is Map && (trip['activity'] as Map).isEmpty) ||

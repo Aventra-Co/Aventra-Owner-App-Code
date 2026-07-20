@@ -132,6 +132,38 @@ class TripAdCard extends StatelessWidget {
     return raw;
   }
 
+  static String _addHoursToTime(dynamic value, dynamic hours) {
+    final raw = _clean(value);
+    final duration = double.tryParse(_clean(hours));
+    if (raw.isEmpty || duration == null) return '';
+
+    final match = RegExp(
+      r'^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$',
+      caseSensitive: false,
+    ).firstMatch(raw);
+    if (match == null) return '';
+
+    var hour = int.parse(match.group(1)!);
+    final minute = int.parse(match.group(2)!);
+    final meridiem = match.group(3)?.toUpperCase();
+    if (meridiem != null) {
+      hour %= 12;
+      if (meridiem == 'PM') hour += 12;
+    }
+
+    final totalMinutes =
+        (hour * 60 + minute + (duration * 60).round()) % (24 * 60);
+    final resultHour = totalMinutes ~/ 60;
+    final resultMinute = totalMinutes % 60;
+
+    if (meridiem != null) {
+      final suffix = resultHour >= 12 ? 'PM' : 'AM';
+      final displayHour = resultHour % 12 == 0 ? 12 : resultHour % 12;
+      return '${displayHour.toString().padLeft(2, '0')}:${resultMinute.toString().padLeft(2, '0')} $suffix';
+    }
+    return '${resultHour.toString().padLeft(2, '0')}:${resultMinute.toString().padLeft(2, '0')}';
+  }
+
   /// Prefer title_name_* (submit) then trip_name_* (owner view APIs)
   String get _tripTitle => _resolveTitleOnly(trip);
 
@@ -145,12 +177,16 @@ class TripAdCard extends StatelessWidget {
   String get _activityName {
     final activity = trip['activity'];
     if (activity is Map && activity.isNotEmpty) {
-      final en = resolveLocalized(activity['activity_english'] ??
-          activity['name_english'] ??
-          activity['english']);
-      final ar = resolveLocalized(activity['activity_arabic'] ??
-          activity['name_arabic'] ??
-          activity['arabic']);
+      final en = resolveLocalized(
+        activity['activity_english'] ??
+            activity['name_english'] ??
+            activity['english'],
+      );
+      final ar = resolveLocalized(
+        activity['activity_arabic'] ??
+            activity['name_arabic'] ??
+            activity['arabic'],
+      );
       if (language == 1 && ar.isNotEmpty) return ar;
       if (en.isNotEmpty) return en;
       if (ar.isNotEmpty) return ar;
@@ -159,12 +195,14 @@ class TripAdCard extends StatelessWidget {
     if (activity is List && activity.isNotEmpty) {
       final first = activity.first;
       if (first is Map) {
-        final en = resolveLocalized(first['activity_english'] ??
-            first['name_english'] ??
-            first['english']);
-        final ar = resolveLocalized(first['activity_arabic'] ??
-            first['name_arabic'] ??
-            first['arabic']);
+        final en = resolveLocalized(
+          first['activity_english'] ??
+              first['name_english'] ??
+              first['english'],
+        );
+        final ar = resolveLocalized(
+          first['activity_arabic'] ?? first['name_arabic'] ?? first['arabic'],
+        );
         if (language == 1 && ar.isNotEmpty) return ar;
         if (en.isNotEmpty) return en;
         if (ar.isNotEmpty) return ar;
@@ -174,9 +212,10 @@ class TripAdCard extends StatelessWidget {
   }
 
   String get _routeText {
-    final pickup = resolveLocalized(trip['pickup_point'] ?? trip['pickup']);
+    final pickup = resolveLocalized(trip['city_name'] ?? trip['pickup']);
     final destination = resolveLocalized(
-        trip['destinaton'] ?? trip['destination'] ?? trip['destination_english']);
+      trip['destinaton'] ?? trip['destination'] ?? trip['destination_english'],
+    );
     if (pickup.isNotEmpty && destination.isNotEmpty) {
       return '$pickup → $destination';
     }
@@ -211,14 +250,18 @@ class TripAdCard extends StatelessWidget {
     final from = _formatTime(trip['from_time']);
     final to = _formatTime(trip['to_time']);
     final fixed = _formatTime(trip['fixed_time']);
+    final minimumHours = _clean(trip['minimum_hours']);
 
     if (_isFixedTime) {
-      if (fixed.isNotEmpty) return fixed;
       if (from.isNotEmpty && to.isNotEmpty) return '$from – $to';
-      if (from.isNotEmpty) return from;
+      final start = from.isNotEmpty ? from : fixed;
+      final calculatedEnd = _addHoursToTime(start, minimumHours);
+      if (start.isNotEmpty && calculatedEnd.isNotEmpty) {
+        return '$start – $calculatedEnd';
+      }
+      if (start.isNotEmpty) return start;
     } else {
-      if (from.isNotEmpty && to.isNotEmpty) return '$from – $to';
-      if (from.isNotEmpty) return from;
+      if (minimumHours.isNotEmpty) return '${minimumHours}h';
     }
     return '';
   }
@@ -243,7 +286,8 @@ class TripAdCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final cardWidth = width ?? size.width * 0.9;
-    final cardHeight = height ??
+    final cardHeight =
+        height ??
         (layout == TripAdCardLayout.portrait
             ? size.height * 0.28
             : size.height * 0.22);
@@ -303,10 +347,12 @@ class TripAdCard extends StatelessWidget {
             borderRadius: BorderRadius.only(
               topLeft: language == 1 ? Radius.zero : const Radius.circular(20),
               topRight: language == 1 ? const Radius.circular(20) : Radius.zero,
-              bottomLeft:
-                  language == 1 ? const Radius.circular(16) : Radius.zero,
-              bottomRight:
-                  language == 1 ? Radius.zero : const Radius.circular(16),
+              bottomLeft: language == 1
+                  ? const Radius.circular(16)
+                  : Radius.zero,
+              bottomRight: language == 1
+                  ? Radius.zero
+                  : const Radius.circular(16),
             ),
           ),
         ),
@@ -420,8 +466,11 @@ class TripAdCard extends StatelessWidget {
                 if (showShare && onShare != null)
                   _circleAction(
                     onTap: onShare!,
-                    child:
-                        const Icon(Icons.share, color: Colors.white, size: 18),
+                    child: const Icon(
+                      Icons.share,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                   ),
                 if (topTrailing != null) topTrailing!,
               ],
@@ -485,11 +534,7 @@ class TripAdCard extends StatelessWidget {
                   right: language == 1 ? 0 : 150,
                   left: language == 1 ? 150 : 0,
                 ),
-                child: Row(
-                  children: [
-                    _peoplePill(),
-                  ],
-                ),
+                child: Row(children: [_peoplePill()]),
               ),
             ],
           ),
@@ -522,8 +567,10 @@ class TripAdCard extends StatelessWidget {
                       ? Radius.zero
                       : const Radius.circular(20),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
               ),
               if (language == 1 && _timeText.isNotEmpty)
                 Padding(
@@ -539,8 +586,10 @@ class TripAdCard extends StatelessWidget {
 
   Widget _priceBadge({
     required BorderRadius borderRadius,
-    EdgeInsetsGeometry padding =
-        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    EdgeInsetsGeometry padding = const EdgeInsets.symmetric(
+      horizontal: 12,
+      vertical: 6,
+    ),
   }) {
     return Container(
       padding: padding,
@@ -619,8 +668,11 @@ class TripAdCard extends StatelessWidget {
   Widget _boatRow(String name) {
     return Row(
       children: [
-        const Icon(Icons.directions_boat_outlined,
-            color: Colors.white, size: 14),
+        const Icon(
+          Icons.directions_boat_outlined,
+          color: Colors.white,
+          size: 14,
+        ),
         const SizedBox(width: 6),
         Flexible(
           child: Text(
